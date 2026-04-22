@@ -2,7 +2,7 @@
 
 ## Context
 
-SigBah! is an academic defense panel management system for UFRGS physics graduate programs (PPGFis/PPGEnFis). Step 1 produced the analysis (use cases, business description). Step 2's goal is to design the architecture, choose the tech stack, and implement the first use cases as working code. The team is comfortable with Python web frameworks.
+SigBah! is an academic defense panel management system for UFRGS physics graduate programs (PPGFis/PPGEnFis). Step 1 produced the analysis (use cases, business description). Step 2's goal is to design the architecture, choose the tech stack, and implement the first use cases as working code.
 
 Focus: **source code + architecture + package diagrams only** (no slides/demo prep).
 
@@ -10,127 +10,198 @@ Focus: **source code + architecture + package diagrams only** (no slides/demo pr
 
 ## Tech Stack
 
-| Component       | Choice              | Why                                          |
-|-----------------|---------------------|----------------------------------------------|
-| Framework       | Flask 3.x           | Lightweight, explicit, team knows it          |
-| ORM             | Flask-SQLAlchemy    | Clean model definitions, easy queries         |
-| Database        | SQLite (dev)        | Zero setup, swap to PostgreSQL later if needed|
-| Templates       | Jinja2              | Built into Flask                              |
-| Forms           | Flask-WTF           | Validation + CSRF out of the box              |
-| Auth            | Flask-Login          | Simple session-based auth                     |
-| Migrations      | Flask-Migrate       | Alembic wrapper for schema changes            |
-| CSS             | Bootstrap 5 (CDN)   | Quick UI, no build tools                      |
+| Component       | Choice                  | Why                                              |
+|-----------------|-------------------------|--------------------------------------------------|
+| Backend         | ASP.NET Core 8 Web API  | C# controllers, mature ecosystem, strong typing  |
+| ORM             | Entity Framework Core   | Code-first, migrations, LINQ queries             |
+| Database        | PostgreSQL              | Full-featured relational DB                      |
+| DB Provider     | Npgsql.EFCore           | EF Core provider for PostgreSQL                  |
+| Auth            | JWT (Bearer tokens)     | Standard for SPA + API separation                |
+| Frontend        | React 18 + Vite         | Fast dev server, HMR, TypeScript support         |
+| Language (FE)   | TypeScript              | Type safety across the frontend                  |
+| UI Library      | MUI (Material UI) v5    | Rich pre-built components, fast to build forms   |
+| HTTP Client     | Axios                   | Clean API for REST calls from React              |
+| Routing (FE)    | React Router v6         | SPA routing                                      |
+| Email           | Gmail SMTP              | Free, zero signup, App Password auth             |
 
 ---
 
-## Architecture: Layered (MVC)
+## Architecture: Separated API + SPA
 
 ```
-views (Blueprints)  -->  services (Business Logic)  -->  models (ORM)
-       |                        |
-       v                        v
-    forms (WTForms)       infrastructure (email stubs, doc stubs)
+┌─────────────────────────┐     HTTP/JSON      ┌──────────────────────────┐
+│     sigbah-web (SPA)    │ ◄──────────────────► │   sigbah-api (ASP.NET)  │
+│  React + Vite + MUI     │                      │   Controllers           │
+│  TypeScript             │                      │     → Services          │
+│                         │                      │       → EF Core / DB    │
+└─────────────────────────┘                      └──────────────────────────┘
 ```
 
-Dependencies flow **left to right / top to bottom only**. Views never touch models directly.
+**Backend layers** (dependencies flow top to bottom):
+
+- **Controllers** — HTTP endpoints, request/response mapping, `[Authorize]` attributes
+- **Services** — Business logic (create banca, approve, search)
+- **Models/Entities** — EF Core entity classes
+- **DTOs** — Request/response data transfer objects
+- **Infrastructure** — DbContext, JWT config, Gmail SMTP email service
+
+**Frontend layers**:
+
+- **Pages** — Route-level components (one per screen)
+- **Components** — Shared UI (Layout, ProtectedRoute)
+- **API** — Axios client with JWT interceptor, typed API call functions
+- **Contexts** — Auth state (JWT storage, current user)
+- **Types** — TypeScript interfaces matching backend DTOs
 
 ---
 
 ## Package Structure
 
 ```
-sigbah/
-  __init__.py              # App factory (create_app)
-  config.py                # Dev/Test/Prod configs
+sigbah-api/
+  SigBah.Api/
+    Program.cs                    # App entry point, DI, middleware
+    appsettings.json              # Connection string, JWT settings, SMTP config
 
-  models/
-    __init__.py            # db instance
-    enums.py               # TipoBanca, StatusBanca, TipoMembro, PPG
-    usuario.py             # Usuario model (single table, tipo discriminator)
-    banca.py               # Banca + MembroBanca models
-    documento.py           # Documento model (stub for Step 3)
+    Controllers/
+      AuthController.cs           # Login endpoint → returns JWT
+      BancaController.cs          # UC1: create banca, list my bancas
+      AprovacaoController.cs      # UC3: list pending, approve/reject
+      PesquisaController.cs       # UC7: search bancas, view details
 
-  services/
-    __init__.py
-    banca_service.py       # Create banca, search, get details
-    aprovacao_service.py   # Approve/reject banca
+    Services/
+      IBancaService.cs + BancaService.cs
+      IAprovacaoService.cs + AprovacaoService.cs
+      IAuthService.cs + AuthService.cs
+      IEmailService.cs + EmailService.cs
 
-  views/
-    __init__.py
-    auth.py                # Login/logout blueprint
-    orientador.py          # UC1: Formalizar Pedido de Banca
-    coordenador.py         # UC3: Aprovar Banca
-    secretario.py          # UC7: Pesquisar Bancas
+    Models/
+      Entities/
+        Usuario.cs
+        Banca.cs
+        MembroBanca.cs
+        Documento.cs              # Stub for Step 3
+      Enums/
+        TipoBanca.cs
+        StatusBanca.cs
+        TipoMembro.cs
+        TipoPPG.cs
+        TipoUsuario.cs
 
-  forms/
-    __init__.py
-    banca_form.py          # FormalizarBancaForm
-    aprovacao_form.py      # AprovarBancaForm
-    pesquisa_form.py       # PesquisaBancaForm
+    DTOs/
+      LoginRequest.cs
+      LoginResponse.cs
+      CriarBancaRequest.cs
+      BancaResponse.cs
+      AvaliarBancaRequest.cs
+      PesquisaBancaRequest.cs
 
-  templates/
-    base.html              # Bootstrap layout
-    auth/login.html
-    orientador/nova_banca.html
-    orientador/minhas_bancas.html
-    coordenador/pendentes.html
-    coordenador/avaliar.html
-    secretario/pesquisa.html
-    secretario/detalhes_banca.html
+    Data/
+      SigBahDbContext.cs          # EF Core DbContext
+      Migrations/                 # EF Core migrations
 
-  static/css/              # Custom CSS overrides
+    Infrastructure/
+      JwtSettings.cs
+      SmtpSettings.cs             # Gmail SMTP config (host, port, credentials)
 
-  infrastructure/
-    __init__.py
-    email.py               # Stub: logs instead of sending
-    documentos.py          # Stub: placeholder for Step 3
+  SigBah.Api.csproj
 
-seed.py                    # Populate DB with test data
-run.py                     # Entry point
-requirements.txt
+sigbah-web/
+  src/
+    main.tsx                      # Vite entry point
+    App.tsx                       # Router setup
+
+    api/
+      client.ts                   # Axios instance with JWT interceptor
+      bancaApi.ts                 # Banca-related API calls
+      authApi.ts                  # Auth API calls
+
+    components/
+      Layout.tsx                  # AppBar, navigation, auth context
+      ProtectedRoute.tsx          # Route guard by role
+
+    pages/
+      Login.tsx
+      orientador/
+        NovaBanca.tsx             # UC1: create banca form
+        MinhasBancas.tsx          # List my bancas
+      coordenador/
+        Pendentes.tsx             # UC3: list pending bancas
+        AvaliarBanca.tsx          # Approve/reject form
+      secretario/
+        PesquisaBancas.tsx        # UC7: search form + results
+        DetalhesBanca.tsx         # View banca details
+
+    types/
+      index.ts                   # TypeScript interfaces matching DTOs
+
+    contexts/
+      AuthContext.tsx             # JWT storage + user state
+
+  index.html
+  vite.config.ts
+  tsconfig.json
+  package.json
 ```
 
 ---
 
 ## Data Model
 
-**Usuario** - id, nome, email, senha_hash, tipo (ORIENTADOR/COORDENADOR/SECRETARIO), ppg (PPGFIS/PPGENFIS)
+**Usuario** - Id, Nome, Email, SenhaHash, Tipo (ORIENTADOR/COORDENADOR/SECRETARIO), Ppg (PPGFIS/PPGENFIS)
 
-**Banca** - id, ppg, tipo_banca (MESTRADO/QUALIFICACAO/DOUTORADO), titulo_trabalho, nome_aluno, matricula_aluno, data_defesa, local, status (PENDENTE/APROVADA/RECUSADA), justificativa_recusa, orientador_id (FK), coordenador_avaliador_id (FK), data_solicitacao, data_avaliacao
+**Banca** - Id, Ppg, TipoBanca (MESTRADO/QUALIFICACAO/DOUTORADO), TituloTrabalho, NomeAluno, MatriculaAluno, CursoAluno, DataDefesa (date+time), Local (free text), Status (PENDENTE/APROVADA/RECUSADA), JustificativaRecusa, OrientadorId (FK), CoordenadorAvaliadorId (FK), DataSolicitacao, DataAvaliacao
 
-**MembroBanca** - id, banca_id (FK), nome, email, instituicao, tipo_membro (TITULAR/SUPLENTE)
+**MembroBanca** - Id, BancaId (FK), Nome, Email, Instituicao, TipoMembro (TITULAR/SUPLENTE)
 
-**Documento** (stub) - id, banca_id (FK), tipo_documento, gerado_em, enviado, enviado_em
+**Documento** (stub) - Id, BancaId (FK), TipoDocumento, GeradoEm, Enviado, EnviadoEm
 
 ---
 
 ## Use Cases to Implement
 
 ### UC1: Formalizar Pedido de Banca (Orientador)
-- Form with: PPG, tipo_banca, titulo, aluno (nome+matricula), data_defesa, local, membros (titulares + suplentes)
+- MUI form with: PPG, tipo_banca, titulo, aluno (nome + matrícula + curso), data_defesa (date + time), local (free text), membros (titulares + suplentes with nome, email, instituição)
 - Validation: min 3 titulares, min 1 suplente, data >= 30 days ahead
-- On submit: create Banca (status=PENDENTE) + MembroBanca records
-- Stub email notification (log to console)
-- Also: "Minhas Bancas" listing for the orientador
+- On submit: POST to API → create Banca (status=PENDENTE) + MembroBanca records
+- Email notification to Coordenador AND Secretário via Gmail SMTP (UC2) — HTML email with banca details table
+- Also: "Minhas Bancas" page listing the orientador's bancas
+- After rejection: orientador must create a new banca from scratch (no clone/resubmit)
 
 ### UC7: Pesquisar Bancas (Secretario)
+- Secretário sees only bancas from their own PPG
 - Search by name (aluno or orientador) and/or date range
-- Paginated results (10-50 per page)
+- Paginated results using MUI DataGrid (10-50 per page)
 - Click a banca to see full details (all fields + members)
 
 ### UC3: Aprovar Banca (Coordenador)
-- List pending bancas (status=PENDENTE)
-- View banca details + approve/reject form
+- MUI table listing pending bancas (status=PENDENTE) from coordenador's PPG
+- View banca details + approve/reject form (approve/reject only — no editing banca data)
 - If rejected: require justificativa
-- On submit: update status, record coordenador + timestamp
-- Stub notification to orientador (log to console)
+- On submit: PUT to API → update status, record coordenador + timestamp
+- Email notification to orientador via Gmail SMTP (UC10) — HTML email with result + justificativa if rejected
+- Notification email includes direct link to evaluation page (NFR: coordenador can evaluate without leaving their inbox)
+
+---
+
+## Design Decisions
+
+1. **Tipo de banca**: Mestrado / Qualificação / Doutorado (from business description, not TCC/Dissertação/Tese from UC spec)
+2. **Email notifications**: HTML emails with styled info table (banca details, link to system)
+3. **Email targets**: UC1 → Coordenador + Secretário (UC2). UC3 → Orientador (UC10)
+4. **UC3 scope**: Approve/reject only — coordenador cannot modify banca data
+5. **UC7 scope**: Secretário sees only bancas from their own PPG
+6. **Navigation**: Role-specific landing pages after login (e.g., /orientador/minhas-bancas, /coordenador/pendentes)
+7. **Local field**: Free text (orientador types room name, address, "Google Meet", etc.)
+8. **Resubmission**: After rejection, orientador creates a new banca from scratch
+9. **Notification email includes direct link** to evaluation page for coordenador
 
 ---
 
 ## Simplifications to Document
 
 1. **Auth simplified** - pre-seeded users, no self-registration, no UFRGS institutional login
-2. **Emails simulated** - UC2/UC10 log to console instead of sending SMTP
+2. **Emails via Gmail SMTP** - using a Gmail account with App Password for sending notifications (convites, divulgacao, etc.)
 3. **Document generation deferred** - UC4 not implemented, Documento model exists as stub
 4. **Single PPG template** - both PPGFis/PPGEnFis use same rules, no PPG-specific customization
 5. **Members as free text** - not selected from a database of professors
@@ -142,41 +213,70 @@ requirements.txt
 ## Implementation Order
 
 ### 1. Project skeleton
-- Git repo, `sigbah/` package, app factory, config, `run.py`, `requirements.txt`
-- `base.html` with Bootstrap
-- Verify: `python run.py` shows a page
+- `dotnet new webapi` for API, `npm create vite@latest` for frontend
+- Configure CORS on API to allow frontend origin
+- Basic health check endpoint, verify both dev servers run
+- **Verify**: `dotnet run` serves API on :5000, `npm run dev` serves frontend on :5173
 
 ### 2. Data layer
-- All models (Usuario, Banca, MembroBanca, Documento stub, enums)
-- Flask-Migrate initial migration
-- `seed.py` with test data (3 users, ~5 bancas in various statuses)
+- EF Core entities (Usuario, Banca, MembroBanca, Documento stub, enums)
+- SigBahDbContext + PostgreSQL connection string
+- Initial migration + seed data (3 users, ~5 bancas in various statuses)
+- **Verify**: `dotnet ef database update` creates tables, seed runs
 
 ### 3. Auth
-- Flask-Login setup, login/logout routes
-- Role-based decorators (`@orientador_required`, etc.)
+- JWT generation on login (AuthController + AuthService)
+- `[Authorize]` attributes + role-based policies (Orientador, Coordenador, Secretario)
+- React AuthContext + ProtectedRoute, Axios JWT interceptor
+- Login page with MUI form
+- **Verify**: Login returns token, protected endpoints reject unauthenticated requests
 
 ### 4. UC1 - Formalizar Pedido de Banca
-- `FormalizarBancaForm`, `banca_service.criar_banca()`, orientador blueprint + templates
+- BancaController.Create + BancaService.CriarBanca
+- NovaBanca.tsx with MUI form: PPG, tipo, titulo, aluno, data, local, members
+- MinhasBancas.tsx with MUI table
 
 ### 5. UC3 - Aprovar Banca
-- `AprovarBancaForm`, `aprovacao_service.avaliar_banca()`, coordenador blueprint + templates
+- AprovacaoController + AprovacaoService
+- Pendentes.tsx + AvaliarBanca.tsx
 
 ### 6. UC7 - Pesquisar Bancas
-- `PesquisaBancaForm`, search methods in `banca_service`, secretario blueprint + templates
+- PesquisaController + search methods in BancaService
+- PesquisaBancas.tsx + DetalhesBanca.tsx
 
 ### 7. Polish
-- Cross-test all use cases, fix bugs, ensure seed.py creates clean demo state
+- Cross-test all use cases, fix bugs, ensure seed data creates clean demo state
 
 ---
 
 ## Verification
 
-1. `python run.py` starts the app on localhost
+1. `dotnet run` starts API, `npm run dev` starts frontend
 2. Login as orientador -> create a banca -> see it in "Minhas Bancas"
 3. Login as coordenador -> see pending banca -> approve it
 4. Login as secretario -> search for the banca by name and by date -> view details
 5. Login as coordenador -> reject a different banca with justificativa
 6. Login as orientador -> see status updated on "Minhas Bancas"
+
+---
+
+## Gmail SMTP Configuration
+
+Prerequisites: enable 2-Step Verification on the Gmail account, then generate an **App Password** (Google Account → Security → App Passwords).
+
+`appsettings.json` (credentials go in user-secrets or env vars, not committed):
+```json
+{
+  "SmtpSettings": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "Username": "sigbah.ufrgs@gmail.com",
+    "EnableSsl": true
+  }
+}
+```
+
+The App Password is stored via `dotnet user-secrets set "SmtpSettings:Password" "xxxx xxxx xxxx xxxx"` or via environment variable `SmtpSettings__Password`.
 
 ---
 
