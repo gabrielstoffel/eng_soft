@@ -2,33 +2,58 @@
 
 Sistema de Gestão de Bancas Acadêmicas — PPGFis / PPGEnFis (UFRGS)
 
-## Local Email Setup
+## Dependencies
 
-Postfix relays outgoing mail to Mailpit, which captures everything for inspection.
+- **Docker** — for the mail infrastructure
+- **uv** — Python package manager ([install](https://docs.astral.sh/uv/getting-started/installation/))
+- **Node.js 20+** and **npm** — for the frontend
 
-```
-backend → localhost:2525 → postfix → mailpit:1025 → http://localhost:8025
-```
+## Running
 
-### 1. Start the mail containers
+Each component runs in its own terminal.
+
+### 1. Mail infrastructure
 
 ```bash
 cd infrastructure
 docker compose up -d
 ```
 
-### 2. Send a test email
+Starts Mailpit (email capture) and Postfix (SMTP relay).
+
+### 2. Backend
 
 ```bash
 cd backend
-uv run main.py
+uv sync
+uv run uvicorn main:app --reload
 ```
 
-### 3. View the email
+### 3. Frontend
 
-Open [http://localhost:8025](http://localhost:8025) in your browser.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-### Stop
+## URLs
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| API | http://localhost:8000 |
+| Email inbox (Mailpit) | http://localhost:8025 |
+
+## Mail flow
+
+```
+backend → localhost:2525 → postfix → mailpit:1025 → http://localhost:8025
+```
+
+All outgoing email is captured by Mailpit — nothing reaches the internet.
+
+## Stop
 
 ```bash
 cd infrastructure
