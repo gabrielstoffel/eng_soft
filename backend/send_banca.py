@@ -21,7 +21,6 @@ sys.path.insert(0, CRIABANCAS_DIR)
 
 from criaBancas import Banca  # noqa: E402
 
-
 # --- Sample banca ---
 banca = Banca(
     nome=(0, "João Paulo da Silva"),
@@ -75,7 +74,7 @@ html = f"""\
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><td><b>Aluno</b></td><td>{banca.nome[1]}</td></tr>
       <tr><td><b>Tipo</b></td><td>{banca.tipoAta(banca.tipo)}</td></tr>
-      <tr><td><b>Data</b></td><td>{banca.data.strftime('%d/%m/%Y')} às {banca.horario.strftime('%H:%M')}</td></tr>
+      <tr><td><b>Data</b></td><td>{banca.data.strftime("%d/%m/%Y")} às {banca.horario.strftime("%H:%M")}</td></tr>
       <tr><td><b>Local</b></td><td>{banca.local_banca}</td></tr>
       <tr><td><b>Orientador</b></td><td>{banca.orientador[1]}</td></tr>
     </table>
@@ -95,5 +94,4 @@ msg.attach(attachment)
 with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
     server.sendmail(FROM, [TO], msg.as_string())
 
-print(
-    f"E-mail com '{zip_name}' enviado! Acesse http://localhost:8025 para visualizar.")
+print(f"E-mail com '{zip_name}' enviado! Acesse http://localhost:8025 para visualizar.")

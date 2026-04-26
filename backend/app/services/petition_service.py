@@ -1,0 +1,65 @@
+from app.models import BancaRequest
+
+_TIPO_LABEL = {
+    1: "Dissertação de Mestrado",
+    2: "Exame de Qualificação ao Doutorado",
+    3: "Tese de Doutorado",
+}
+
+
+def tipo_label(tipo: int) -> str:
+    return _TIPO_LABEL[tipo]
+
+
+def build_petition_subject(req: BancaRequest) -> str:
+    return f"[SigBah!] Novo Pedido de Banca #{req.ata} — {req.nome.name}"
+
+
+def build_petition_html(req: BancaRequest) -> str:
+    membros_rows = ""
+    pairs = [
+        ("Orientador", req.orientador),
+        ("Coorientador", req.coorientador),
+        ("Externo 1", req.externo1),
+        ("Externo 2", req.externo2),
+        ("Interno 1", req.interno1),
+        ("Interno 2", req.interno2),
+        ("Suplente Interno", req.supl_int),
+        ("Suplente Externo", req.supl_ext),
+    ]
+    for label, member in pairs:
+        if member is None:
+            continue
+        membros_rows += f"<tr><td><b>{label}</b></td><td>{member.name}</td><td>{member.institution}</td></tr>\n"
+
+    local_parts = []
+    if req.local_banca:
+        local_parts.append(req.local_banca)
+    if req.link:
+        local_parts.append(f'<a href="{req.link}">{req.link}</a>')
+    local_str = " / ".join(local_parts) if local_parts else "—"
+    data_hora = f"{req.data.strftime('%d/%m/%Y')} às {req.horario.strftime('%H:%M')}"
+
+    return f"""\
+<html>
+  <body>
+    <h2>Novo Pedido de Banca — SigBah!</h2>
+    <p>Uma nova banca foi submetida e aguarda aprovação.</p>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr><td><b>Aluno</b></td><td colspan="2">{req.nome.name}</td></tr>
+      <tr><td><b>Tipo</b></td><td colspan="2">{tipo_label(req.tipo)}</td></tr>
+      <tr><td><b>Data</b></td><td colspan="2">{data_hora}</td></tr>
+      <tr><td><b>Local / Link</b></td><td colspan="2">{local_str}</td></tr>
+      <tr><td><b>Número da Ata</b></td><td colspan="2">{req.ata}</td></tr>
+      <tr><td><b>Título (PT)</b></td><td colspan="2">{req.titulo}</td></tr>
+      <tr><td><b>Title (EN)</b></td><td colspan="2">{req.titulo2}</td></tr>
+    </table>
+    <h3>Membros da Banca</h3>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr><th>Função</th><th>Nome</th><th>Instituição</th></tr>
+      {membros_rows}
+    </table>
+    <p>Atenciosamente,<br>Sistema SigBah!</p>
+  </body>
+</html>
+"""

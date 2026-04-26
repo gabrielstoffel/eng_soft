@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+criaBancas/Bancas/
+criaBancas/qrcode.png
+criaBancas/Fonts/*.pkl
