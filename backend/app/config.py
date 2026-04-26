@@ -1,5 +1,10 @@
 import os
 
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_DB = os.getenv("MONGO_DB", "sigbah")
+MONGO_USERNAME = os.getenv("MONGO_USERNAME", "")
+MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "")
+
 SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "2525"))
 FROM_ADDRESS = os.getenv("SMTP_FROM", "sigbah@sigbah.local")

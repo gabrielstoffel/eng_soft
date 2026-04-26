@@ -1,4 +1,4 @@
-from app.models import BancaRequest
+from app.domain.models import BancaRequest
 
 _TIPO_LABEL = {
     1: "Dissertação de Mestrado",
@@ -58,6 +58,24 @@ def build_petition_html(req: BancaRequest) -> str:
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><th>Função</th><th>Nome</th><th>Instituição</th></tr>
       {membros_rows}
+    </table>
+    <p>Atenciosamente,<br>Sistema SigBah!</p>
+  </body>
+</html>
+"""
+
+
+def build_documents_html(req: BancaRequest) -> str:
+    return f"""\
+<html>
+  <body>
+    <h2>Documentos da Banca — SigBah!</h2>
+    <p>Os documentos foram gerados e estão em anexo (arquivo zip).</p>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr><td><b>Aluno</b></td><td>{req.nome.name}</td></tr>
+      <tr><td><b>Tipo</b></td><td>{tipo_label(req.tipo)}</td></tr>
+      <tr><td><b>Data</b></td><td>{req.data.strftime("%d/%m/%Y")} às {req.horario.strftime("%H:%M")}</td></tr>
+      <tr><td><b>Orientador</b></td><td>{req.orientador.name}</td></tr>
     </table>
     <p>Atenciosamente,<br>Sistema SigBah!</p>
   </body>
