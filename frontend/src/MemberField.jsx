@@ -1,6 +1,6 @@
-const EMPTY_MEMBER = { gender: 0, name: '', institution: '', location: '', lang: 'pt' }
+const EMPTY_MEMBER = { gender: 0, name: '', institution: '', location: '', lang: 'pt', email: '' }
 
-export default function MemberField({ label, value, onChange, required = false }) {
+export default function MemberField({ label, value, onChange, required = false, requireEmail = false }) {
   const enabled = required || value !== null
 
   function toggle(e) {
@@ -66,6 +66,17 @@ export default function MemberField({ label, value, onChange, required = false }
               <option value="pt">Português</option>
               <option value="en">English</option>
             </select>
+          </label>
+
+          <label>
+            E-mail{requireEmail ? ' *' : ''}
+            <input
+              type="email"
+              required={requireEmail}
+              value={value.email ?? ''}
+              onChange={e => update('email', e.target.value)}
+              placeholder="email@instituicao.br"
+            />
           </label>
         </div>
       )}
