@@ -62,6 +62,20 @@ select:focus {
   border-color: transparent;
 }
 
+input[readonly],
+textarea[readonly] {
+  background: #f3f4f6;
+  color: #4b5563;
+  cursor: default;
+  border-color: #e5e7eb;
+}
+
+input[readonly]:focus,
+textarea[readonly]:focus {
+  outline: none;
+  border-color: #e5e7eb;
+}
+
 .row {
   display: flex;
   gap: 1rem;

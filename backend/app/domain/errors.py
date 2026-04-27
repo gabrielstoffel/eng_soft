@@ -17,3 +17,12 @@ class EmailError(BancaError):
 
 @dataclass
 class PersistenceError(BancaError): ...
+
+
+@dataclass
+class BancaNotFoundError(BancaError): ...
+
+
+@dataclass
+class BancaAlreadyDecidedError(BancaError):
+    current_status: str

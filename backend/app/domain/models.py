@@ -1,7 +1,7 @@
-from datetime import date, time
+from datetime import date, datetime, time
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 
 class MemberInfo(BaseModel):
@@ -10,6 +10,7 @@ class MemberInfo(BaseModel):
     institution: str
     location: str  # e.g. "Porto Alegre, RS"
     lang: Literal["pt", "en"]
+    email: EmailStr | None = None
 
     def to_tuple(self) -> tuple:
         return (self.gender, self.name, self.institution, self.location, self.lang)
@@ -34,18 +35,52 @@ class BancaRequest(BaseModel):
     link: str | None = None
     orientador: MemberInfo
     coorientador: MemberInfo | None = None
-    externo1: MemberInfo
+    externo1: MemberInfo | None = None
     externo2: MemberInfo | None = None
-    interno1: MemberInfo
-    interno2: MemberInfo
+    interno1: MemberInfo | None = None
+    interno2: MemberInfo | None = None
     supl_int: MemberInfo | None = None
     supl_ext: MemberInfo | None = None
     titulo: str
     titulo2: str
 
+    @model_validator(mode="after")
+    def _require_orientador_email(self) -> "BancaRequest":
+        if not self.orientador.email:
+            raise ValueError("orientador.email is required (used for petition decision notifications)")
+        return self
 
-class BancaResponse(BaseModel):
+
+BancaStatus = Literal["pending", "approved", "rejected"]
+
+
+class BancaRecord(BaseModel):
+    request: BancaRequest
+    decision_token: str
+    status: BancaStatus
+    rejection_reason: str | None = None
+    created_at: datetime
+    decided_at: datetime | None = None
+
+
+class BancaSubmitResponse(BaseModel):
     message: str
     ata: int
     student_name: str
-    zip_name: str
+    decision_token: str
+
+
+class BancaSummary(BaseModel):
+    request: BancaRequest
+    status: BancaStatus
+    rejection_reason: str | None = None
+
+
+class BancaDecisionResponse(BaseModel):
+    message: str
+    ata: int
+    student_name: str
+
+
+class RejectRequest(BaseModel):
+    reason: str = Field(min_length=1)
