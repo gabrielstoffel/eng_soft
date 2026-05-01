@@ -12,14 +12,14 @@ Sistema de Gestão de Bancas Acadêmicas — PPGFis / PPGEnFis (UFRGS)
 
 Each component runs in its own terminal.
 
-### 1. Mail infrastructure
+### 1. Infrastructure
 
 ```bash
 cd infrastructure
 docker compose up -d
 ```
 
-Starts Mailpit (email capture) and Postfix (SMTP relay).
+Starts MongoDB (persistence), Mailpit (email capture) and Postfix (SMTP relay).
 
 ### 2. Backend
 
@@ -44,6 +44,18 @@ npm run dev
 | Frontend | http://localhost:5173 |
 | API | http://localhost:8000 |
 | Email inbox (Mailpit) | http://localhost:8025 |
+| MongoDB | mongodb://localhost:27017 |
+
+## Pages
+
+| Route | Audience | Purpose |
+|---|---|---|
+| `/` | Servidor / orientador | Submit a new banca petition |
+| `/decide/:token` | Coordenador | Approve or reject a pending petition (link arrives by e-mail) |
+| `/admin` | Servidor | Search bancas in the database |
+| `/admin/banca/:token` | Servidor | View full state, edit (when status = aceita), and download/regenerate documents per version |
+
+Approved bancas are stored as an ordered list of versions; editing creates a new version only when content changes. Each version exposes a manifest of individual PDFs (Ata, Cartas de Convite, Pareceres, Cartaz, Relatoria de Avaliação) that can be downloaded one at a time or as a zip of selected files.
 
 ## Mail flow
 
