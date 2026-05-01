@@ -1,0 +1,107 @@
+@startuml sequence-uc1-submit
+!theme plain
+skinparam shadowing false
+
+title Diagrama de Sequencia — UC1: Formalizar Pedido de Banca
+
+actor "Orientador" as orientador
+participant "PetitionForm\n(Frontend)" as frontend
+participant "router\n(api)" as router
+participant "BancaService\n(application)" as service
+participant "MongoBancaRepository\n(infrastructure)" as repo
+database "MongoDB" as db
+participant "petition_service\n(application)" as petition
+participant "email_service\n(application)" as email
+participant "Postfix\n(SMTP)" as smtp
+
+' ============================================================
+' FLUXO PRINCIPAL
+' ============================================================
+
+orientador -> frontend : Preenche formulario\n(aluno, tipo, membros, data)
+activate frontend
+
+frontend -> router : POST /banca\n(BancaRequest JSON)
+activate router
+
+router -> service : submit_petition(req)
+activate service
+
+' --- Persistencia ---
+service -> repo : save(req)
+activate repo
+repo -> db : insert_one(document)
+activate db
+db --> repo : OK
+deactivate db
+repo --> service : Ok(decision_token)
+deactivate repo
+
+' --- Construcao do email ---
+service -> petition : build_petition_subject(req)
+activate petition
+petition --> service : subject
+deactivate petition
+
+service -> petition : build_petition_html(req, decision_link)
+activate petition
+petition --> service : html
+deactivate petition
+
+' --- Envio do email ---
+service -> email : send_petition_email(\ncoordenador_email, subject, html)
+activate email
+email -> smtp : SMTP send
+activate smtp
+smtp --> email : OK
+deactivate smtp
+email --> service : Ok(None)
+deactivate email
+
+' --- Retorno ---
+service --> router : Ok(BancaSubmitResponse)
+deactivate service
+
+router --> frontend : HTTP 200\n{message, ata, student_name, decision_token}
+deactivate router
+
+frontend --> orientador : Exibe confirmacao:\n"Pedido enviado ao coordenador"
+deactivate frontend
+
+' ============================================================
+' FLUXO ALTERNATIVO: Dados invalidos
+' ============================================================
+== Fluxo Alternativo 8a: Dados invalidos ==
+
+orientador -> frontend : Submete formulario\ncom dados incompletos
+activate frontend
+frontend -> router : POST /banca\n(dados invalidos)
+activate router
+router --> frontend : HTTP 422\n(Validation Error)
+deactivate router
+frontend --> orientador : Exibe campos\ncom erro
+deactivate frontend
+
+' ============================================================
+' FLUXO ALTERNATIVO: Erro de persistencia
+' ============================================================
+== Fluxo Alternativo: Erro de persistencia ==
+
+orientador -> frontend : Submete formulario
+activate frontend
+frontend -> router : POST /banca
+activate router
+router -> service : submit_petition(req)
+activate service
+service -> repo : save(req)
+activate repo
+repo --> service : Err(PersistenceError)
+deactivate repo
+service --> router : Err(PersistenceError)
+deactivate service
+router --> frontend : HTTP 503\n(Service Unavailable)
+deactivate router
+frontend --> orientador : Exibe mensagem\nde erro
+deactivate frontend
+
+@enduml

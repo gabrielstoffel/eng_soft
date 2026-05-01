@@ -1,0 +1,80 @@
+@startuml use-case-diagram
+!pragma layout smetana
+!theme plain
+skinparam shadowing false
+
+title Diagrama de Casos de Uso — SigBah!\nSistema de Gestao de Bancas Academicas
+
+left to right direction
+
+' ============================================================
+' ATORES
+' ============================================================
+actor "Orientador" as orientador
+actor "Coordenador\ndo PPG" as coordenador
+actor "Secretario\ndo PPG" as secretario
+
+' ============================================================
+' FRONTEIRA DO SISTEMA
+' ============================================================
+rectangle "SigBah!" {
+
+    ' --- Casos de uso do Orientador ---
+    usecase "UC1: Formalizar\nPedido de Banca" as UC1
+
+    ' --- Casos de uso do Sistema (include/extend) ---
+    usecase "UC2: Enviar Email para\nCoordenador/Secretario" as UC2
+    usecase "UC10: Notificar\nOrientador" as UC10
+    usecase "UC4: Gerar\nDocumentos" as UC4
+
+    ' --- Casos de uso do Coordenador ---
+    usecase "UC3: Aprovar\nBanca" as UC3
+
+    ' --- Casos de uso do Secretario ---
+    usecase "UC5: Enviar Documentos\nda Banca" as UC5
+    usecase "UC6: Enviar\nAtestados" as UC6
+    usecase "UC7: Pesquisar\nBancas" as UC7
+    usecase "UC8: Editar\nDocumentos" as UC8
+    usecase "UC9: Gerar Relatorio\nde Bancas" as UC9
+    usecase "UC11: Enviar\nDocumentos" as UC11
+}
+
+' ============================================================
+' ASSOCIACOES ATOR <-> CASO DE USO
+' ============================================================
+orientador --> UC1
+
+coordenador --> UC3
+
+secretario --> UC5
+secretario --> UC6
+secretario --> UC7
+secretario --> UC8
+secretario --> UC9
+secretario --> UC11
+
+' ============================================================
+' RELACIONAMENTOS ENTRE CASOS DE USO
+' ============================================================
+
+' Include
+UC1 ..> UC2 : <<include>>
+UC3 ..> UC10 : <<include>>
+
+' Extend
+UC3 <.. UC4 : <<extend>>\n[banca aprovada]
+
+' Generalizacao/Especializacao
+UC5 --|> UC11
+UC6 --|> UC11
+
+' ============================================================
+' NOTA
+' ============================================================
+note bottom of "SigBah!"
+    Diagrama inalterado em relacao a Etapa 1.
+    UC2, UC4 e UC10 sao executados pelo Sistema
+    (automaticamente, sem interacao de ator humano).
+end note
+
+@enduml
