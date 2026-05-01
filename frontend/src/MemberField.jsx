@@ -1,6 +1,6 @@
 const EMPTY_MEMBER = { gender: 0, name: '', institution: '', location: '', lang: 'pt', email: '' }
 
-export default function MemberField({ label, value, onChange, required = false, requireEmail = false }) {
+export default function MemberField({ label, value, onChange, required = false, requireEmail = false, disabled = false }) {
   const enabled = required || value !== null
 
   function toggle(e) {
@@ -15,7 +15,13 @@ export default function MemberField({ label, value, onChange, required = false, 
     <fieldset>
       <legend>
         {!required && (
-          <input type="checkbox" checked={enabled} onChange={toggle} style={{ marginRight: 6 }} />
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={toggle}
+            disabled={disabled}
+            style={{ marginRight: 6 }}
+          />
         )}
         {label}
       </legend>
@@ -24,7 +30,11 @@ export default function MemberField({ label, value, onChange, required = false, 
         <div className="member-grid">
           <label>
             Tratamento
-            <select value={value.gender} onChange={e => update('gender', Number(e.target.value))}>
+            <select
+              value={value.gender}
+              disabled={disabled}
+              onChange={e => update('gender', Number(e.target.value))}
+            >
               <option value={0}>Prof. Dr.</option>
               <option value={1}>Profª. Drª.</option>
             </select>
@@ -35,6 +45,7 @@ export default function MemberField({ label, value, onChange, required = false, 
             <input
               type="text"
               required
+              disabled={disabled}
               value={value.name}
               onChange={e => update('name', e.target.value)}
             />
@@ -45,6 +56,7 @@ export default function MemberField({ label, value, onChange, required = false, 
             <input
               type="text"
               required
+              disabled={disabled}
               value={value.institution}
               onChange={e => update('institution', e.target.value)}
             />
@@ -55,6 +67,7 @@ export default function MemberField({ label, value, onChange, required = false, 
             <input
               type="text"
               required
+              disabled={disabled}
               value={value.location}
               onChange={e => update('location', e.target.value)}
             />
@@ -62,7 +75,11 @@ export default function MemberField({ label, value, onChange, required = false, 
 
           <label>
             Idioma da carta
-            <select value={value.lang} onChange={e => update('lang', e.target.value)}>
+            <select
+              value={value.lang}
+              disabled={disabled}
+              onChange={e => update('lang', e.target.value)}
+            >
               <option value="pt">Português</option>
               <option value="en">English</option>
             </select>
@@ -73,6 +90,7 @@ export default function MemberField({ label, value, onChange, required = false, 
             <input
               type="email"
               required={requireEmail}
+              disabled={disabled}
               value={value.email ?? ''}
               onChange={e => update('email', e.target.value)}
               placeholder="email@instituicao.br"

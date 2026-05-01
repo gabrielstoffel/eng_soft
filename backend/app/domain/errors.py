@@ -26,3 +26,13 @@ class BancaNotFoundError(BancaError): ...
 @dataclass
 class BancaAlreadyDecidedError(BancaError):
     current_status: str
+
+
+@dataclass
+class BancaNotEditableError(BancaError):
+    current_status: str
+
+
+@dataclass
+class BancaVersionNotFoundError(BancaError):
+    version: int

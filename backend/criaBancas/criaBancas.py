@@ -854,10 +854,23 @@ class Banca:
             self.pdf.get_y(),
         )
         self.pdf.ln(5)
+
+        usable_width = self.pdf.get_page_width() - 2 * margin
+        half = usable_width / 2
+        row_h = 8
+
+        # Pair Data and Horário on the same row so Horário stays on-page.
         self.pdf.cell(
-            0,
-            None,
-            f"Data: **{self.data.day} de {self.dataMesExtenso(self.data.month)} de {self.data.year}**\n",
+            half,
+            row_h,
+            f"Data: **{self.data.day} de {self.dataMesExtenso(self.data.month)} de {self.data.year}**",
+            align="L",
+            markdown=True,
+        )
+        self.pdf.cell(
+            half,
+            row_h,
+            f"Horário: **{self.horario.hour}h{self.horario.minute:02d}**",
             align="L",
             markdown=True,
             new_x=XPos.LMARGIN,
@@ -866,8 +879,8 @@ class Banca:
         if self.local_banca is not None:
             self.pdf.cell(
                 0,
-                None,
-                f"Local: **{self.local_banca}**\n",
+                row_h,
+                f"Local: **{self.local_banca}**",
                 align="L",
                 markdown=True,
                 new_x=XPos.LMARGIN,
@@ -876,8 +889,8 @@ class Banca:
         if self.link is not None:
             self.pdf.cell(
                 0,
-                None,
-                f"Link: **{self.link}**\n",
+                row_h,
+                f"Link: **{self.link}**",
                 align="L",
                 markdown=True,
                 new_x=XPos.LMARGIN,
@@ -895,13 +908,6 @@ class Banca:
                 w=25,
                 h=25,
             )
-        self.pdf.cell(
-            0,
-            None,
-            f"Horário: **{self.horario.hour}h{self.horario.minute:02d}**",
-            align="L",
-            markdown=True,
-        )
         if save is True:
             self.pdf.output(os.path.join(self.dir, "Cartaz - " + self.nome[1] + ".pdf"))
 
