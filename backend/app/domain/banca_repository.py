@@ -21,9 +21,7 @@ class BancaRepository(ABC):
     def save(self, req: BancaRequest) -> Result[str, PersistenceError]: ...
 
     @abstractmethod
-    def find_by_token(
-        self, token: str
-    ) -> Result[BancaRecord, BancaNotFoundError | PersistenceError]: ...
+    def find_by_token(self, token: str) -> Result[BancaRecord, BancaNotFoundError | PersistenceError]: ...
 
     @abstractmethod
     def update_decision(
@@ -31,13 +29,9 @@ class BancaRepository(ABC):
     ) -> Result[None, BancaNotFoundError | BancaAlreadyDecidedError | PersistenceError]: ...
 
     @abstractmethod
-    def list(
-        self, filters: BancaListFilters
-    ) -> Result[list[BancaListItem], PersistenceError]: ...
+    def list(self, filters: BancaListFilters) -> Result[list[BancaListItem], PersistenceError]: ...
 
     @abstractmethod
     def append_version(
         self, token: str, req: BancaRequest
-    ) -> Result[
-        int, BancaNotFoundError | BancaNotEditableError | PersistenceError
-    ]: ...
+    ) -> Result[int, BancaNotFoundError | BancaNotEditableError | PersistenceError]: ...

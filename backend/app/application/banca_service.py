@@ -24,9 +24,7 @@ class BancaService:
     def __init__(self, repo: BancaRepository) -> None:
         self._repo = repo
 
-    def submit_petition(
-        self, req: BancaRequest
-    ) -> Result[BancaSubmitResponse, EmailError | PersistenceError]:
+    def submit_petition(self, req: BancaRequest) -> Result[BancaSubmitResponse, EmailError | PersistenceError]:
         logger.info("submit_petition.start", {"ata": req.ata, "student": req.nome.name})
 
         match self._repo.save(req):
@@ -68,9 +66,7 @@ class BancaService:
             )
         )
 
-    def get_summary(
-        self, token: str
-    ) -> Result[BancaSummary, BancaNotFoundError | PersistenceError]:
+    def get_summary(self, token: str) -> Result[BancaSummary, BancaNotFoundError | PersistenceError]:
         logger.info("get_summary.start", {"decision_token": token})
         match self._repo.find_by_token(token):
             case Err() as err:
@@ -90,11 +86,7 @@ class BancaService:
         self, token: str
     ) -> Result[
         BancaDecisionResponse,
-        BancaNotFoundError
-        | BancaAlreadyDecidedError
-        | DocumentGenerationError
-        | EmailError
-        | PersistenceError,
+        BancaNotFoundError | BancaAlreadyDecidedError | DocumentGenerationError | EmailError | PersistenceError,
     ]:
         logger.info("approve.start", {"decision_token": token})
 
@@ -130,9 +122,7 @@ class BancaService:
         logger.info("approve.send_documents_email.start", {"recipient": SECRETARY_EMAIL})
         docs_subject = f"[SigBah!] Documentos da Banca #{req.ata} — {req.nome.name}"
         docs_html = petition_service.build_documents_html(req)
-        match email_service.send_documents_email(
-            SECRETARY_EMAIL, docs_subject, docs_html, zip_bytes, zip_name
-        ):
+        match email_service.send_documents_email(SECRETARY_EMAIL, docs_subject, docs_html, zip_bytes, zip_name):
             case Err() as err:
                 logger.error(
                     "approve.send_documents_email.error",

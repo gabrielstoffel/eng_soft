@@ -43,7 +43,9 @@ def send_rejection_email(to: str, subject: str, html_body: str) -> Result[None, 
     return result
 
 
-def send_documents_email(to: str, subject: str, html_body: str, zip_bytes: BytesIO, zip_name: str) -> Result[None, EmailError]:
+def send_documents_email(
+    to: str, subject: str, html_body: str, zip_bytes: BytesIO, zip_name: str
+) -> Result[None, EmailError]:
     logger.info("send_documents_email.start", {"to": to, "zip": zip_name})
     msg = MIMEMultipart("mixed")
     msg["Subject"] = subject

@@ -39,9 +39,7 @@ def list_bancas(
     orientador: str | None = None,
     q: str | None = None,
 ) -> list[BancaListItem]:
-    filters = BancaListFilters(
-        status=status, ata=ata, student=student, orientador=orientador, q=q
-    )
+    filters = BancaListFilters(status=status, ata=ata, student=student, orientador=orientador, q=q)
     logger.info(
         "GET /admin/bancas.start",
         {"status": status, "ata": ata, "student": student, "orientador": orientador, "q": q},
@@ -115,7 +113,7 @@ def update_banca(
 def list_banca_files(
     token: str,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
-    version: int | None = Query(default=None),
+    version: Annotated[int | None, Query()] = None,
 ) -> list[FileManifestEntry]:
     logger.info(
         "GET /admin/bancas/{token}/files.start",
@@ -123,9 +121,7 @@ def list_banca_files(
     )
     match admin_service.list_files(token, version):
         case Err(BancaNotFoundError(message=msg)):
-            logger.warn(
-                "GET /admin/bancas/{token}/files.not_found", {"decision_token": token}
-            )
+            logger.warn("GET /admin/bancas/{token}/files.not_found", {"decision_token": token})
             raise HTTPException(status_code=404, detail=msg)
         case Err(BancaVersionNotFoundError(message=msg)):
             logger.warn(
@@ -151,8 +147,8 @@ def list_banca_files(
 def download_banca_files(
     token: str,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
-    id: list[str] = Query(default=[]),
-    version: int | None = Query(default=None),
+    id: Annotated[list[str], Query()] = [],
+    version: Annotated[int | None, Query()] = None,
 ) -> StreamingResponse:
     logger.info(
         "GET /admin/bancas/{token}/files/download.start",
@@ -189,10 +185,7 @@ def download_banca_files(
         case ok:
             buf, filename, mime = ok.value
             ascii_name = filename.encode("ascii", "replace").decode("ascii").replace("?", "_")
-            disposition = (
-                f'attachment; filename="{ascii_name}"; '
-                f"filename*=UTF-8''{quote(filename)}"
-            )
+            disposition = f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
             logger.info(
                 "GET /admin/bancas/{token}/files/download.end",
                 {"decision_token": token, "filename": filename},
