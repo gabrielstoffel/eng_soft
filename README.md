@@ -29,6 +29,17 @@ uv sync
 uv run uvicorn main:app --reload
 ```
 
+Backend reads from `backend/.env` (gitignored):
+
+```
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=sigbah
+MONGO_USERNAME=admin
+MONGO_PASSWORD=password
+SMTP_HOST=localhost
+SMTP_PORT=2525
+```
+
 ### 3. Frontend
 
 ```bash
