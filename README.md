@@ -39,21 +39,21 @@ npm run dev
 
 ## URLs
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:5173 |
-| API | http://localhost:8000 |
-| Email inbox (Mailpit) | http://localhost:8025 |
-| MongoDB | mongodb://localhost:27017 |
+| Service               | URL                       |
+| --------------------- | ------------------------- |
+| Frontend              | http://localhost:5173     |
+| API                   | http://localhost:8000     |
+| Email inbox (Mailpit) | http://localhost:8025     |
+| MongoDB               | mongodb://localhost:27017 |
 
 ## Pages
 
-| Route | Audience | Purpose |
-|---|---|---|
-| `/` | Servidor / orientador | Submit a new banca petition |
-| `/decide/:token` | Coordenador | Approve or reject a pending petition (link arrives by e-mail) |
-| `/admin` | Servidor | Search bancas in the database |
-| `/admin/banca/:token` | Servidor | View full state, edit (when status = aceita), and download/regenerate documents per version |
+| Route                 | Audience              | Purpose                                                                                     |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| `/`                   | Servidor / orientador | Submit a new banca petition                                                                 |
+| `/decide/:token`      | Coordenador           | Approve or reject a pending petition (link arrives by e-mail)                               |
+| `/admin`              | Servidor              | Search bancas in the database                                                               |
+| `/admin/banca/:token` | Servidor              | View full state, edit (when status = aceita), and download/regenerate documents per version |
 
 Approved bancas are stored as an ordered list of versions; editing creates a new version only when content changes. Each version exposes a manifest of individual PDFs (Ata, Cartas de Convite, Pareceres, Cartaz, Relatoria de Avaliação) that can be downloaded one at a time or as a zip of selected files.
 
