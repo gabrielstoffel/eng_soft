@@ -1,0 +1,123 @@
+@startuml package-diagram
+!pragma layout smetana
+!theme plain
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+
+title Diagrama de Pacotes — SigBah!\nEstilo Arquitetural: Clean Architecture (Camadas com Inversao de Dependencia)
+
+' ============================================================
+' TOP-LEVEL SYSTEM: FRONTEND
+' ============================================================
+package "SigBah! Frontend" <<system>> {
+    package "Pages" <<subsystem>> {
+    }
+    package "Components" <<subsystem>> {
+    }
+    package "Config" <<subsystem>> {
+    }
+    note right of "SigBah! Frontend"
+        React 18 + Vite
+        JavaScript (plain)
+        SPA (Single Page Application)
+    end note
+}
+
+' ============================================================
+' TOP-LEVEL SYSTEM: BACKEND
+' ============================================================
+package "SigBah! Backend" <<system>> {
+
+    package "api" <<subsystem>> {
+        note as N1
+            FastAPI routes
+            HTTP request/response
+            Injecao de Dependencia (deps.py)
+            Mapeamento erro -> HTTP status
+        end note
+    }
+
+    package "application" <<subsystem>> {
+        note as N2
+            Casos de uso:
+            - BancaService
+            - document_service
+            - email_service
+            - petition_service
+        end note
+    }
+
+    package "domain" <<subsystem>> {
+        note as N3
+            Contratos (ABCs)
+            Modelos (Pydantic)
+            Erros tipados
+            SEM dependencias externas
+        end note
+    }
+
+    package "infrastructure" <<subsystem>> {
+        note as N4
+            MongoBancaRepository
+            Conexao com banco de dados
+            Cliente SMTP
+        end note
+    }
+
+    package "criaBancas" <<library>> {
+        note as N5
+            Geracao de documentos PDF
+            (cartas-convite, atas,
+            folhas de conceito)
+        end note
+    }
+
+    note bottom of "SigBah! Backend"
+        Python 3.12
+        FastAPI + Pydantic
+        PyMongo
+        uvicorn (ASGI)
+    end note
+}
+
+' ============================================================
+' TOP-LEVEL SYSTEM: INFRASTRUCTURE SERVICES
+' ============================================================
+package "Servicos de Infraestrutura" <<system>> {
+    package "MongoDB 7" <<framework>> {
+    }
+    package "Postfix" <<framework>> {
+    }
+    package "Mailpit" <<framework>> {
+    }
+    note bottom of "Servicos de Infraestrutura"
+        Docker Compose
+        Rede isolada (bridge)
+    end note
+}
+
+' ============================================================
+' DEPENDENCIAS
+' ============================================================
+
+' Frontend -> Backend (via HTTP)
+"SigBah! Frontend" ..> "api" : <<use>>\nHTTP/JSON REST
+
+' Camadas internas do Backend (deps apontam para dentro)
+"api" ..> "application" : <<use>>
+"api" ..> "domain" : <<use>>\n(modelos, erros)
+"application" ..> "domain" : <<use>>
+"infrastructure" ..> "domain" : <<import>>\n(implementa ABCs)
+
+' Application usa biblioteca de PDF
+"application" ..> "criaBancas" : <<use>>\n(geracao PDF)
+
+' Infrastructure -> Servicos externos
+"infrastructure" ..> "MongoDB 7" : <<use>>\n(PyMongo, porta 27017)
+"infrastructure" ..> "Postfix" : <<use>>\n(SMTP, porta 2525)
+
+' Postfix relay para Mailpit
+"Postfix" ..> "Mailpit" : <<use>>\n(relay SMTP)
+
+@enduml

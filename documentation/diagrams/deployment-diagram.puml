@@ -1,0 +1,86 @@
+@startuml deployment-diagram
+!pragma layout smetana
+!theme plain
+skinparam shadowing false
+
+title Diagrama de Deployment — SigBah!\nDisposicao fisica dos componentes em execucao
+
+' ============================================================
+' NODO: NAVEGADOR DO USUARIO
+' ============================================================
+node "Navegador Web\n(Chrome, Firefox)" as browser {
+    component "SigBah! SPA\n(React)" as spa
+}
+
+' ============================================================
+' NODO: MAQUINA DO DESENVOLVEDOR
+' ============================================================
+node "Maquina Local" as devmachine {
+
+    node "Python 3.12 + uvicorn" <<executionEnvironment>> as python_env {
+        component "SigBah! Backend\n(FastAPI)" as backend
+        component "criaBancas\n(PDF generation)" as pdf
+    }
+
+    node "Node.js + Vite Dev Server" <<executionEnvironment>> as node_env {
+        component "SigBah! Frontend\n(React + Vite)" as frontend
+    }
+}
+
+' ============================================================
+' NODO: DOCKER HOST (mesma maquina)
+' ============================================================
+node "Docker Host" as docker {
+
+    node "Container: mongo" <<container>> as mongo_container {
+        database "MongoDB 7" as mongodb
+    }
+
+    node "Container: postfix" <<container>> as postfix_container {
+        component "Postfix\n(SMTP Relay)" as postfix
+    }
+
+    node "Container: mailpit" <<container>> as mailpit_container {
+        component "Mailpit\n(Email Capture)" as mailpit
+    }
+}
+
+' ============================================================
+' CONEXOES
+' ============================================================
+
+' Browser <-> Frontend
+browser -- frontend : HTTP\nporta 5173
+
+' Frontend proxies API calls to Backend
+frontend -- backend : HTTP/JSON\n(Vite proxy)\nporta 8000
+
+' Backend <-> MongoDB
+backend -- mongodb : PyMongo\nporta 27017
+
+' Backend <-> Postfix (envio de emails)
+backend -- postfix : SMTP\nporta 2525
+
+' Postfix relay -> Mailpit
+postfix -- mailpit : SMTP relay\nporta 1025
+
+' PDF library
+backend ..> pdf : <<use>>
+
+' ============================================================
+' NOTAS
+' ============================================================
+note right of docker
+    Todos os containers sao
+    gerenciados via Docker Compose.
+    Rede isolada: "mail" (bridge).
+    Volume persistente: mongo_data
+end note
+
+note right of mailpit_container
+    Web UI disponivel em
+    http://localhost:8025
+    (visualizacao de emails)
+end note
+
+@enduml

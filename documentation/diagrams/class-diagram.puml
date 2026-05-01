@@ -1,0 +1,182 @@
+@startuml class-diagram
+!pragma layout smetana
+!theme plain
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+title Diagrama de Classes — Modelo de Dominio\nSigBah! (app/domain/)
+
+' ============================================================
+' VALUE OBJECTS
+' ============================================================
+
+class StudentInfo {
+    - gender: Literal[0, 1]
+    - name: str
+    + to_tuple(): tuple
+}
+
+class MemberInfo {
+    - gender: Literal[0, 1]
+    - name: str
+    - institution: str
+    - location: str
+    - lang: Literal["pt", "en"]
+    - email: EmailStr | None
+    + to_tuple(): tuple
+}
+
+' ============================================================
+' AGGREGATE ROOT (Request)
+' ============================================================
+
+class BancaRequest {
+    - nome: StudentInfo
+    - tipo: Literal[1, 2, 3]
+    - data: date
+    - horario: time
+    - data_convite: date | None
+    - ata: int
+    - local_banca: str | None
+    - link: str | None
+    - orientador: MemberInfo
+    - coorientador: MemberInfo | None
+    - externo1: MemberInfo | None
+    - externo2: MemberInfo | None
+    - interno1: MemberInfo | None
+    - interno2: MemberInfo | None
+    - supl_int: MemberInfo | None
+    - supl_ext: MemberInfo | None
+    - titulo: str
+    - titulo2: str
+}
+
+' ============================================================
+' PERSISTED RECORD
+' ============================================================
+
+class BancaRecord {
+    - request: BancaRequest
+    - decision_token: str
+    - status: BancaStatus
+    - rejection_reason: str | None
+    - created_at: datetime
+    - decided_at: datetime | None
+}
+
+enum BancaStatus {
+    pending
+    approved
+    rejected
+}
+
+' ============================================================
+' RESPONSE MODELS
+' ============================================================
+
+class BancaSubmitResponse {
+    - message: str
+    - ata: int
+    - student_name: str
+    - decision_token: str
+}
+
+class BancaSummary {
+    - request: BancaRequest
+    - status: BancaStatus
+    - rejection_reason: str | None
+}
+
+class BancaDecisionResponse {
+    - message: str
+    - ata: int
+    - student_name: str
+}
+
+class RejectRequest {
+    - reason: str
+}
+
+' ============================================================
+' REPOSITORY (INTERFACE + IMPLEMENTACAO)
+' ============================================================
+
+interface BancaRepository <<interface>> {
+    + save(req: BancaRequest): Result[str, PersistenceError]
+    + find_by_token(token: str): Result[BancaRecord, Error]
+    + update_decision(token, status, reason): Result[None, Error]
+}
+
+class MongoBancaRepository {
+    - _collection: Collection
+    + save(req: BancaRequest): Result[str, PersistenceError]
+    + find_by_token(token: str): Result[BancaRecord, Error]
+    + update_decision(token, status, reason): Result[None, Error]
+}
+
+' ============================================================
+' SERVICE
+' ============================================================
+
+class BancaService {
+    - _repo: BancaRepository
+    + submit_petition(req: BancaRequest): Result[BancaSubmitResponse, Error]
+    + get_summary(token: str): Result[BancaSummary, Error]
+    + approve(token: str): Result[BancaDecisionResponse, Error]
+    + reject(token: str, reason: str): Result[BancaDecisionResponse, Error]
+}
+
+' ============================================================
+' ERROR HIERARCHY
+' ============================================================
+
+abstract class BancaError {
+    - message: str
+}
+
+class DocumentGenerationError {
+}
+
+class EmailError {
+    - recipient: str
+}
+
+class PersistenceError {
+}
+
+class BancaNotFoundError {
+}
+
+class BancaAlreadyDecidedError {
+    - current_status: str
+}
+
+' ============================================================
+' RELACIONAMENTOS
+' ============================================================
+
+' Composicao: BancaRequest contem StudentInfo e MemberInfo
+BancaRequest *-- "1" StudentInfo : nome
+BancaRequest *-- "1..8" MemberInfo : membros
+
+' Composicao: BancaRecord contem BancaRequest
+BancaRecord *-- "1" BancaRequest : request
+BancaRecord --> BancaStatus : status
+
+' BancaSummary referencia BancaRequest
+BancaSummary --> BancaRequest : request
+
+' Realizacao: MongoBancaRepository implementa BancaRepository
+MongoBancaRepository ..|> BancaRepository
+
+' Dependencia: BancaService depende de BancaRepository (injecao)
+BancaService --> BancaRepository : <<use>>
+
+' Hierarquia de erros
+DocumentGenerationError --|> BancaError
+EmailError --|> BancaError
+PersistenceError --|> BancaError
+BancaNotFoundError --|> BancaError
+BancaAlreadyDecidedError --|> BancaError
+
+@enduml

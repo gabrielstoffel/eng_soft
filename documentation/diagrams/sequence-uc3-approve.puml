@@ -1,0 +1,195 @@
+@startuml sequence-uc3-approve
+!theme plain
+skinparam shadowing false
+
+title Diagrama de Sequencia — UC3: Aprovar Banca
+
+actor "Coordenador" as coordenador
+participant "DecisionPage\n(Frontend)" as frontend
+participant "router\n(api)" as router
+participant "BancaService\n(application)" as service
+participant "MongoBancaRepository\n(infrastructure)" as repo
+database "MongoDB" as db
+participant "document_service\n(application)" as docs
+participant "petition_service\n(application)" as petition
+participant "email_service\n(application)" as email
+participant "Postfix\n(SMTP)" as smtp
+
+' ============================================================
+' FLUXO PRINCIPAL: CONSULTA + APROVACAO
+' ============================================================
+
+coordenador -> frontend : Acessa link de decisao\n(/decide/{token})
+activate frontend
+
+' --- Consulta dados da banca ---
+frontend -> router : GET /banca/decide/{token}
+activate router
+router -> service : get_summary(token)
+activate service
+service -> repo : find_by_token(token)
+activate repo
+repo -> db : find_one({decision_token})
+activate db
+db --> repo : document
+deactivate db
+repo --> service : Ok(BancaRecord)
+deactivate repo
+service --> router : Ok(BancaSummary)
+deactivate service
+router --> frontend : HTTP 200\n(request, status, rejection_reason)
+deactivate router
+
+frontend --> coordenador : Exibe dados do pedido\n(aluno, orientador, membros, data)
+deactivate frontend
+
+|||
+
+' --- Coordenador aprova ---
+coordenador -> frontend : Clica "Aprovar"
+activate frontend
+
+frontend -> router : POST /banca/decide/{token}/approve
+activate router
+
+router -> service : approve(token)
+activate service
+
+' Busca registro
+service -> repo : find_by_token(token)
+activate repo
+repo --> service : Ok(BancaRecord)
+deactivate repo
+
+note right of service
+    Verifica: status == "pending"
+    Se nao, retorna
+    BancaAlreadyDecidedError
+end note
+
+' --- Geracao de documentos (UC4 - extend) ---
+service -> docs : generate_documents(req)
+activate docs
+note right of docs
+    Gera: carta-convite, folha
+    de conceito, ata (conforme tipo)
+    Retorna: (zip_bytes, zip_name)
+end note
+docs --> service : Ok((zip_bytes, zip_name))
+deactivate docs
+
+' --- Envio de documentos ao secretario ---
+service -> petition : build_documents_html(req)
+activate petition
+petition --> service : html
+deactivate petition
+
+service -> email : send_documents_email(\nsecretary_email, subject, html,\nzip_bytes, zip_name)
+activate email
+email -> smtp : SMTP send\n(com anexo ZIP)
+activate smtp
+smtp --> email : OK
+deactivate smtp
+email --> service : Ok(None)
+deactivate email
+
+' --- Atualiza status no banco ---
+service -> repo : update_decision(token, "approved")
+activate repo
+repo -> db : update_one(\n{decision_token},\n{status: "approved"})
+activate db
+db --> repo : OK
+deactivate db
+repo --> service : Ok(None)
+deactivate repo
+
+' --- Retorno ---
+service --> router : Ok(BancaDecisionResponse)
+deactivate service
+
+router --> frontend : HTTP 200\n{message, ata, student_name}
+deactivate router
+
+frontend --> coordenador : Exibe confirmacao:\n"Banca aprovada e documentos\nenviados a secretaria"
+deactivate frontend
+
+' ============================================================
+' FLUXO ALTERNATIVO 4a: RECUSA
+' ============================================================
+== Fluxo Alternativo 4a: Coordenador recusa a banca ==
+
+coordenador -> frontend : Clica "Recusar"\ne preenche justificativa
+activate frontend
+
+frontend -> router : POST /banca/decide/{token}/reject\n{reason: "..."}
+activate router
+
+router -> service : reject(token, reason)
+activate service
+
+service -> repo : find_by_token(token)
+activate repo
+repo --> service : Ok(BancaRecord)
+deactivate repo
+
+service -> repo : update_decision(token, "rejected", reason)
+activate repo
+repo -> db : update_one(...)
+activate db
+db --> repo : OK
+deactivate db
+repo --> service : Ok(None)
+deactivate repo
+
+' Notifica orientador (UC10 - include)
+service -> petition : build_rejection_subject(req)
+activate petition
+petition --> service : subject
+deactivate petition
+
+service -> petition : build_rejection_html(req, reason)
+activate petition
+petition --> service : html
+deactivate petition
+
+service -> email : send_rejection_email(\norientador_email, subject, html)
+activate email
+email -> smtp : SMTP send
+activate smtp
+smtp --> email : OK
+deactivate smtp
+email --> service : Ok(None)
+deactivate email
+
+service --> router : Ok(BancaDecisionResponse)
+deactivate service
+
+router --> frontend : HTTP 200\n{message, ata, student_name}
+deactivate router
+
+frontend --> coordenador : Exibe confirmacao:\n"Banca rejeitada e\nsubmetente notificado"
+deactivate frontend
+
+' ============================================================
+' FLUXO ALTERNATIVO: Banca ja decidida
+' ============================================================
+== Fluxo Alternativo: Banca ja decidida ==
+
+coordenador -> frontend : Tenta aprovar/recusar
+activate frontend
+frontend -> router : POST /banca/decide/{token}/approve
+activate router
+router -> service : approve(token)
+activate service
+service -> repo : find_by_token(token)
+activate repo
+repo --> service : Ok(BancaRecord)\nstatus != "pending"
+deactivate repo
+service --> router : Err(BancaAlreadyDecidedError)
+deactivate service
+router --> frontend : HTTP 409 (Conflict)\n{current_status}
+deactivate router
+frontend --> coordenador : Exibe: "Banca ja foi\navaliada anteriormente"
+deactivate frontend
+
+@enduml
