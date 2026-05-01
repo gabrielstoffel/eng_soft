@@ -95,9 +95,7 @@ class BancaRequest(BaseModel):
 
 BancaStatus = Literal["pending", "approved", "rejected"]
 
-DocumentKind = Literal[
-    "ata", "carta_convite", "parecer", "cartaz", "relatoria_avaliacao"
-]
+DocumentKind = Literal["ata", "carta_convite", "parecer", "cartaz", "relatoria_avaliacao"]
 
 MemberRole = Literal[
     "orientador",

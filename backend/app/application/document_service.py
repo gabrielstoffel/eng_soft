@@ -177,9 +177,7 @@ def generate_documents(req: BancaRequest) -> Result[tuple[io.BytesIO, str], Docu
         return Err(DocumentGenerationError(message=str(e)))
 
 
-def generate_files(
-    req: BancaRequest, ids: list[str]
-) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
+def generate_files(req: BancaRequest, ids: list[str]) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
     """Generate the PDFs identified by `ids`. Returns single PDF if one id, zip otherwise.
 
     Each id is a manifest entry id (e.g. `ata`, `cartaz`, `carta_convite:orientador`).
@@ -216,11 +214,7 @@ def generate_files(
             for entry in requested:
                 path = os.path.join(banca.dir, entry.label)
                 if not os.path.exists(path):
-                    return Err(
-                        DocumentGenerationError(
-                            message=f"Generated file missing on disk: {entry.label}"
-                        )
-                    )
+                    return Err(DocumentGenerationError(message=f"Generated file missing on disk: {entry.label}"))
                 picked.append((entry.label, path))
 
             if len(picked) == 1:

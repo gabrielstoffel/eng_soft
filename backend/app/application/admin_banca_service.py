@@ -27,9 +27,7 @@ class AdminBancaService:
     def __init__(self, repo: BancaRepository) -> None:
         self._repo = repo
 
-    def list_bancas(
-        self, filters: BancaListFilters
-    ) -> Result[list[BancaListItem], PersistenceError]:
+    def list_bancas(self, filters: BancaListFilters) -> Result[list[BancaListItem], PersistenceError]:
         logger.info(
             "admin.list_bancas.start",
             {
@@ -48,9 +46,7 @@ class AdminBancaService:
                 logger.info("admin.list_bancas.end", {"count": len(ok.value)})
                 return Ok(ok.value)
 
-    def get_detail(
-        self, token: str
-    ) -> Result[BancaAdminDetail, BancaNotFoundError | PersistenceError]:
+    def get_detail(self, token: str) -> Result[BancaAdminDetail, BancaNotFoundError | PersistenceError]:
         logger.info("admin.get_detail.start", {"decision_token": token})
         match self._repo.find_by_token(token):
             case Err() as err:
@@ -183,10 +179,7 @@ class AdminBancaService:
         self, token: str, ids: list[str], version: int | None = None
     ) -> Result[
         tuple[io.BytesIO, str, str],
-        BancaNotFoundError
-        | BancaVersionNotFoundError
-        | DocumentGenerationError
-        | PersistenceError,
+        BancaNotFoundError | BancaVersionNotFoundError | DocumentGenerationError | PersistenceError,
     ]:
         logger.info(
             "admin.download_files.start",

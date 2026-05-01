@@ -50,9 +50,7 @@ class MongoBancaRepository(BancaRepository):
             logger.error("save.error", {"ata": req.ata, "message": str(e)})
             return Err(PersistenceError(message=str(e)))
 
-    def find_by_token(
-        self, token: str
-    ) -> Result[BancaRecord, BancaNotFoundError | PersistenceError]:
+    def find_by_token(self, token: str) -> Result[BancaRecord, BancaNotFoundError | PersistenceError]:
         logger.info("find_by_token.start", {"decision_token": token})
         try:
             doc = get_db()["bancas"].find_one({"decision_token": token})
@@ -109,9 +107,7 @@ class MongoBancaRepository(BancaRepository):
             logger.error("update_decision.error", {"decision_token": token, "message": str(e)})
             return Err(PersistenceError(message=str(e)))
 
-    def list(
-        self, filters: BancaListFilters
-    ) -> Result[list[BancaListItem], PersistenceError]:
+    def list(self, filters: BancaListFilters) -> Result[list[BancaListItem], PersistenceError]:
         logger.info(
             "list.start",
             {
@@ -150,9 +146,7 @@ class MongoBancaRepository(BancaRepository):
                     continue
                 if filters.q:
                     q = filters.q.lower()
-                    haystack = " ".join(
-                        [req.nome.name, req.orientador.name, req.titulo, req.titulo2]
-                    ).lower()
+                    haystack = " ".join([req.nome.name, req.orientador.name, req.titulo, req.titulo2]).lower()
                     if q not in haystack:
                         continue
                 items.append(
@@ -212,9 +206,7 @@ class MongoBancaRepository(BancaRepository):
                 },
             )
             if result.matched_count == 0:
-                existing2 = get_db()["bancas"].find_one(
-                    {"decision_token": token}, {"status": 1}
-                )
+                existing2 = get_db()["bancas"].find_one({"decision_token": token}, {"status": 1})
                 if existing2 is None:
                     return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
                 current2 = existing2.get("status", "unknown")
