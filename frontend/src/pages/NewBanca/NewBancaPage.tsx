@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
-import BancaForm, { serializeBanca } from "./BancaForm";
+import BancaForm, { serializeBanca } from "./form/BancaForm";
 import { isDevelopment } from "../../env.js";
 import {
   newBancaDefaultValues,
