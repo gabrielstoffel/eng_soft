@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
-import NewBancaPage from './pages/NewBanca/NewBancaPage.jsx'
+import NewBancaPage from './pages/NewBanca/NewBancaPage'
 import DecisionPage from './DecisionPage.jsx'
 import AdminBancaList from './AdminBancaList.jsx'
 import AdminBancaDetail from './AdminBancaDetail.jsx'
