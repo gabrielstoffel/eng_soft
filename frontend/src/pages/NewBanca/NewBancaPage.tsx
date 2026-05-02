@@ -85,9 +85,6 @@ export default function NewBancaPage() {
     <div className="min-h-screen bg-stone-100 text-slate-900">
       <div className="mx-auto w-full max-w-6xl px-3 py-8 sm:px-6 lg:px-8 lg:py-10">
         <header>
-          <div className="text-xs font-semibold tracking-[0.2em] text-sky-700 uppercase">
-            Etapa 1 de 2
-          </div>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl mb-4!">
             Solicitação de nova banca
           </h1>
@@ -116,19 +113,10 @@ export default function NewBancaPage() {
               </div>
             )}
 
-            <BancaForm />
-
-            <div className="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.35)]">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 sm:ml-auto"
-                >
-                  {loading ? "Enviando..." : "Enviar Pedido ao Coordenador"}
-                </button>
-              </div>
-            </div>
+            <BancaForm
+              loading={loading}
+              submittedSuccessfully={status?.ok === true}
+            />
           </form>
         </FormProvider>
       </div>

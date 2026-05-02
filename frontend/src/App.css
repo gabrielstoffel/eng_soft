@@ -127,7 +127,7 @@ body {
   color: #991b1b;
 }
 
-button[type='submit'] {
+.container button[type='submit'] {
   padding: 0.7rem 2rem;
   background: #3b82f6;
   color: #fff;
@@ -139,11 +139,11 @@ button[type='submit'] {
   width: 100%;
 }
 
-button[type='submit']:hover:not(:disabled) {
+.container button[type='submit']:hover:not(:disabled) {
   background: #2563eb;
 }
 
-button[type='submit']:disabled {
+.container button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
