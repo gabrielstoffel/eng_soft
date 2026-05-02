@@ -17,19 +17,18 @@ body {
   padding: 0 1rem 4rem;
 }
 
-h1 {
+.container h1 {
   font-size: 1.6rem;
   margin-bottom: 1.5rem;
 }
 
-h2 {
+.container h2 {
   font-size: 1.1rem;
   margin: 0 0 1rem;
   padding-bottom: 0.4rem;
-  border-bottom: 2px solid #ddd;
 }
 
-section {
+.container section {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -40,7 +39,7 @@ section {
   gap: 0.75rem;
 }
 
-label {
+.container label {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -49,8 +48,8 @@ label {
   flex: 1;
 }
 
-input,
-select {
+.container input,
+.container select {
   padding: 0.45rem 0.6rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -58,22 +57,16 @@ select {
   width: 100%;
 }
 
-input:focus,
-select:focus {
-  outline: 2px solid #3b82f6;
-  border-color: transparent;
-}
-
-input[readonly],
-textarea[readonly] {
+.container input[readonly],
+.container textarea[readonly] {
   background: #f3f4f6;
   color: #4b5563;
   cursor: default;
   border-color: #e5e7eb;
 }
 
-input[readonly]:focus,
-textarea[readonly]:focus {
+.container input[readonly]:focus,
+.container textarea[readonly]:focus {
   outline: none;
   border-color: #e5e7eb;
 }
@@ -89,14 +82,14 @@ textarea[readonly]:focus {
 }
 
 /* member fieldset */
-fieldset {
+.container fieldset {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   padding: 0.75rem 1rem;
   margin: 0;
 }
 
-legend {
+.container legend {
   font-weight: 600;
   font-size: 0.9rem;
   padding: 0 0.3rem;

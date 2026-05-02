@@ -82,24 +82,56 @@ export default function NewBancaPage() {
   }
 
   return (
-    <div className="container">
-      <h1>SigBah! — Nova Banca</h1>
+    <div className="min-h-screen bg-stone-100 text-slate-900">
+      <div className="mx-auto w-full max-w-6xl px-3 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <header>
+          <div className="text-xs font-semibold tracking-[0.2em] text-sky-700 uppercase">
+            Etapa 1 de 2
+          </div>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl mb-4!">
+            Solicitação de nova banca
+          </h1>
+        </header>
 
-      <FormProvider {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <BancaForm />
+        <FormProvider {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-5"
+          >
+            <p className="text-sm leading-6 text-slate-500">
+              Campos marcados com{" "}
+              <span className="font-semibold text-sky-700">*</span> precisam ser
+              preenchidos antes do envio.
+            </p>
 
-          {status && (
-            <div className={status.ok ? "alert alert-ok" : "alert alert-err"}>
-              {status.message}
+            {status && (
+              <div
+                className={
+                  status.ok
+                    ? "rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+                    : "rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+                }
+              >
+                {status.message}
+              </div>
+            )}
+
+            <BancaForm />
+
+            <div className="rounded-xl border border-slate-200 bg-white px-5 py-5 shadow-[0_20px_50px_-40px_rgba(15,23,42,0.35)]">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-2xl bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300 sm:ml-auto"
+                >
+                  {loading ? "Enviando..." : "Enviar Pedido ao Coordenador"}
+                </button>
+              </div>
             </div>
-          )}
-
-          <button type="submit" disabled={loading}>
-            {loading ? "Enviando..." : "Enviar Pedido ao Coordenador"}
-          </button>
-        </form>
-      </FormProvider>
+          </form>
+        </FormProvider>
+      </div>
     </div>
   );
 }
