@@ -1,24 +1,14 @@
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import Field from "./Field";
-import MemberField from "./MemberField";
-import SelectInput from "./SelectInput";
-import TextInput from "./TextInput";
+import { ROLES_BY_TIPO } from "./config";
+import BancaCompositionSection from "./BancaCompositionSection";
+import BancaGeneralSection from "./BancaGeneralSection";
 import {
-  ALL_ROLES,
-  OPTIONAL_MEMBER_ROLES,
-  ROLE_LABELS,
-  ROLES_BY_TIPO,
-  type OptionalMemberRole,
-} from "./config";
-import {
-  bancaTypeLabelByValue,
   emptyMemberForm,
-  genderLabelByValue,
   newBancaDefaultValues,
   serializeNewBancaForm,
   type BancaRequest,
-  type MemberForm,
   type MemberInfo,
   type NewBancaFormState,
 } from "../../types/new-banca.ts";
@@ -43,7 +33,7 @@ export function serializeBanca(form: NewBancaFormState): BancaRequest {
 }
 
 export function deserializeBanca(req: BancaRequest): NewBancaFormState {
-  const fillMember = (m: MemberInfo | null): MemberForm | null =>
+  const fillMember = (m: MemberInfo | null) =>
     m ? { ...EMPTY_MEMBER, ...m, email: m.email ?? "" } : null;
 
   return {
@@ -70,227 +60,84 @@ export function deserializeBanca(req: BancaRequest): NewBancaFormState {
 
 type BancaFormProps = {
   disabled?: boolean;
+  loading?: boolean;
+  submittedSuccessfully?: boolean;
 };
 
-export default function BancaForm({ disabled = false }: BancaFormProps) {
-  const { register, setValue, watch } = useFormContext<NewBancaFormState>();
-  const form = watch();
+const STEP_ONE_FIELDS = [
+  "nome.gender",
+  "nome.name",
+  "tipo",
+  "ata",
+  "data",
+  "horario",
+  "data_convite",
+  "local_banca",
+  "link",
+  "titulo",
+  "titulo2",
+] as const;
 
-  function parseGender(value: string): 0 | 1 {
-    return value === "1" ? 1 : 0;
-  }
+export default function BancaForm({
+  disabled = false,
+  loading = false,
+  submittedSuccessfully = false,
+}: BancaFormProps) {
+  const { trigger } = useFormContext<NewBancaFormState>();
+  const [step, setStep] = useState<1 | 2>(1);
 
-  function parseBancaType(value: string): NewBancaFormState["tipo"] {
-    if (value === "2") return 2;
-    if (value === "3") return 3;
-    return 1;
-  }
-
-  function setOptionalMember(
-    role: OptionalMemberRole,
-    value: MemberForm | null,
-  ) {
-    setValue(role, value);
-  }
-
-  function changeTipo(newTipo: NewBancaFormState["tipo"]) {
-    const newRoles = ROLES_BY_TIPO[newTipo];
-    setValue("tipo", newTipo);
-    for (const role of OPTIONAL_MEMBER_ROLES) {
-      if (newRoles[role] === "required" && !form[role]) {
-        setOptionalMember(role, { ...EMPTY_MEMBER });
-      }
-      if (newRoles[role] === "hidden") {
-        setOptionalMember(role, null);
-      }
+  useEffect(() => {
+    if (submittedSuccessfully) {
+      setStep(1);
     }
-  }
+  }, [submittedSuccessfully]);
 
-  const visibleRoles = ROLES_BY_TIPO[form.tipo];
+  async function goToComposition() {
+    const isValid = await trigger(STEP_ONE_FIELDS);
+    if (!isValid) return;
+    setStep(2);
+  }
 
   return (
-    <>
-      <section className="overflow-hidden rounded-xl bg-white shadow-[0_20px_50px_-40px_rgba(15,23,42,0.35)]">
-        <div className="border-b border-slate-200 px-4 py-5 sm:px-8">
-          <div className="text-xs font-semibold tracking-[0.18em] text-sky-700 uppercase">
-            Dados Gerais
-          </div>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight mb-0! pb-0! text-slate-950">
-            Identificação da banca e agenda da defesa
-          </h2>
-        </div>
+    <div className="space-y-5">
+      {step === 1 ? (
+        <>
+          <BancaGeneralSection disabled={disabled} />
 
-        <div className="space-y-8 px-4 py-6 sm:px-8 sm:py-8">
-          <div className="space-y-4 border-b border-slate-200 pb-8">
-            <div>
-              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-                Identificação
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Dados do aluno e enquadramento formal da sessão.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
-              <Field label="Tratamento" required>
-                <SelectInput
-                  required
-                  disabled={disabled}
-                  {...register("nome.gender", {
-                    setValueAs: (value) => parseGender(String(value)),
-                  })}
-                >
-                  <option value={0}>{genderLabelByValue[0]}</option>
-                  <option value={1}>{genderLabelByValue[1]}</option>
-                </SelectInput>
-              </Field>
-
-              <Field label="Nome do(a) aluno(a)" required>
-                <TextInput
-                  type="text"
-                  required
-                  disabled={disabled}
-                  {...register("nome.name")}
-                />
-              </Field>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_11rem]">
-              <Field label="Tipo" required>
-                <SelectInput
-                  required
-                  disabled={disabled}
-                  {...register("tipo", {
-                    onChange: (e) => changeTipo(parseBancaType(e.target.value)),
-                  })}
-                >
-                  <option value={1}>{bancaTypeLabelByValue[1]}</option>
-                  <option value={2}>{bancaTypeLabelByValue[2]}</option>
-                  <option value={3}>{bancaTypeLabelByValue[3]}</option>
-                </SelectInput>
-              </Field>
-
-              <Field label="Ata" required>
-                <TextInput
-                  type="number"
-                  required
-                  min={1}
-                  disabled={disabled}
-                  {...register("ata")}
-                />
-              </Field>
-            </div>
-          </div>
-
-          <div className="space-y-4 border-b border-slate-200 pb-8">
-            <div>
-              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-                Agenda
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Data, horário e referências de logística para a realização da
-                defesa.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="Data da defesa" required>
-                <TextInput
-                  type="date"
-                  required
-                  disabled={disabled}
-                  {...register("data")}
-                />
-              </Field>
-
-              <Field label="Horário" required>
-                <TextInput
-                  type="time"
-                  required
-                  disabled={disabled}
-                  {...register("horario")}
-                />
-              </Field>
-
-              <Field label="Data dos convites">
-                <TextInput
-                  type="date"
-                  disabled={disabled}
-                  {...register("data_convite")}
-                />
-              </Field>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Local">
-                <TextInput
-                  type="text"
-                  disabled={disabled}
-                  {...register("local_banca")}
-                />
-              </Field>
-
-              <Field label="Link de videoconferência">
-                <TextInput
-                  type="url"
-                  disabled={disabled}
-                  placeholder="https://"
-                  {...register("link")}
-                />
-              </Field>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-                Títulos
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Estes campos são usados diretamente nos documentos oficiais
-                emitidos pelo sistema.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <Field label="Título em português" required>
-                <TextInput
-                  type="text"
-                  required
-                  disabled={disabled}
-                  {...register("titulo")}
-                />
-              </Field>
-
-              <Field label="Título em inglês" required>
-                <TextInput
-                  type="text"
-                  required
-                  disabled={disabled}
-                  {...register("titulo2")}
-                />
-              </Field>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <h2>Composição da Banca</h2>
-
-        {ALL_ROLES.map((role) =>
-          visibleRoles[role] === "hidden" ? null : (
-            <MemberField
-              key={role}
-              label={ROLE_LABELS[role]}
-              name={role}
-              required={visibleRoles[role] === "required"}
-              requireEmail={role === "orientador"}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={goToComposition}
               disabled={disabled}
-            />
-          ),
-        )}
-      </section>
-    </>
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-1/2"
+            >
+              Continuar
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <BancaCompositionSection disabled={disabled} />
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={loading}
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 sm:w-1/2"
+            >
+              Voltar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-1/2"
+            >
+              {loading ? "Enviando..." : "Enviar"}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
