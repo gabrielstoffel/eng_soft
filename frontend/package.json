@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@tailwindcss/vite": "^4.2.4",
     "joi": "^18.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.75.0",
     "react-router-dom": "^7.14.2",
+    "tailwindcss": "^4.2.4",
     "zod": "^4.4.2"
   },
   "devDependencies": {
