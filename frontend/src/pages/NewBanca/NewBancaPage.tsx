@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -53,6 +53,7 @@ export default function NewBancaPage() {
   });
   const [status, setStatus] = useState<SubmitStatus | null>(null);
   const loading = form.formState.isSubmitting;
+  const headerRef = useRef<HTMLElement | null>(null);
 
   async function handleSubmit(values: NewBancaFormState) {
     setStatus(null);
@@ -84,7 +85,7 @@ export default function NewBancaPage() {
   return (
     <div className="min-h-screen bg-stone-100 text-slate-900">
       <div className="mx-auto w-full max-w-6xl px-3 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header>
+        <header ref={headerRef}>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl mb-4!">
             Solicitação de nova banca
           </h1>
@@ -116,6 +117,7 @@ export default function NewBancaPage() {
             <BancaForm
               loading={loading}
               submittedSuccessfully={status?.ok === true}
+              scrollTargetRef={headerRef}
             />
           </form>
         </FormProvider>

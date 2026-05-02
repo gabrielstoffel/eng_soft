@@ -62,6 +62,7 @@ type BancaFormProps = {
   disabled?: boolean;
   loading?: boolean;
   submittedSuccessfully?: boolean;
+  scrollTargetRef?: React.RefObject<HTMLElement | null>;
 };
 
 const STEP_ONE_FIELDS = [
@@ -82,6 +83,7 @@ export default function BancaForm({
   disabled = false,
   loading = false,
   submittedSuccessfully = false,
+  scrollTargetRef,
 }: BancaFormProps) {
   const { trigger } = useFormContext<NewBancaFormState>();
   const [step, setStep] = useState<1 | 2>(1);
@@ -91,6 +93,17 @@ export default function BancaForm({
       setStep(1);
     }
   }, [submittedSuccessfully]);
+
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      scrollTargetRef?.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(id);
+  }, [scrollTargetRef, step]);
 
   async function goToComposition() {
     const isValid = await trigger(STEP_ONE_FIELDS);
@@ -109,7 +122,7 @@ export default function BancaForm({
               type="button"
               onClick={goToComposition}
               disabled={disabled}
-              className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-1/2"
+              className="inline-flex w-full cursor-pointer items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-slate-300"
             >
               Continuar
             </button>
