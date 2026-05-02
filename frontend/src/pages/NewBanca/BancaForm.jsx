@@ -1,4 +1,4 @@
-import MemberField from './MemberField.jsx'
+import MemberField from '../../MemberField.jsx'
 
 export const EMPTY_MEMBER = { gender: 0, name: '', institution: '', location: '', lang: 'pt', email: '' }
 
@@ -264,7 +264,7 @@ export default function BancaForm({ value, onChange, disabled = false }) {
                 </label>
 
                 <label>
-                    Title (EN) *
+                    Título (EN) *
                     <input
                         type="text"
                         required
@@ -276,25 +276,21 @@ export default function BancaForm({ value, onChange, disabled = false }) {
             </section>
 
             <section>
-                <h2>Membros da Banca</h2>
+                <h2>Composição da Banca</h2>
 
-                {ALL_ROLES.map(role => {
-                    const visibility = visibleRoles[role]
-                    if (visibility === 'hidden') return null
-                    const required = visibility === 'required'
-                    const star = required ? ' *' : ''
-                    return (
+                {Object.entries(visibleRoles).map(([role, mode]) =>
+                    mode === 'hidden' ? null : (
                         <MemberField
                             key={role}
-                            label={`${ROLE_LABELS[role]}${star}`}
+                            label={ROLE_LABELS[role]}
                             value={form[role]}
                             onChange={v => set(role, v)}
-                            required={required}
-                            requireEmail={role === 'orientador'}
+                            required={mode === 'required'}
+                            requireEmail={role === 'orientador' || role.startsWith('externo') || role.startsWith('supl_')}
                             disabled={disabled}
                         />
                     )
-                })}
+                )}
             </section>
         </>
     )
