@@ -5,10 +5,10 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+load_dotenv()
+
 from app.api.admin_router import admin_router
 from app.api.router import router
-
-load_dotenv()
 
 logging.basicConfig(
     level=logging.WARNING,
