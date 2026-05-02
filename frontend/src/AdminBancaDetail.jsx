@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import BancaForm, { deserializeBanca, serializeBanca } from './pages/NewBanca/BancaForm'
+import BancaForm, { deserializeBanca, serializeBanca } from './pages/NewBanca/form/BancaForm'
 
 const STATUS_LABEL = {
     pending: 'Pendente',

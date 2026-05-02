@@ -6,14 +6,14 @@ import { useFormContext } from "react-hook-form";
 import {
   emptyMemberForm,
   type NewBancaFormState,
-} from "../../types/new-banca.ts";
+} from "../../../types/new-banca.ts";
 import {
   ALL_ROLES,
   ROLE_LABELS,
   ROLES_BY_TIPO,
   type OptionalMemberRole,
-} from "./config";
-import MemberField from "./MemberField";
+} from "../config";
+import MemberField from "../../../components/MemberField";
 
 type BancaCompositionSectionProps = {
   disabled?: boolean;

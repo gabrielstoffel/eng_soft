@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import { ROLES_BY_TIPO } from "./config";
+import { ROLES_BY_TIPO } from "../config";
 import BancaCompositionSection from "./BancaCompositionSection";
 import BancaGeneralSection from "./BancaGeneralSection";
 import {
@@ -11,7 +11,7 @@ import {
   type BancaRequest,
   type MemberInfo,
   type NewBancaFormState,
-} from "../../types/new-banca.ts";
+} from "../../../types/new-banca.ts";
 
 export const EMPTY_MEMBER = emptyMemberForm;
 

@@ -10,15 +10,15 @@ import {
   emptyMemberForm,
   genderLabelByValue,
   type NewBancaFormState,
-} from "../../types/new-banca.ts";
+} from "../../../types/new-banca.ts";
 import {
   OPTIONAL_MEMBER_ROLES,
   ROLES_BY_TIPO,
   type OptionalMemberRole,
-} from "./config";
-import Field from "./Field";
-import SelectInput from "./SelectInput";
-import TextInput from "./TextInput";
+} from "../config";
+import Field from "../../../components/Field";
+import SelectInput from "../../../components/SelectInput";
+import TextInput from "../../../components/TextInput";
 
 type BancaGeneralSectionProps = {
   disabled?: boolean;

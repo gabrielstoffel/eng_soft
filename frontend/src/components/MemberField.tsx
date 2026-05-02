@@ -1,11 +1,11 @@
 import { IconX } from "@tabler/icons-react";
 import { useFormContext } from "react-hook-form";
 
-import { type NewBancaFormState } from "../../types/new-banca.ts";
+import { type NewBancaFormState } from "../types/new-banca.ts";
 import Field from "./Field";
 import SelectInput from "./SelectInput";
 import TextInput from "./TextInput";
-import type { MemberRole } from "./config";
+import type { MemberRole } from "../pages/NewBanca/config";
 
 type MemberFieldProps = {
   label: string;
