@@ -1,14 +1,34 @@
-const EMPTY_MEMBER = { gender: 0, name: '', institution: '', location: '', lang: 'pt', email: '' }
+import { useFormContext } from 'react-hook-form'
 
-export default function MemberField({ label, value, onChange, required = false, requireEmail = false, disabled = false }) {
+import { emptyMemberForm, type NewBancaFormState } from '../../types/new-banca.ts'
+import type { MemberRole, OptionalMemberRole } from './config'
+
+type MemberFieldProps = {
+  label: string
+  name: MemberRole
+  required?: boolean
+  requireEmail?: boolean
+  disabled?: boolean
+}
+
+export default function MemberField({
+  label,
+  name,
+  required = false,
+  requireEmail = false,
+  disabled = false,
+}: MemberFieldProps) {
+  const { register, setValue, watch } = useFormContext<NewBancaFormState>()
+  const value = watch(name)
   const enabled = required || value !== null
 
-  function toggle(e) {
-    onChange(e.target.checked ? { ...EMPTY_MEMBER } : null)
+  function parseGender(raw: string): 0 | 1 {
+    return raw === '1' ? 1 : 0
   }
 
-  function update(field, val) {
-    onChange({ ...value, [field]: val })
+  function toggle(checked: boolean) {
+    if (required) return
+    setValue(name as OptionalMemberRole, checked ? { ...emptyMemberForm } : null)
   }
 
   return (
@@ -18,7 +38,7 @@ export default function MemberField({ label, value, onChange, required = false, 
           <input
             type="checkbox"
             checked={enabled}
-            onChange={toggle}
+            onChange={(e) => toggle(e.target.checked)}
             disabled={disabled}
             style={{ marginRight: 6 }}
           />
@@ -26,14 +46,16 @@ export default function MemberField({ label, value, onChange, required = false, 
         {label}
       </legend>
 
-      {enabled && (
+      {enabled && value && (
         <div className="member-grid">
           <label>
-            Tratamento
+            Tratamento *
             <select
-              value={value.gender}
+              required
               disabled={disabled}
-              onChange={e => update('gender', Number(e.target.value))}
+              {...register(`${name}.gender`, {
+                setValueAs: (fieldValue) => parseGender(String(fieldValue)),
+              })}
             >
               <option value={0}>Prof. Dr.</option>
               <option value={1}>Profª. Drª.</option>
@@ -41,44 +63,41 @@ export default function MemberField({ label, value, onChange, required = false, 
           </label>
 
           <label>
-            Nome
+            Nome *
             <input
               type="text"
               required
               disabled={disabled}
-              value={value.name}
-              onChange={e => update('name', e.target.value)}
+              {...register(`${name}.name`)}
             />
           </label>
 
           <label>
-            Instituição
+            Instituição *
             <input
               type="text"
               required
               disabled={disabled}
-              value={value.institution}
-              onChange={e => update('institution', e.target.value)}
+              {...register(`${name}.institution`)}
             />
           </label>
 
           <label>
-            Localidade
+            Localidade *
             <input
               type="text"
               required
               disabled={disabled}
-              value={value.location}
-              onChange={e => update('location', e.target.value)}
+              {...register(`${name}.location`)}
             />
           </label>
 
           <label>
-            Idioma da carta
+            Idioma da carta *
             <select
-              value={value.lang}
+              required
               disabled={disabled}
-              onChange={e => update('lang', e.target.value)}
+              {...register(`${name}.lang`)}
             >
               <option value="pt">Português</option>
               <option value="en">English</option>
@@ -91,9 +110,8 @@ export default function MemberField({ label, value, onChange, required = false, 
               type="email"
               required={requireEmail}
               disabled={disabled}
-              value={value.email ?? ''}
-              onChange={e => update('email', e.target.value)}
               placeholder="email@instituicao.br"
+              {...register(`${name}.email`)}
             />
           </label>
         </div>

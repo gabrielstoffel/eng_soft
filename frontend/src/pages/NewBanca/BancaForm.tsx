@@ -1,12 +1,11 @@
 import { useFormContext } from 'react-hook-form'
 
-import MemberField from '../../MemberField.jsx'
+import MemberField from './MemberField'
 import {
   ALL_ROLES,
   OPTIONAL_MEMBER_ROLES,
   ROLE_LABELS,
   ROLES_BY_TIPO,
-  type MemberRole,
   type OptionalMemberRole,
 } from './config'
 import {
@@ -73,7 +72,7 @@ type BancaFormProps = {
 }
 
 export default function BancaForm({ disabled = false }: BancaFormProps) {
-  const { setValue, watch } = useFormContext<NewBancaFormState>()
+  const { register, setValue, watch } = useFormContext<NewBancaFormState>()
   const form = watch()
 
   function parseGender(value: string): 0 | 1 {
@@ -88,17 +87,6 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
 
   function setOptionalMember(role: OptionalMemberRole, value: MemberForm | null) {
     setValue(role, value)
-  }
-
-  function setMember(role: MemberRole, value: MemberForm | null) {
-    if (role === 'orientador') {
-      if (value) {
-        setValue('orientador', value)
-      }
-      return
-    }
-
-    setOptionalMember(role, value)
   }
 
   function changeTipo(newTipo: NewBancaFormState['tipo']) {
@@ -123,11 +111,13 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
 
         <div className="row">
           <label>
-            Tratamento do(a) aluno(a)
+            Tratamento do(a) aluno(a) *
             <select
-              value={form.nome.gender}
+              required
               disabled={disabled}
-              onChange={(e) => setValue('nome', { ...form.nome, gender: parseGender(e.target.value) })}
+              {...register('nome.gender', {
+                setValueAs: (value) => parseGender(String(value)),
+              })}
             >
               <option value={0}>{genderLabelByValue[0]}</option>
               <option value={1}>{genderLabelByValue[1]}</option>
@@ -140,8 +130,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
               type="text"
               required
               disabled={disabled}
-              value={form.nome.name}
-              onChange={(e) => setValue('nome', { ...form.nome, name: e.target.value })}
+              {...register('nome.name')}
             />
           </label>
         </div>
@@ -150,9 +139,11 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
           <label>
             Tipo *
             <select
-              value={form.tipo}
+              required
               disabled={disabled}
-              onChange={(e) => changeTipo(parseBancaType(e.target.value))}
+              {...register('tipo', {
+                onChange: (e) => changeTipo(parseBancaType(e.target.value)),
+              })}
             >
               <option value={1}>{bancaTypeLabelByValue[1]}</option>
               <option value={2}>{bancaTypeLabelByValue[2]}</option>
@@ -167,8 +158,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
               required
               min={1}
               disabled={disabled}
-              value={form.ata}
-              onChange={(e) => setValue('ata', e.target.value)}
+              {...register('ata')}
             />
           </label>
         </div>
@@ -180,8 +170,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
               type="date"
               required
               disabled={disabled}
-              value={form.data}
-              onChange={(e) => setValue('data', e.target.value)}
+              {...register('data')}
             />
           </label>
 
@@ -191,8 +180,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
               type="time"
               required
               disabled={disabled}
-              value={form.horario}
-              onChange={(e) => setValue('horario', e.target.value)}
+              {...register('horario')}
             />
           </label>
 
@@ -201,8 +189,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             <input
               type="date"
               disabled={disabled}
-              value={form.data_convite}
-              onChange={(e) => setValue('data_convite', e.target.value)}
+              {...register('data_convite')}
             />
           </label>
         </div>
@@ -213,8 +200,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             <input
               type="text"
               disabled={disabled}
-              value={form.local_banca}
-              onChange={(e) => setValue('local_banca', e.target.value)}
+              {...register('local_banca')}
             />
           </label>
 
@@ -223,8 +209,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             <input
               type="url"
               disabled={disabled}
-              value={form.link}
-              onChange={(e) => setValue('link', e.target.value)}
+              {...register('link')}
             />
           </label>
         </div>
@@ -235,8 +220,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             type="text"
             required
             disabled={disabled}
-            value={form.titulo}
-            onChange={(e) => setValue('titulo', e.target.value)}
+            {...register('titulo')}
           />
         </label>
 
@@ -246,8 +230,7 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             type="text"
             required
             disabled={disabled}
-            value={form.titulo2}
-            onChange={(e) => setValue('titulo2', e.target.value)}
+            {...register('titulo2')}
           />
         </label>
       </section>
@@ -260,10 +243,9 @@ export default function BancaForm({ disabled = false }: BancaFormProps) {
             <MemberField
               key={role}
               label={ROLE_LABELS[role]}
-              value={form[role]}
-              onChange={(value: MemberForm | null) => setMember(role, value)}
+              name={role}
               required={visibleRoles[role] === 'required'}
-              requireEmail={role === 'orientador' || role.startsWith('externo') || role.startsWith('supl_')}
+              requireEmail={role === 'orientador'}
               disabled={disabled}
             />
           ),
