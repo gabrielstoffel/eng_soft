@@ -1,3 +1,8 @@
+import {
+  IconCalendarEvent,
+  IconFileDescription,
+  IconUserSquareRounded,
+} from "@tabler/icons-react";
 import { useFormContext } from "react-hook-form";
 
 import {
@@ -69,9 +74,17 @@ export default function BancaGeneralSection({
       <div className="space-y-8 px-4 py-6 sm:px-8 sm:py-8">
         <div className="space-y-4 border-b border-slate-200 pb-8">
           <div>
-            <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-              Identificação
-            </h3>
+            <div className="flex items-center gap-1">
+              <IconUserSquareRounded
+                aria-hidden="true"
+                size={18}
+                stroke={1.9}
+                className="shrink-0 self-center text-sky-700"
+              />
+              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
+                Identificação
+              </h3>
+            </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Dados do aluno e enquadramento formal da sessão.
             </p>
@@ -130,9 +143,17 @@ export default function BancaGeneralSection({
 
         <div className="space-y-4 border-b border-slate-200 pb-8">
           <div>
-            <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-              Agenda
-            </h3>
+            <div className="flex items-center gap-1">
+              <IconCalendarEvent
+                aria-hidden="true"
+                size={18}
+                stroke={1.9}
+                className="shrink-0 self-center text-sky-700"
+              />
+              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
+                Agenda
+              </h3>
+            </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Data, horário e referências de logística para a realização da
               defesa.
@@ -189,9 +210,17 @@ export default function BancaGeneralSection({
 
         <div className="space-y-4">
           <div>
-            <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
-              Títulos
-            </h3>
+            <div className="flex items-center gap-1">
+              <IconFileDescription
+                aria-hidden="true"
+                size={18}
+                stroke={1.9}
+                className="shrink-0 self-center text-sky-700"
+              />
+              <h3 className="text-sm font-semibold tracking-[0.12em] text-slate-900 uppercase">
+                Títulos
+              </h3>
+            </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Estes campos são usados diretamente nos documentos oficiais
               emitidos pelo sistema.
