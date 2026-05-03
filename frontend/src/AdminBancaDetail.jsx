@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
-import BancaForm, { deserializeBanca, serializeBanca } from './pages/NewBanca/form/BancaForm'
+import { newBancaDefaultValues } from './types/new-banca.ts'
+import { deserializeBanca, serializeBanca } from './pages/NewBanca/form/BancaForm'
+import BancaGeneralSection from './pages/NewBanca/form/BancaGeneralSection'
+import BancaCompositionSection from './pages/NewBanca/form/BancaCompositionSection'
 
 const STATUS_LABEL = {
     pending: 'Pendente',
@@ -48,7 +52,6 @@ export default function AdminBancaDetail() {
 
     const [selectedVersion, setSelectedVersion] = useState(null)
     const [editing, setEditing] = useState(false)
-    const [editForm, setEditForm] = useState(null)
     const [saveStatus, setSaveStatus] = useState(null)
     const [saving, setSaving] = useState(false)
 
@@ -59,6 +62,8 @@ export default function AdminBancaDetail() {
     const [selectedIds, setSelectedIds] = useState(new Set())
     const [downloadStatus, setDownloadStatus] = useState(null)
     const [downloadInFlight, setDownloadInFlight] = useState(null) // null | 'bulk' | <id>
+    const previewForm = useForm({ defaultValues: newBancaDefaultValues })
+    const editMethods = useForm({ defaultValues: newBancaDefaultValues })
 
     useEffect(() => {
         let cancelled = false
@@ -110,6 +115,16 @@ export default function AdminBancaDetail() {
         return () => { cancelled = true }
     }, [token, regenVersion])
 
+    const versionEntry = detail?.versions.find(v => v.version === selectedVersion)
+        || detail?.versions[detail.versions.length - 1]
+        || null
+    const req = versionEntry?.request ?? null
+
+    useEffect(() => {
+        if (!req || editing) return
+        previewForm.reset(deserializeBanca(req))
+    }, [editing, previewForm, req])
+
     if (loading) {
         return <div className="container"><p>Carregando…</p></div>
     }
@@ -123,8 +138,6 @@ export default function AdminBancaDetail() {
         )
     }
 
-    const versionEntry = detail.versions.find(v => v.version === selectedVersion) || detail.versions[detail.versions.length - 1]
-    const req = versionEntry.request
     const isApproved = detail.status === 'approved'
     const isLatest = selectedVersion === detail.current_version
     const canEdit = isApproved && isLatest
@@ -135,14 +148,13 @@ export default function AdminBancaDetail() {
             : ''
 
     function startEdit() {
-        setEditForm(deserializeBanca(req))
+        editMethods.reset(deserializeBanca(req))
         setEditing(true)
         setSaveStatus(null)
     }
 
     function cancelEdit() {
         setEditing(false)
-        setEditForm(null)
         setSaveStatus(null)
     }
 
@@ -151,7 +163,7 @@ export default function AdminBancaDetail() {
         setSaving(true)
         setSaveStatus(null)
         try {
-            const body = serializeBanca(editForm)
+            const body = serializeBanca(editMethods.getValues())
             const res = await fetch(`/admin/bancas/${token}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -172,7 +184,6 @@ export default function AdminBancaDetail() {
                     setRegenVersion(refreshed.current_version)
                 }
                 setEditing(false)
-                setEditForm(null)
             } else {
                 let msg
                 if (res.status === 409 && data.detail && typeof data.detail === 'object') {
@@ -295,33 +306,39 @@ export default function AdminBancaDetail() {
             </section>
 
             {editing ? (
-                <form onSubmit={saveEdit}>
-                    <BancaForm value={editForm} onChange={setEditForm} />
-                    {saveStatus && (
-                        <div className={saveStatus.ok ? 'alert alert-ok' : 'alert alert-err'}>
-                            {saveStatus.message}
+                <FormProvider {...editMethods}>
+                    <form onSubmit={saveEdit}>
+                        <BancaGeneralSection />
+                        <BancaCompositionSection />
+                        {saveStatus && (
+                            <div className={saveStatus.ok ? 'alert alert-ok' : 'alert alert-err'}>
+                                {saveStatus.message}
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', gap: '0.75rem' }}>
+                            <button
+                                type="button"
+                                onClick={cancelEdit}
+                                disabled={saving}
+                                style={{
+                                    flex: 1, padding: '0.7rem 2rem', background: '#6b7280', color: '#fff',
+                                    border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button type="submit" disabled={saving}>
+                                {saving ? 'Salvando…' : 'Salvar (cria nova versão)'}
+                            </button>
                         </div>
-                    )}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        <button
-                            type="button"
-                            onClick={cancelEdit}
-                            disabled={saving}
-                            style={{
-                                flex: 1, padding: '0.7rem 2rem', background: '#6b7280', color: '#fff',
-                                border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
-                            }}
-                        >
-                            Cancelar
-                        </button>
-                        <button type="submit" disabled={saving}>
-                            {saving ? 'Salvando…' : 'Salvar (cria nova versão)'}
-                        </button>
-                    </div>
-                </form>
+                    </form>
+                </FormProvider>
             ) : (
                 <>
-                    <BancaForm value={deserializeBanca(req)} onChange={() => {}} disabled />
+                    <FormProvider {...previewForm}>
+                        <BancaGeneralSection disabled />
+                        <BancaCompositionSection disabled />
+                    </FormProvider>
                     {saveStatus && (
                         <div className={saveStatus.ok ? 'alert alert-ok' : 'alert alert-err'}>
                             {saveStatus.message}
