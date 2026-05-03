@@ -12,14 +12,20 @@ title Diagrama de Pacotes — SigBah!\nEstilo Arquitetural: Clean Architecture (
 ' ============================================================
 package "SigBah! Frontend" <<system>> {
     package "Pages" <<subsystem>> {
+        note as NP
+            NewBancaPage (.tsx)
+            DecisionPage (.jsx)
+            AdminBancaList (.jsx)
+            AdminBancaDetail (.jsx)
+        end note
     }
     package "Components" <<subsystem>> {
     }
     package "Config" <<subsystem>> {
     }
     note right of "SigBah! Frontend"
-        React 18 + Vite
-        JavaScript (plain)
+        React 19 + Vite
+        JavaScript + TypeScript
         SPA (Single Page Application)
     end note
 }
@@ -31,7 +37,7 @@ package "SigBah! Backend" <<system>> {
 
     package "api" <<subsystem>> {
         note as N1
-            FastAPI routes
+            FastAPI routes (router.py, admin_router.py)
             HTTP request/response
             Injecao de Dependencia (deps.py)
             Mapeamento erro -> HTTP status
@@ -42,6 +48,7 @@ package "SigBah! Backend" <<system>> {
         note as N2
             Casos de uso:
             - BancaService
+            - AdminBancaService
             - document_service
             - email_service
             - petition_service

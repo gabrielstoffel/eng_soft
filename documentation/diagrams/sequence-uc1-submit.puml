@@ -5,7 +5,7 @@ skinparam shadowing false
 title Diagrama de Sequencia — UC1: Formalizar Pedido de Banca
 
 actor "Orientador" as orientador
-participant "PetitionForm\n(Frontend)" as frontend
+participant "NewBancaPage\n(Frontend)" as frontend
 participant "router\n(api)" as router
 participant "BancaService\n(application)" as service
 participant "MongoBancaRepository\n(infrastructure)" as repo

@@ -8,6 +8,16 @@ title Diagrama de Casos de Uso — SigBah!\nSistema de Gestao de Bancas Academic
 left to right direction
 
 ' ============================================================
+' ESTILOS: implementado vs planejado
+' ============================================================
+skinparam usecase {
+    BackgroundColor<<implementado>> #D5E8D4
+    BorderColor<<implementado>> #82B366
+    BackgroundColor<<planejado>> #FFF2CC
+    BorderColor<<planejado>> #D6B656
+}
+
+' ============================================================
 ' ATORES
 ' ============================================================
 actor "Orientador" as orientador
@@ -20,23 +30,23 @@ actor "Secretario\ndo PPG" as secretario
 rectangle "SigBah!" {
 
     ' --- Casos de uso do Orientador ---
-    usecase "UC1: Formalizar\nPedido de Banca" as UC1
+    usecase "UC1: Formalizar\nPedido de Banca" as UC1 <<implementado>>
 
     ' --- Casos de uso do Sistema (include/extend) ---
-    usecase "UC2: Enviar Email para\nCoordenador/Secretario" as UC2
-    usecase "UC10: Notificar\nOrientador" as UC10
-    usecase "UC4: Gerar\nDocumentos" as UC4
+    usecase "UC2: Enviar Email para\nCoordenador/Secretario" as UC2 <<implementado>>
+    usecase "UC10: Notificar\nOrientador" as UC10 <<implementado>>
+    usecase "UC4: Gerar\nDocumentos" as UC4 <<implementado>>
 
     ' --- Casos de uso do Coordenador ---
-    usecase "UC3: Aprovar\nBanca" as UC3
+    usecase "UC3: Aprovar\nBanca" as UC3 <<implementado>>
 
     ' --- Casos de uso do Secretario ---
-    usecase "UC5: Enviar Documentos\nda Banca" as UC5
-    usecase "UC6: Enviar\nAtestados" as UC6
-    usecase "UC7: Pesquisar\nBancas" as UC7
-    usecase "UC8: Editar\nDocumentos" as UC8
-    usecase "UC9: Gerar Relatorio\nde Bancas" as UC9
-    usecase "UC11: Enviar\nDocumentos" as UC11
+    usecase "UC5: Enviar Documentos\nda Banca" as UC5 <<implementado>>
+    usecase "UC6: Enviar\nAtestados" as UC6 <<planejado>>
+    usecase "UC7: Pesquisar\nBancas" as UC7 <<implementado>>
+    usecase "UC8: Editar\nDocumentos" as UC8 <<implementado>>
+    usecase "UC9: Gerar Relatorio\nde Bancas" as UC9 <<planejado>>
+    usecase "UC11: Enviar\nDocumentos" as UC11 <<implementado>>
 }
 
 ' ============================================================
@@ -69,10 +79,11 @@ UC5 --|> UC11
 UC6 --|> UC11
 
 ' ============================================================
-' NOTA
+' LEGENDA
 ' ============================================================
 note bottom of "SigBah!"
-    Diagrama inalterado em relacao a Etapa 1.
+    Verde = implementado na Etapa 2
+    Amarelo = planejado (ainda nao implementado)
     UC2, UC4 e UC10 sao executados pelo Sistema
     (automaticamente, sem interacao de ator humano).
 end note
