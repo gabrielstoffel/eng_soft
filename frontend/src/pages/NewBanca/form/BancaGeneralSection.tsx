@@ -120,6 +120,7 @@ export default function BancaGeneralSection({
                 required
                 disabled={disabled}
                 {...register("tipo", {
+                  setValueAs: (value) => parseBancaType(String(value)),
                   onChange: (e) => changeTipo(parseBancaType(e.target.value)),
                 })}
               >
