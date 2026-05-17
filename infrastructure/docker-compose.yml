@@ -1,4 +1,44 @@
 services:
+  gateway:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - web
+
+  frontend:
+    build:
+      context: ../frontend
+    expose:
+      - "80"
+    networks:
+      - web
+
+  backend:
+    build:
+      context: ../backend
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: ${MONGO_DB:-sigbah}
+      MONGO_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_PASSWORD: ${MONGO_PASSWORD:-password}
+      SMTP_HOST: postfix
+      SMTP_PORT: "25"
+    expose:
+      - "8000"
+    depends_on:
+      - mongo
+      - postfix
+    networks:
+      - web
+      - mail
+      - db
+
   mailpit:
     image: axllent/mailpit:latest
     ports:
@@ -29,10 +69,16 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    networks:
+      - db
 
 volumes:
   mongo_data:
 
 networks:
+  web:
+    driver: bridge
   mail:
+    driver: bridge
+  db:
     driver: bridge
