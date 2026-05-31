@@ -1,0 +1,2499 @@
+0:00
+E aí eu tá começou a gravação aqui. Eu vou te mostrar o nosso protótipo e eu
+Copy link to this transcript
+0:05
+quero assim poder compartilhar a gravação tanto com a Liane quanto com os
+Copy link to this transcript
+0:09
+meus colegas de de grupo também. O pessoal também tá tudo eh ocupado,
+Copy link to this transcript
+0:16
+trabalho faculdade, então talvez não consigam participar.
+Copy link to this transcript
+0:20
+>> Tá bom.
+Copy link to this transcript
+0:22
+>> Assim, mano, eu vou compartilhar aqui minha tela.
+Copy link to this transcript
+0:27
+Tá vendo o quê? tá conectando aí. Tá, agora apareceu.
+Copy link to this transcript
+0:33
+>> Agora foi boa. Tá seguinte, Antônio, a gente fez um protótipo inicial ali do
+do
+Copy link to this transcript
+0:41
+nosso projeto, né? Qual que é a nossa ideia? A gente fez um formulariozinho
+Copy link to this transcript
+0:46
+bonitinho aqui e a gente a a gente quer que o orientador
+Copy link to this transcript
+0:52
+ele consiga acessar um link. Hoje a gente tá, eu tô rodando tudo aqui na
+Copy link to this transcript
+0:57
+minha máquina, tá? Mas quando tiver feito, a gente vai ter um link bonitinho
+Copy link to this transcript
+1:02
+e o orientador vai ter acesso a esse link e ele vai poder preencher os dados
+Copy link to this transcript
+1:07
+do da banca, certo? Então aqui tu vê que tem aqui as informações básicas, o
+Copy link to this transcript
+1:13
+tratamento, o nome do aluno, o tipo de de tipo de banca, né? O número da banca.
+Copy link to this transcript
+1:19
+>> Só uma perguntinha. Ô,
+Copy link to this transcript
+1:22
+>> pode fazer. prefere que eu que eu vá eh assim perguntando já fazendo alguma
+Copy link to this transcript
+1:29
+>> ponderação,
+Copy link to this transcript
+1:30
+>> é, a alguma consideração assim durante ou quer prefere apresentar primeiro e
+a
+Copy link to this transcript
+1:36
+gente fala no final assim,
+Copy link to this transcript
+1:37
+>> cara, deixa eu eu apresentar primeiro. Eu acho que vai ser eh vai ser bem
+Copy link to this transcript
+1:42
+rapidinho, tá? São umas duas ou três telas
+Copy link to this transcript
+1:45
+>> e acho que vai ficar vai ficar mais fácil a gente fazer as perguntas depois.
+Copy link to this transcript
+1:48
+Pode pode ser. Eh,
+Copy link to this transcript
+1:52
+uma uma um denda que eu tenho que fazer, tá? Nossa aplicação vai mandar
+e-mails,
+Copy link to this transcript
+1:57
+tá? A gente a gente quer que ele mande e-mails tanto pro coordenador, quanto
+Copy link to this transcript
+2:01
+para você, quanto pros eh quanto pros pros membros da banca. Como eu tô
+Copy link to this transcript
+2:07
+fazendo o local aqui, eu tô usando essa aplicação aqui, velho, que ele meio que
+Copy link to this transcript
+2:11
+captura todos os e-mails que chegarem, tá?
+Copy link to this transcript
+2:14
+>> Uhum. Então, quando a quando a aplicação que mandar o e-mail vai aparecer
+aqui,
+Copy link to this transcript
+2:21
+daí eu te mostro como é que vai ser o e-mail pro pra pessoa final, tá ligado?
+Copy link to this transcript
+2:25
+>> Tá beleza?
+Copy link to this transcript
+2:26
+>> Boa. Então aí a gente tem a parte de identificação da banca. Isso aqui é bem
+Copy link to this transcript
+2:31
+aquele formulariozinho do do criabancas que eu fiz, ã, que vocês usam hoje, tá
+Copy link to this transcript
+2:37
+ligado? Só que ele tá mais bonitinho assim.
+Copy link to this transcript
+2:40
+Aí, eh, tem múltiplas telas e tals, tem a informação de orientador, dos membros
+Copy link to this transcript
+2:46
+internos e dos membros externos. Bem simples, tá?
+Copy link to this transcript
+2:50
+>> Aí o o orientador vai terminar de preencher essa esses dados e ele vai
+Copy link to this transcript
+2:55
+enviar a banca, certo? Quando ele enviar, tu vai ver que aqui apareceu o
+Copy link to this transcript
+3:00
+númerozinho, vai aplicar, a aplicação, ela vai mandar
+Copy link to this transcript
+3:05
+um e-mail pro coentador para ele poder avaliar essa banca, tá? Vai receber um
+Copy link to this transcript
+3:12
+vai receber um e-mail com algumas informações básicas ali da banca,
+Copy link to this transcript
+3:16
+informações de membros e ele vai ter uma outra página
+Copy link to this transcript
+3:20
+onde ele vai poder eh definir se essa banca tá foi aprovada ou não, certo? Tá,
+Copy link to this transcript
+3:26
+isso tá dizendo o coordenador daí.
+Copy link to this transcript
+3:29
+>> Isso, coordenador, desculpa, el orientador, né? É o coordenador do do
+Copy link to this transcript
+3:33
+projeto do do é do programa, tá?
+Copy link to this transcript
+3:35
+>> Do do ou do PPG de física ou do PPG de de ensino de física,
+Copy link to this transcript
+3:39
+>> tá?
+Copy link to this transcript
+3:39
+>> Aí aqui embaixo ele tem ali ele pode revisar as informações aqui embaixo ele
+Copy link to this transcript
+3:44
+pode aceitar, ele pode recusar. No caso de recuso, Antônio, a gente tá a
+Copy link to this transcript
+3:50
+gente tá imaginando que a gente pensou em mandar um e-mail de volta pro
+Copy link to this transcript
+3:54
+orientador com o motivo da recusa.
+Copy link to this transcript
+3:58
+>> Uhum.
+Copy link to this transcript
+3:59
+>> E aí o orientador poderia fazer um novo pedido de banca e daí não acabaria
+nem
+Copy link to this transcript
+4:04
+passando por por você por por você secretário, sabe?
+Copy link to this transcript
+4:08
+>> Uhum. E aí, caso o
+Copy link to this transcript
+4:13
+coordenador aceite, a gente vai mandar um e-mail para você
+Copy link to this transcript
+4:18
+com os dados da banca. Só deixar ele carregar. Tá pensando aqui.
+Copy link to this transcript
+4:24
+Boa. Aí aqui, esse aqui é o segundo e-mail.
+Copy link to this transcript
+4:29
+Esse aqui seria eh seria o que vocês receberiam, tá? Aí tu vai ver que vai
+Copy link to this transcript
+4:35
+ter a a
+Copy link to this transcript
+4:37
+>> tá? Esse aí que tu tu mandou agora tu tu
+Copy link to this transcript
+4:41
+>> não Ah, tá. Esse aí tu já tinha no teste.
+Copy link to this transcript
+4:45
+>> O quê? Essa
+Copy link to this transcript
+4:47
+>> é esses e-mails aqui que eu já tinha recebido no teste. É isso.
+Copy link to this transcript
+4:50
+>> Não, não. Esses esses e-mail esses foi agora e
+Copy link to this transcript
+4:54
+>> eu mandei o e-mail agora, mas lembra que eu tô eu não tô mandando e-mail de
+Copy link to this transcript
+4:59
+verdade, tá? Eu tô mandando e-mail aqui para para dentro da minha máquina.
+Copy link to this transcript
+5:02
+Basicamente, tô simulando o envio de meias.
+Copy link to this transcript
+5:05
+>> Ah, entendi.
+Copy link to this transcript
+5:07
+>> E aí tu receberia a a as informações da banca e aqui viriam juntos as
+Copy link to this transcript
+5:14
+eh as documentação. Então é um zip, cara, com todos
+Copy link to this transcript
+5:19
+aqueles documentos, pareceres, cartazes, convites e atas, tá? A gente ainda não
+Copy link to this transcript
+5:26
+implementou aquela parte que eu te falei de enviar eh os e-mails pros membros.
+Copy link to this transcript
+5:32
+Tá, mas a gente quer eh em vez de você receber esses esses documentos, a gente
+Copy link to this transcript
+5:38
+já eh a gente tem um botão com tipo enviar convites para membros, saca? E aí
+Copy link to this transcript
+5:44
+você clicaria nesse botão e os e os convites seriam enviados
+Copy link to this transcript
+5:47
+automaticamente. A gente quer fazer algo mais nessa nessa vibe
+Copy link to this transcript
+5:52
+a também pra parte dos pareceres, né? Que depois da banca tem que enviar
+Copy link to this transcript
+5:57
+parecer pros professores. A gente quer algo mais ou menos essa vibe também.
+Copy link to this transcript
+6:01
+>> Uhum. E aí a última página que eu tenho para
+Copy link to this transcript
+6:04
+te mostrar é a página de admin, tá? Isso aqui seria só você e Alian teriam
+acesso
+Copy link to this transcript
+6:12
+a essa página. A gente fez uma, a gente deu uma simplificada aqui, Antônia.
+Copy link to this transcript
+6:17
+Então não é não tem login, não tem nada, não tem proteção nenhuma, mas é porque
+Copy link to this transcript
+6:20
+ainda é um protótipo, tá?
+Copy link to this transcript
+6:21
+>> Uhum. na na coisa de verdade. Aí sim a gente precisa implementar isso. E aí
+Copy link to this transcript
+6:28
+aqui vocês vai conseguir pesquisar pela pelas bancas que já foram eh aprovadas,
+Copy link to this transcript
+6:34
+que ainda estão pendentes, né? E você consegue vir aqui na banca
+Copy link to this transcript
+6:39
+específica e consegue editar a informação dessa banca. Por quê? para
+Copy link to this transcript
+6:45
+aquele caso do de tipo, ah, de última hora o
+Copy link to this transcript
+6:50
+o membro externo não vai conseguir participar, então a gente precisa mudar
+Copy link to this transcript
+6:54
+o cartaz e a aquela ata para adicionar o suplente externo, sabe?
+Copy link to this transcript
+7:01
+Então você conseguiria vir aqui embaixo, editar a ata,
+Copy link to this transcript
+7:07
+vem aqui em externo, por exemplo, trocar o a professora Ana Costa, sei lá, pelo
+Copy link to this transcript
+7:14
+ã, vamos dizer que é o interno, na verdade, tá? Consegue trocar o professor
+Copy link to this transcript
+7:19
+Pedro Santos pelo professor Lucas Almeida aqui.
+Copy link to this transcript
+7:24
+>> Uhum.
+Copy link to this transcript
+7:25
+>> Entendeu? Aí você vem aqui, salva. Ele vai salvar uma nova versão.
+Copy link to this transcript
+7:30
+Tu tem a versão original e tem a versão dois.
+Copy link to this transcript
+7:34
+>> Na versão dois, aqui tem a documentação. Você consegue clicar aqui na ata,
+baixa
+Copy link to this transcript
+7:39
+ATA, ela vai gerar. E aqui ela vai ter a versão atualizada
+Copy link to this transcript
+7:47
+com o professor Lucas Almeida em vez do professor
+Copy link to this transcript
+7:51
+anterior. Tu vê que aqui ainda tem algumas coisas que a gente precisa
+Copy link to this transcript
+7:54
+precisa melhorar, tipo isso aqui, tá? Sim, ele tinha que ser obrigatório
+Copy link to this transcript
+7:59
+campo, né?
+Copy link to this transcript
+8:00
+>> Isso, exatamente, exatamente. Tem que primeiro aqui é presidente da banca,
+se
+Copy link to this transcript
+8:04
+não me engano, que entra ali, né?
+Copy link to this transcript
+8:06
+>> Isso, exatamente.
+Copy link to this transcript
+8:06
+>> Ah, não, o último tá lá, Carlos presidente. Então, aqui é o membro
+Copy link to this transcript
+8:10
+certo. Isso aí. Então, tu vê que assim ainda tem alguns detalhes que a gente
+Copy link to this transcript
+8:13
+precisa ajustar, tá? Principalmente na questão assim da criação dos documentos.
+Copy link to this transcript
+8:18
+>> Uhum. Eh, hoje a gente só a gente pegou o código que eu tinha ali do cria
+Copy link to this transcript
+8:23
+bancas, jogou aqui dentro e a gente gera essas bancas, mas assim, a gente ainda
+Copy link to this transcript
+8:27
+tem que fazer pegar o formato da Liane, tem que integrar essas coisas ainda lá
+Copy link to this transcript
+8:32
+no Bantinho, entende? Mas aqui, mas eu eu acho que assim, para validar a a
+Copy link to this transcript
+8:37
+estrutura geral de enviar e-mails, o fluxo, eu acho que faz sentido, tá? E eu
+Copy link to this transcript
+8:44
+acho que é isso, cara. E e achei muito bom esse primeiro comentário que eu
+Copy link to this transcript
+8:47
+quero te fazer, essa parte da reformulação ali dos documentos da
+Copy link to this transcript
+8:50
+banca, achei ficou muito bom. Aí
+Copy link to this transcript
+8:53
+>> formulários ficou bonitinho, né, velho?
+Copy link to this transcript
+8:55
+>> Aham. Muito legal. E dá para tirar também só, por exemplo, ah, o parecer só
+Copy link to this transcript
+8:59
+do professor aquele que que alterou, né? Isso.
+Copy link to this transcript
+9:02
+>> Edita ali, só que gera aquele ali, né? Isso, exatamente. A ideia é bem
+assim, a
+Copy link to this transcript
+9:07
+gente tentou deixar as coisas bem flexíveis, Antônio, até porque a gente
+Copy link to this transcript
+9:10
+não sabe
+Copy link to this transcript
+9:12
+>> eh a gente a gente tem muita coisa que a gente não sabe assim no dia a dia,
+né?
+Copy link to this transcript
+9:16
+Pode ter mudado.
+Copy link to this transcript
+9:16
+>> Uhum.
+Copy link to this transcript
+9:17
+>> Então assim, a gente tenta não validar tantas coisas, a gente deixa tenta
+Copy link to this transcript
+9:21
+deixar bem livre para que vocês consigam usar para no dia a dia, assim, né?
+Copy link to this transcript
+9:26
+>> Sim, sim.
+Copy link to this transcript
+9:28
+>> Ah, e acho que é isso, cara. Eh, quer fazer tuas perguntas aí?
+Copy link to this transcript
+9:33
+>> Sim, sim. Eu fui anotando aqui para deixar tu tu.
+Copy link to this transcript
+9:36
+>> Ah, boa. Desculpa se eu falei muito rápido, velho.
+Copy link to this transcript
+9:40
+>> Foi um pouquinho rápido, tá? Mas mas eu fui acompanhando aí. Tranquilo.
+Copy link to this transcript
+9:45
+>> Pode fazer aí, mano. Qualquer coisa eu
+Copy link to this transcript
+9:47
+>> Tá. Não, mas bota, se puder botar na tela de novo ali, ô Lucas, que daí a
+Copy link to this transcript
+9:51
+gente vai vendo por ali.
+Copy link to this transcript
+9:52
+>> É que eu fiz umas anotações aqui que talvez seja interessante e a gente
+Copy link to this transcript
+9:57
+pensar aqui, ó.
+Copy link to this transcript
+9:58
+>> Uhum. Ah, primeiro aqui, ó. H, uma das coisas, a a ata, cara, eh, eu fiquei
+Copy link to this transcript
+10:05
+pensando assim, é que o normalmente, né, eh, os professores não têm acesso ali
+a
+Copy link to this transcript
+10:11
+ao número da ata,
+Copy link to this transcript
+10:13
+>> entendi.
+Copy link to this transcript
+10:14
+>> Então, eu não sei se não ficaria melhor se tivesse como a gente deixar lá na
+Copy link to this transcript
+10:18
+aprovação da banca a gente botar o número da ata.
+Copy link to this transcript
+10:22
+>> Conseguimos? Conseguimos sim. Eh, a gente todas essas informações aqui da
+Copy link to this transcript
+10:28
+banca a gente salva num banco, um banco de dados nosso da aplicação,
+Copy link to this transcript
+10:34
+>> tá ligado?
+Copy link to this transcript
+10:35
+>> E aí a gente pode fazer algo do tipo, tá? A última ata foi a ata 20, então a
+Copy link to this transcript
+10:40
+próxima ata de disertação de mestrado vai ser a 21.
+Copy link to this transcript
+10:44
+>> Isso,
+Copy link to this transcript
+10:45
+>> dá para fazer isso.
+Copy link to this transcript
+10:45
+>> E daí já automático já busca lá e já faz, né? Tá, daí seria perfeito.
+Copy link to this transcript
+10:50
+>> É porque aqui seria um problema, porque a gente sabe lá, né? Uhum.
+Copy link to this transcript
+10:54
+>> Certo. Lembra, a gente olha lá, ah, tá. Qual é a ata? Foi a última atual,
+tá?
+Copy link to this transcript
+10:57
+Isso só faz a sequência. Só que o orientador não vai ter o número da ata,
+Copy link to this transcript
+11:02
+né? Então isso aqui era uma questão, tá
+Copy link to this transcript
+11:05
+>> boa. Isso aqui a gente pode até tirar inclusive, cara, essa essa partezinha
+da
+Copy link to this transcript
+11:08
+ata aqui.
+Copy link to this transcript
+11:09
+>> Deixar estendido.
+Copy link to this transcript
+11:10
+>> E daí a gente pensa para essa segunda parte lá, né?
+Copy link to this transcript
+11:13
+>> Uhum.
+Copy link to this transcript
+11:13
+>> Tá. Eh, aprovação da Bom, outra coisa que eu botei aqui,
+Copy link to this transcript
+11:20
+ã, eh, cadê aqui,
+Copy link to this transcript
+11:25
+ah, o, o, o local de preferência, eu botei ali, ó, aqui, ó, no local,
+Copy link to this transcript
+11:32
+>> talvez a gente botar assim, ã, eh, local de preferência, né? Porque na
+verdade a
+Copy link to this transcript
+11:39
+gente
+Copy link to this transcript
+11:40
+>> a gente tem que consultar isso aqui. A gente precisa da aprovação da da
+Copy link to this transcript
+11:44
+gerência lá do agendamento, tá? Entendi.
+Copy link to this transcript
+11:47
+>> Então não é não é uma coisa assim que eles ah vai ser nessa sala daqui a
+pouco
+Copy link to this transcript
+11:51
+assim ele quer no anfiteatro, mas o anfiteatro tá de tá
+Copy link to this transcript
+11:57
+>> ã tá reservado. Daí a gente consegue a sala de videoconferência, entendeu?
+Copy link to this transcript
+12:03
+Mas outra coisa também, ô Lucas, que terei que deixar aqui uma opção é se
+Copy link to this transcript
+12:07
+caso for banca remota.
+Copy link to this transcript
+12:10
+>> Ah, verdade.
+Copy link to this transcript
+12:11
+>> É, pode ser que ela não seja também presencial, daí tu também deixar uma uma
+Copy link to this transcript
+12:15
+opção ali,
+Copy link to this transcript
+12:16
+>> né? Local de preferência, né?
+Copy link to this transcript
+12:20
+>> E e ver como é que a gente botaria pra pessoa, se a pessoa quiser botar como
+Copy link to this transcript
+12:24
+banca remota. Talvez o que poderia botar aqui, porque normalmente nossas bancas
+é
+Copy link to this transcript
+12:30
+o seguinte, o local fica eh sala de videoconferências,
+Copy link to this transcript
+12:35
+anfiteatro
+Copy link to this transcript
+12:37
+>> Uhum.
+Copy link to this transcript
+12:38
+>> ou banca remoto. Daqui a pouco poderia ser uma caixinha para essas três
+opções,
+Copy link to this transcript
+12:42
+entendeu?
+Copy link to this transcript
+12:43
+>> Boa. Dá para fazer, dá para fazer sim. Eh, que queia, eh, dá para eu
+adicionar
+Copy link to this transcript
+12:48
+um esse essas três opções de adicionar uma opção de outro e daí o cara consegue
+Copy link to this transcript
+12:53
+digitar, sabe? sabe?
+Copy link to this transcript
+12:56
+>> Aham. Para, sei lá, caso o cara tem um, sei lá, um caso diferente assim.
+Copy link to this transcript
+13:02
+>> Eh, queria te perguntar, Antônio,
+Copy link to this transcript
+13:05
+>> eh, sobre a essa parte de consultar a gerência,
+Copy link to this transcript
+13:11
+cara, eu tava com a impressão que o orientador ele já ele já vinha para
+Copy link to this transcript
+13:16
+fazer a já vinha para para dizer, de peso assim,
+Copy link to this transcript
+13:22
+né? Isso. Já eu já tinha a impressão que ele
+Copy link to this transcript
+13:25
+já tinha todas as informações antes de fazer essa formalização. Talvez seja
+Copy link to this transcript
+13:29
+algo diferente entre os dois PPGs.
+Copy link to this transcript
+13:33
+>> Sim, sim. Eh, tu lembra, tu sabe se ali no pedido
+Copy link to this transcript
+13:37
+de ensino o pessoal já tem essa confirmação antes de solicitar
+Copy link to this transcript
+13:41
+eh antes de solicitar a banca ou eu
+Copy link to this transcript
+13:46
+acredito que não. Alguns é que isso aí varia muito de professor para professor.
+Copy link to this transcript
+13:50
+Tem professor que é mais despachado e já vai lá e já pergunta, já vê se tá tudo
+Copy link to this transcript
+13:54
+certo. Às vezes tem alguns que até já reservam, entendeu?
+Copy link to this transcript
+13:58
+>> Uhum. Entendi.
+Copy link to this transcript
+13:59
+>> E e tem outros que ficam nessa dependência da gente, só joga uma bomba
+Copy link to this transcript
+14:03
+para nós assim. Entendi.
+Copy link to this transcript
+14:06
+>> Então,
+Copy link to this transcript
+14:07
+>> né, às vezes é é isso aí. A gente tem que pegar e e tá negociando. Às vezes
+é
+Copy link to this transcript
+14:13
+um horário ruim assim que não já tem reserva, já aconteceu situações assim,
+Copy link to this transcript
+14:18
+né?
+Copy link to this transcript
+14:19
+>> Uhum.
+Copy link to this transcript
+14:20
+>> Bem bem esquisitas assim, né? Da gente tá correndo atrás de sala porque o
+Copy link to this transcript
+14:24
+professor a andou num dia e daí a gente falou que não tinha sala disponível.
+Copy link to this transcript
+14:29
+Disse: "Não, mas essa esse é o dia que a banca consegue". E aí deu um desespero
+Copy link to this transcript
+14:33
+pra gente conseguir sal,
+Copy link to this transcript
+14:35
+>> tá,
+Copy link to this transcript
+14:35
+>> cara? Então,
+Copy link to this transcript
+14:36
+>> eh, e como é que funciona nesse, nesses casos de, tipo assim, ah, o cara
+quer a
+Copy link to this transcript
+14:42
+sala 220 no dia tal, mas a gerência diz que já tá ocupado. Você manda o e-mail
+Copy link to this transcript
+14:48
+de volta pro pro orientador explicando a situação.
+Copy link to this transcript
+14:51
+>> É, eu normalmente faço isso. Eu entro em contato com ele por e-mail e
+explico.
+Copy link to this transcript
+14:56
+Hoje, ô Lucas, até assim se avançou. Eu vou até te passar depois, que tem hoje
+a
+Copy link to this transcript
+15:01
+gente tem como consultar a agenda de sala online, tá? Ah, os agendamentos
+Copy link to this transcript
+15:07
+estão disponíveis hoje no site do Instituto Físico, então tu consegue já
+Copy link to this transcript
+15:11
+olhar, dá paraqui a pouco, se tiver um link ali de consulte, ele pode consultar
+Copy link to this transcript
+15:16
+e ver se o horário tá liberado,
+Copy link to this transcript
+15:18
+>> tá? Ah, já seria um um assim uma prévia para ele saber se vai se posso
+solicitar
+Copy link to this transcript
+15:25
+esse horário que ele já tá liberado.
+Copy link to this transcript
+15:27
+>> Mas igual o agendamento tem que ser feito daí com a gerência lá primeiro
+Copy link to this transcript
+15:31
+para garantir que aquela aquele horário tá reservado.
+Copy link to this transcript
+15:34
+>> Não, não faz sentido. O que que eu tô pensando aqui, Antônio? Eh, como é que
+a
+Copy link to this transcript
+15:39
+gente lidaria com o caso do cara da sala de preferência dele? Não, não, não
+está
+Copy link to this transcript
+15:44
+disponível. Eu acho que a gente pode talvez não mandar o e-mail pela própria
+Copy link to this transcript
+15:51
+aplicação. Aí a gente manda o e-mail, você manda e-mail para ele e de repente
+Copy link to this transcript
+15:56
+talvez depois só atualiza os dados da banca aqui na na página de admin, sabe?
+Copy link to this transcript
+16:03
+>> Ah, dá um check aí, vá.
+Copy link to this transcript
+16:05
+>> E isso, sabe?
+Copy link to this transcript
+16:08
+>> Sim.
+Copy link to this transcript
+16:09
+>> É, na verdade assim, ô Lucas, deixa eu te explicar como é que normalmente
+Copy link to this transcript
+16:12
+funciona, né? Uhum. H aprovação até do do nosso eh
+Copy link to this transcript
+16:20
+coordenador.
+Copy link to this transcript
+16:22
+>> Uhum.
+Copy link to this transcript
+16:22
+>> Não precisa já da questão do agendamento da sala, né? Porque ele avalia é o
+Copy link to this transcript
+16:26
+mérito da banca, né? Então para ver se os membros da banca têm capacidade de
+Copy link to this transcript
+16:30
+avaliar aquele trabalho, tá?
+Copy link to this transcript
+16:32
+>> Então a gente precisa dessa etapa primeiro. O orientador, o coordenador,
+Copy link to this transcript
+16:38
+desculpa,
+Copy link to this transcript
+16:39
+>> precisa aprovar a banca, tá?
+Copy link to this transcript
+16:42
+>> Uhum. depois de aprovado, a gente pode correr atrás dessa questão da sala,
+tá?
+Copy link to this transcript
+16:46
+Então até pode fazer esse primeiro esse encaminhamento direto para ele lá pro
+Copy link to this transcript
+16:51
+>> pro orientador, né?
+Copy link to this transcript
+16:53
+>> Uhum.
+Copy link to this transcript
+16:53
+>> E só que daí quando volta paraa nossa que a gente tem que confirmar essa
+Copy link to this transcript
+16:57
+questão da sala, a gente tem que ter algum momento de pra gente fazer essa
+Copy link to this transcript
+17:01
+confirmação da sala para garantir que ela vai est reservada.
+Copy link to this transcript
+17:05
+>> Entendi. Então talvez essa parte aqui da agenda talvez ela não seja tão
+Copy link to this transcript
+17:09
+necessária no inicialmente, né? Ah, tá. Eu achava só do
+Copy link to this transcript
+17:17
+>> Uhum.
+Copy link to this transcript
+17:20
+>> Ah, pilha. Tá.
+Copy link to this transcript
+17:21
+>> Você tem
+Copy link to this transcript
+17:22
+>> a gente tinha uma pilha, senão comas pequeninas,
+Copy link to this transcript
+17:28
+>> eu acho. Talvez o pessoal lá da Secretaria Acadêmica possa abrir ele
+Copy link to this transcript
+17:31
+também para conhecer se não tiver. Obrigada.
+Copy link to this transcript
+17:35
+>> Tá.
+Copy link to this transcript
+17:35
+>> É, sabe? Lucas, desculpa aí, Tavar.
+Copy link to this transcript
+17:44
+>> Não, não, tranquilo, cara. Tranquilo.
+Copy link to this transcript
+17:47
+>> Eh, tá. Então, eh, eu tava pensando, Lucas, eh, quem sabe, então, assim,
+Copy link to this transcript
+17:52
+talvez quando chegasse esse agendamento da banca
+Copy link to this transcript
+17:57
+>> Uhum. Se talvez se a gente poderia, se já fosse botar aqui a sala de
+Copy link to this transcript
+18:00
+preferência, se a gente eh já poderia mandar automaticamente também pro e-mail
+Copy link to this transcript
+18:05
+da gerência, quem sabe, aí seria uma possibilidade, né?
+Copy link to this transcript
+18:10
+>> Daí já automaticamente chega para elas lá, elas dizem: "Ah, OK, reservado,
+né?"
+Copy link to this transcript
+18:16
+>> Uhum.
+Copy link to this transcript
+18:17
+>> Também poderia ser,
+Copy link to this transcript
+18:18
+>> poderia, a gente poderia fazer isso,
+Copy link to this transcript
+18:20
+>> né? É, poderia fazer isso. Eh, a, assim, a gente consegue fazer isso. A
+minha
+Copy link to this transcript
+18:26
+preocupação é mais assim, como é que a gente avisa o orientador depois que que
+Copy link to this transcript
+18:31
+deu ruim, que aquela sala não tá disponível naquele momento, saca?
+Copy link to this transcript
+18:35
+>> Pronto. Com o retorno da gerência, se a gerência responder daí para é é que
+Copy link to this transcript
+18:39
+depende como é que vai ser enviado para para ela ali, né?
+Copy link to this transcript
+18:43
+>> Uhum.
+Copy link to this transcript
+18:43
+>> Vai ser enviado para ela, por exemplo, com uma cópia para CPG,
+Copy link to this transcript
+18:47
+>> néum? Daí a gente já sabe que tá, ela recebeu lá o e-mail, daí ela vai
+Copy link to this transcript
+18:52
+responder com cópia para CPG, daí a gente recebe aqui também.
+Copy link to this transcript
+18:56
+>> Uhum.
+Copy link to this transcript
+18:57
+>> Mas tem que ser num, ela tem que responder num e-mail que que seja válido
+Copy link to this transcript
+19:02
+pra gente poder receber também, né? Entendi,
+Copy link to this transcript
+19:07
+entendi.
+Copy link to this transcript
+19:08
+>> Eu acho que poderia ser só poderia colocar aí como cópia
+Copy link to this transcript
+19:14
+a CPG
+Copy link to this transcript
+19:15
+>> e daí o e-mail que ele dá CPG que é um alias, né? Lembra que ele dispara o
+Copy link to this transcript
+19:19
+e-mail? Tu manda CPG fix, por exemplo, aqui ele manda para mim, pro
+Copy link to this transcript
+19:22
+coordenador, pro coordenador de substituto, né?
+Copy link to this transcript
+19:27
+>> Então,
+Copy link to this transcript
+19:29
+>> lembra? Tá, tá, tem, tá, você tá falando desse meio inicial aqui, então em
+vez da
+Copy link to this transcript
+19:33
+gente mandar só pro coordenador, mandar pro pra CPG.
+Copy link to this transcript
+19:37
+>> Isso aí não, não.
+Copy link to this transcript
+19:39
+>> Esse aí, esse inicial de chegada a gente poderia já mandar também para
+Copy link to this transcript
+19:48
+com só com o dado também da sala aqui em cima, né?
+Copy link to this transcript
+19:51
+>> Uhum. Uhum.
+Copy link to this transcript
+19:52
+>> Paraa gerência. Daí eles ela eles já podem verificar a sala ali e já
+Copy link to this transcript
+19:58
+respondem para nós.
+Copy link to this transcript
+19:59
+>> Entendi.
+Copy link to this transcript
+20:00
+>> Aqui, ó. É, é essa a pergunta que eu tava te fazendo aqui, ó. Por exemplo,
+Copy link to this transcript
+20:03
+esse aqui foi, tá? Tu tá usando sisteminha local aí para de envio de
+Copy link to this transcript
+20:07
+e-mail, né?
+Copy link to this transcript
+20:08
+>> Isso aí.
+Copy link to this transcript
+20:08
+>> Mas tá, quando ele for disparado pelo sistema, tá?
+Copy link to this transcript
+20:12
+>> Uhum.
+Copy link to this transcript
+20:13
+>> Ele vai ir para um, vai ser enviado de um e-mail que vai receber resposta.
+Como
+Copy link to this transcript
+20:17
+é que daí funciona a resposta ao e-mail? Entendeu?
+Copy link to this transcript
+20:20
+>> Hum. que elas podem mandar confirmação ou negativa no próprio e-mail, elas
+Copy link to this transcript
+20:25
+respondem dizendo assim: "Bah, essa data não é possível ou sen não essa
+Copy link to this transcript
+20:29
+agendamento." OK,
+Copy link to this transcript
+20:31
+>> entendi. Então, Ton, a gente a gente até consegue receber, a gente vai até
+vai
+Copy link to this transcript
+20:37
+conseguir receber os e-mails de volta, tá? Só que assim,
+Copy link to this transcript
+20:41
+eh, é um negócio que é mais, ele é mais programático, né? Ele não,
+Copy link to this transcript
+20:45
+tipo assim, a a gerência vai responder, mas a gente não vai conseguir olhar o
+Copy link to this transcript
+20:51
+e-mail em si para ver a resposta, saca?
+Copy link to this transcript
+20:54
+>> Sim, sim. Você teri que mandar o e-mail daí para nós, né?
+Copy link to this transcript
+20:58
+>> Isso aí
+Copy link to this transcript
+20:59
+>> e receber de volta, né?
+Copy link to this transcript
+21:01
+>> Isso aí.
+Copy link to this transcript
+21:01
+>> Então, se, por exemplo, para para mim, se colocasse ali o CPG FIS, né? E daí
+a
+Copy link to this transcript
+21:06
+gente receberia toda a resposta ao e-mail,
+Copy link to this transcript
+21:09
+>> aí receberia eu também de volta. Aí, daí nesse aqui que você tá botando ali
+Copy link to this transcript
+21:13
+coordenador também poderia mandar pro coordenador e o pro coordenador botar
+Copy link to this transcript
+21:19
+CPG FIS.
+Copy link to this transcript
+21:20
+>> Uhum.
+Copy link to this transcript
+21:21
+>> TPG FIS e ã eh GIF, né, que é o nosso eh e-mail da gerência.
+Copy link to this transcript
+21:28
+>> E daí ele daí na resposta dela ali, ela vai responder também pro
+coordenador,
+Copy link to this transcript
+21:33
+né?
+Copy link to this transcript
+21:34
+>> Uhum.
+Copy link to this transcript
+21:35
+>> Pra CPG PIS. Daí a gente vai conseguir ver ali.
+Copy link to this transcript
+21:38
+>> Entendi.
+Copy link to this transcript
+21:40
+>> Entendi, entendi, entendi. É, essa parte aí a gente vai, vamos, vamos dar
+uma
+Copy link to this transcript
+21:45
+explorada ainda. Como é que a gente consegue resolver isso aí? Mas boa. Quer
+Copy link to this transcript
+21:50
+continuar com as perguntas? Ah, cara, uma outra coisa, acho que esse botão de
+Copy link to this transcript
+21:53
+link de videoconferência aqui também
+Copy link to this transcript
+21:56
+>> talvez não faça sentido, né? Porque
+Copy link to this transcript
+22:01
+eu poderia botar assim, ó, caso eh teria que botar uma observação. Eu
+Copy link to this transcript
+22:06
+anotei que também esse caso não fosse o padrão, né, que a gente utiliza o MCONF
+Copy link to this transcript
+22:11
+hoje do PPG FIS, por exemplo, né, a Eliane também tá utilizando o MCONF lá
+Copy link to this transcript
+22:16
+do ensino. Daí eh se caso não for o link de prefer eh se eles tiverem um link
+Copy link to this transcript
+22:22
+deles, né, às vezes tem um link lá a
+Copy link to this transcript
+22:26
+>> fluíos complexos, né? tem um, sabe, um um
+Copy link to this transcript
+22:29
+>> um link específico deles. Daí eles podem utilizar ou tem uma conta do Zoom,
+tal,
+Copy link to this transcript
+22:34
+aí eles podem nos indicar aqui qual o link, daí que dispara o e-mail com
+Copy link to this transcript
+22:38
+aquele link também na carta convite, né?
+Copy link to this transcript
+22:41
+>> Uhum. Tá, mas assim,
+Copy link to this transcript
+22:44
+eh, terei que ver só reformular um pouquinho, botar uma observação aqui,
+Copy link to this transcript
+22:48
+link de videoconferência, né, eh,
+Copy link to this transcript
+22:52
+sei lá, sugerido, né, ou caso não queira utilizar o do PPG, alguma coisinha,
+Copy link to this transcript
+22:58
+entendeu? Só dar uma pensada melhor nisso aí.
+Copy link to this transcript
+23:01
+>> Mas aquele link do MC Conf, ele é gerado pela gente, né? Ele não é gerado
+Copy link to this transcript
+23:07
+>> o pelo pelo orientador, saca?
+Copy link to this transcript
+23:09
+>> É, não. Sim, sim, sim. Não, mas eu digo assim, ó, o hoje, né, no PPG que eu
+fiz,
+Copy link to this transcript
+23:16
+>> a gente não tá utilizando mais tanto que a gente nem renovou o Zoom.
+Copy link to this transcript
+23:22
+>> Hum.
+Copy link to this transcript
+23:22
+>> Então, a gente tá usando só aquele que é o nosso McF, que é do PPG físico.
+Então,
+Copy link to this transcript
+23:27
+é sempre o mesmo link.
+Copy link to this transcript
+23:29
+>> Uhum.
+Copy link to this transcript
+23:29
+>> Uau! Sempre o mesmo link. Só que daí o que eu tô falando é que talvez pode a
+Copy link to this transcript
+23:34
+pessoa querer utilizar outro software, né? E aí ela vai sugerir aqui, tá?
+Copy link to this transcript
+23:41
+>> Entendi. Tá, faz sentido. Boa. Certo.
+Copy link to this transcript
+23:45
+>> Vamos avançando então ali. Ô Lucas, eu anotei aqui a questão da aprovação da
+Copy link to this transcript
+23:50
+banca. Acho que vamos ver.
+Copy link to this transcript
+23:53
+>> Vamos ver a página aqui.
+Copy link to this transcript
+23:59
+>> Você quer olha, eu posso eu posso simular uma nova uma nova uma nova band
+Copy link to this transcript
+24:03
+aqui, ó. Pera aí, deixa eu só voltar a ata 22,
+Copy link to this transcript
+24:09
+tá? Dá para fazer um outro testo, né? Tá
+Copy link to this transcript
+24:13
+ligado, tá? Daí tu recebeu lá,
+Copy link to this transcript
+24:18
+>> recebi esse e-mail aqui. Aí ele te manda para essa página.
+Copy link to this transcript
+24:22
+>> Esse aqui seria o coordenador abrindo para para revisar.
+Copy link to this transcript
+24:25
+>> Isso isso aí.
+Copy link to this transcript
+24:27
+>> Beleza. Tá. Tinha anotado agora aqui. Eu botei a data da banca.
+Copy link to this transcript
+24:39
+Data, cara, foi um outro lugar que eu vi. Ah, tá aqui, tá a data da defesa,
+Copy link to this transcript
+24:43
+certinho, ó. Outro lugar que tu botou, acho que data da solicitação,
+Copy link to this transcript
+24:49
+não era nesse nesses nesse script aí.
+Copy link to this transcript
+24:52
+>> Data da solicitação, diz aqui, talvez.
+Copy link to this transcript
+24:56
+>> Não, não, não, não era nessa aí. Eu acho que era
+Copy link to this transcript
+25:01
+naquela página inicial mesmo. Dar uma olha aqui. Aquela primeira do
+Copy link to this transcript
+25:06
+preenchimento mesmo. Deixa eu ver aí. Data não é ali
+Copy link to this transcript
+25:12
+>> data da defesa. Isso. Data dos convites.
+Copy link to this transcript
+25:16
+>> Isso. Ah, tá. A data dos convites a data, tá? Né? Então, beleza. A data que
+Copy link to this transcript
+25:20
+tá enviando o convite. Beleza. É isso. F. Passou meio rápido ali. Eu tinha
+Copy link to this transcript
+25:25
+ficado confuso com isso aí. Tá. Tá. É, talvez isso aqui não faça tanto
+Copy link to this transcript
+25:29
+sentido a o cara preencher, né?
+Copy link to this transcript
+25:32
+>> É, talvez aí fosse se pudesse também pegar do sistema, né?
+Copy link to this transcript
+25:39
+>> O sistema, alguma coisa assim, né?
+Copy link to this transcript
+25:42
+>> Aí ficaria mais prático para nós também, porque isso aí que ele é, ele vai
+botar
+Copy link to this transcript
+25:45
+data da defesa 12 e daí ele vai botar lá, sei lá, tá mandando hoje, né? 22 dia
+Copy link to this transcript
+25:52
+22, só que daqui a pouco ele eh ele não vai ser enviado dia 22. A gente vai,
+ah,
+Copy link to this transcript
+25:57
+pegou uma sexta-feira, só na segunda-feira vou me enviar e tal, né?
+Copy link to this transcript
+26:01
+Seí é o orientador nem tem que saber isso, né?
+Copy link to this transcript
+26:04
+>> Que a gente envia o convite é mais é algum negócio mais interno.
+Copy link to this transcript
+26:08
+>> É, sim, sim. E até porque assim, às vezes também tem outras coisas que que
+Copy link to this transcript
+26:12
+nem a gente tá vendo sala também de de
+Copy link to this transcript
+26:15
+>> eh para para agendar, daqui a pouco não
+Copy link to this transcript
+26:18
+conseguimos sala no dia, a gente tá negociando alguma coisa, fazer uma troca
+Copy link to this transcript
+26:22
+de uma outra, tem uma vai ter uma outra banca, mas dá para trocar de sala.
+Copy link to this transcript
+26:26
+>> Tem situações assim que às vezes acontecem, né?
+Copy link to this transcript
+26:29
+>> Mas então talvez seja legal te botar isso aqui em outro lugar quando a gente
+Copy link to this transcript
+26:33
+for fazer talvez ou aprovação,
+Copy link to this transcript
+26:37
+>> né? ou até
+Copy link to this transcript
+26:39
+>> se pegasse na na data do sistema quando gerasse os documentos melhor.
+Copy link to this transcript
+26:44
+>> Perfeito. Perfeito. Per caso for possível. Tá. Eh, uma outra coisinha no
+Copy link to this transcript
+26:48
+caso da recusa ali, tá? Uhum.
+Copy link to this transcript
+26:51
+>> Tu falou que daí teria que fazer uma nova solicitação de LAN. É isso. Vamos.
+Copy link to this transcript
+26:56
+Recusou.
+Copy link to this transcript
+26:57
+>> Bota aí.
+Copy link to this transcript
+26:59
+>> Bora. É, é membro externo, não tem experiência na área.
+Copy link to this transcript
+27:12
+>> Beleza,
+Copy link to this transcript
+27:13
+>> confirmou.
+Copy link to this transcript
+27:14
+>> E ali tu vai, a gente a gente manda o e-mail pro, nesse caso, a gente vai
+Copy link to this transcript
+27:18
+mandar o e-mail pro
+Copy link to this transcript
+27:19
+>> Voltando pro orientador, né?
+Copy link to this transcript
+27:20
+>> Isso aí. Então, é a formações da da da banca e o motivo assim da
+Copy link to this transcript
+27:28
+recusa.
+Copy link to this transcript
+27:29
+>> E aí nesse caso aí o cara teria que abrir uma outra, teria que fazer um novo
+Copy link to this transcript
+27:33
+pedido,
+Copy link to this transcript
+27:33
+>> tá? É isso que ele te perguntar daí. Se no nesse caso ele teria que refazer
+todo
+Copy link to this transcript
+27:38
+pedido.
+Copy link to this transcript
+27:39
+>> Isso.
+Copy link to this transcript
+27:40
+>> Tá. É bom. Mas aí é uma questão do sistema,
+Copy link to this transcript
+27:46
+né? É,
+Copy link to this transcript
+27:48
+>> você acha não, a gente pode, a gente pode ver. Não sei se tu tem alguma
+ideia
+Copy link to this transcript
+27:51
+de como fazer isso, deixar ele menos burocrático pro orientador?
+Copy link to this transcript
+27:56
+>> É, eu só pensei nisso, que daqui a pouco esse cara poderia incomodar por por
+ter
+Copy link to this transcript
+28:00
+que refazer, sei lá, se fosse daqui a pouco um é um algum erro, bom, se fosse
+Copy link to this transcript
+28:05
+um erro formal, até o o coordenador não precisaria negar a banca, né? Poderia
+Copy link to this transcript
+28:09
+aprovar e depois a gente consegue fazer os ajustes lá na edição onde tu
+mostrou,
+Copy link to this transcript
+28:13
+né?
+Copy link to this transcript
+28:14
+>> Uhum. Tipo assim, o cara ah, botou o nome do aluno incompleto, botou era
+Copy link to this transcript
+28:21
+Pedro,
+Copy link to this transcript
+28:23
+>> Lucas Lopes, ele botou Pedro Lopes, entendeu?
+Copy link to this transcript
+28:26
+>> Uhum. Esse tipo de esse tipo de erro acontece.
+Copy link to this transcript
+28:30
+>> Aham. Acontece. E daí, mas daí a gente pode fazer na edição, né, na lá no
+Copy link to this transcript
+28:35
+final, como a gente falou, né?
+Copy link to this transcript
+28:37
+>> Conseguiros, conseguir
+Copy link to this transcript
+28:38
+>> dá para abrir lá e editar, né? Isso é que esse caso,
+Copy link to this transcript
+28:42
+>> o que eu tô querendo diferenciar é o seguinte, né, Lucas, é assim, é o que
+Copy link to this transcript
+28:45
+que realmente seria para rejeitar a banca, né? Eu acho que assim, a a
+Copy link to this transcript
+28:51
+rejeitar a banca mesmo só no caso daí ã da questão de
+Copy link to this transcript
+28:59
+faltar é que nem isso aqui, ó, o o membro não ter experiência suficiente ou
+Copy link to this transcript
+29:05
+ter faltado algum documento, né? Se bem que às vezes o o poderia talvez fazer o
+Copy link to this transcript
+29:13
+seguinte, ter uma opção aqui, ó, de aprovado
+Copy link to this transcript
+29:20
+sob condição, mais ou menos alguma coisa assim. Vou te dar um exemplo do que
+que
+Copy link to this transcript
+29:24
+às vezes acontece, tá?
+Copy link to this transcript
+29:26
+>> Às vezes o professor mandou o pedido da banca,
+Copy link to this transcript
+29:31
+>> só que não mandou o texto do aluno,
+Copy link to this transcript
+29:34
+>> entendeu? Então o texto assim, né, enquanto a gente não recebe o texto, a
+Copy link to this transcript
+29:39
+gente não envia os convites aos membros, tá?
+Copy link to this transcript
+29:42
+>> Hum.
+Copy link to this transcript
+29:42
+>> Então assim, daí daí seria um caso de aprovado sob condição, bota lá, ah,
+Copy link to this transcript
+29:49
+>> eh, aprovado só aguardando o envio do texto para
+Copy link to this transcript
+29:56
+para o envio das cartas.
+Copy link to this transcript
+29:58
+>> Uhum.
+Copy link to this transcript
+29:59
+>> Entendeu? Entendi.
+Copy link to this transcript
+30:00
+>> Só para não correr o risco do seguinte, de do orientador recusar por não
+ter,
+Copy link to this transcript
+30:05
+por exemplo, um documento que nem desse, ele não impede a gente já de fazer os
+Copy link to this transcript
+30:09
+documentos, ele impede o envio da das cartas aos membros, mas não de fazer os
+Copy link to this transcript
+30:15
+documentos, aprovar a banca e deixar tudo já pronto, agendado da banca.
+Copy link to this transcript
+30:21
+O pergunta, Antônio, o orientador, ele ele manda o texto do aluno ali pro pro
+Copy link to this transcript
+30:28
+coentador para ele avaliar do tipo, ah, não é que não é, desculpa, não é, não
+Copy link to this transcript
+30:34
+falei com orientador, né, mas não é que o coordenador vai olhar o texto ali na
+Copy link to this transcript
+30:38
+minúcia,
+Copy link to this transcript
+30:39
+>> mas ele manda pro o coordenador ver que o que o
+Copy link to this transcript
+30:42
+>> é o que a nossa resolução fala lá, a resolução ela dá a lista de documentos
+Copy link to this transcript
+30:47
+que é que são necessários para aba del é o PDF do texto.
+Copy link to this transcript
+30:53
+>> Ah, entendi. É porque isso aí é uma coisa que a gente pode adicionar aqui na
+Copy link to this transcript
+30:59
+na no formulário.
+Copy link to this transcript
+31:00
+>> Aham.
+Copy link to this transcript
+31:01
+>> E aí se a gente adicionar e se a gente não deixar o cara enviar a banca, é
+uma
+Copy link to this transcript
+31:05
+é um caso de erro a menos, sabe?
+Copy link to this transcript
+31:08
+>> Ah, tá. botar tipo assim para anexar os documentos no próprio formulário.
+Copy link to this transcript
+31:12
+>> Exatamente. A gente põe aqui no final eh uma caixinha com pro cara
+adicionar,
+Copy link to this transcript
+31:17
+anexar o documento do do aluno. Aí o cara o cara anexa e já era. Não tem
+Copy link to this transcript
+31:22
+muito.
+Copy link to this transcript
+31:23
+>> Sim, ficaria perfeito, tá, Lucas? Eu eu acho até que ficaria bem legal eh
+Copy link to this transcript
+31:29
+adicionar mesmo assim. Eu eu acho que seria importante a gente ter essa opção
+Copy link to this transcript
+31:34
+que nem eu te falei de aprovado, mas aguardando
+Copy link to this transcript
+31:38
+>> Aham. Porque, por exemplo, v te dar um outro exemplo que acontece, eh,
+muitas
+Copy link to this transcript
+31:42
+vezes o Jefferson é um que ele é muito chato com a questão dos préseleas,
+Copy link to this transcript
+31:47
+>> né? Então assim, eles mandam o material lá, só que ele não aprovou o press
+Copy link to this transcript
+31:51
+release,
+Copy link to this transcript
+31:52
+>> só que o press relase é um material que pode ser feito depois, né?
+Copy link to this transcript
+31:57
+começar a fazer os documentos da banca porque não recebeu pr eles. Então ele
+Copy link to this transcript
+32:01
+poderia pode botar lá aprovado aguardando o envio do novo
+Copy link to this transcript
+32:07
+>> préis, entendeu? Tipo, então colocar uma condição aí que assim faltou só o
+Copy link to this transcript
+32:12
+reformular o prédice
+Copy link to this transcript
+32:14
+>> eh conforme
+Copy link to this transcript
+32:17
+>> orientação, né? Entendi, entendi. Tá, faz sentido, faz
+Copy link to this transcript
+32:22
+sentido, faz sentido. Eu acho que assim, talvez esses casos de erro, mais de
+Copy link to this transcript
+32:27
+esses casos de erro do do do tipo de ah, faltou algum documento, faltou algum
+Copy link to this transcript
+32:31
+dado, talvez o o sistema não faça isso. Talvez a gente dê, talvez a gente dê
+uma
+Copy link to this transcript
+32:38
+indicação do tipo, ah, sua banca foi aprovada com tal condição, entra em
+Copy link to this transcript
+32:43
+contato com o secretário da do seu PPG
+Copy link to this transcript
+32:47
+>> para resolver pendências.
+Copy link to this transcript
+32:48
+>> Uhum.
+Copy link to this transcript
+32:49
+>> Algum mais nesse sentido. Por por porque, Antônio eu o que eu não quero é
+Copy link to this transcript
+32:54
+que processo fique burocrático, saca? Eu não quero que, pô, o cara tem que
+fazer
+Copy link to this transcript
+33:00
+tudo pelo sistema e quando vê acontece alguma, tem alguma coisa que a gente
+Copy link to this transcript
+33:05
+acabou não pensando e isso trave o cara, saca?
+Copy link to this transcript
+33:08
+>> Uhum. Uhum. Então eu acho, eu acho que tem alguns
+Copy link to this transcript
+33:13
+casos que a gente pode, pode passar pro, que a comunicação direta seria melhor
+Copy link to this transcript
+33:17
+entre você.
+Copy link to this transcript
+33:18
+>> Exatamente. E é exatamente por isso que eu tô te falando, te insistindo na
+Copy link to this transcript
+33:21
+questão da recusa, porque assim, ó, eu acho que que se, por exemplo, o
+Copy link to this transcript
+33:25
+professor recusa aqui e o orientador tem que pedir tudo de novo, isso aí vai
+Copy link to this transcript
+33:30
+gerar um pá, cara,
+Copy link to this transcript
+33:32
+>> isso vai gerar um problema para nós, entendeu?
+Copy link to this transcript
+33:35
+>> Entendi.
+Copy link to this transcript
+33:35
+>> Então assim, eu eu tô querendo evitar essa situação, por isso que eu tô
+Copy link to this transcript
+33:38
+dizendo assim, ó. Tá, ele ele aprovou a banca. Aprova, tá? Aprovou a banca. Ah,
+Copy link to this transcript
+33:43
+faltou tal tal documento, daí a gente vê depois.
+Copy link to this transcript
+33:46
+>> Então, talvez até se tu se tu quiser pode fazer só assim, ó. Ã, colocar é
+que
+Copy link to this transcript
+33:52
+a resolução, aí tá a questão, né? A resolução já diz que paraa formação da
+Copy link to this transcript
+33:58
+banca já teria aquela série de documentos, né? Então, para solicitar a
+Copy link to this transcript
+34:03
+banca já teria que fazer enviar os documentos. Se ele só fizer aqui, eh,
+Copy link to this transcript
+34:10
+aqui, por exemplo, pro coordenador aprovar essa banca, ele precisa
+Copy link to this transcript
+34:15
+consultar os currículos dos externos, por exemplo.
+Copy link to this transcript
+34:18
+>> Hum.
+Copy link to this transcript
+34:19
+>> Então, eu acho que necessariamente teria que acrescentar os os documentos
+aqui,
+Copy link to this transcript
+34:24
+tá? Entendi, entendi, entendi.
+Copy link to this transcript
+34:29
+>> Faz sentido. Faz sentido, Antônio. Se a gente põe uma caixinha aqui no final
+com
+Copy link to this transcript
+34:33
+eh anexar documentos, aí quais documentos tem que mandar? Tem que
+Copy link to this transcript
+34:37
+mandar a dissertação do cara, do aluno, tem que mandar currículo dos
+Copy link to this transcript
+34:43
+professores, tem que mandar prédio release.
+Copy link to this transcript
+34:46
+>> Uhum.
+Copy link to this transcript
+34:46
+>> Faz isso.
+Copy link to this transcript
+34:48
+>> O cara que tá acessando, ele naturalmente já vai procurar isso.
+Copy link to this transcript
+34:52
+>> Uhum. Certo?
+Copy link to this transcript
+34:54
+E aí aí aí a gente vê, tá? A gente vai querer a gente vai querer deixar
+Copy link to this transcript
+34:58
+obrigatório isso aqui na na ferramenta ou a gente vai vai querer deixar o cara
+Copy link to this transcript
+35:04
+mandar sem as coisas e o professor, o coordenador autoriza com essa condição
+Copy link to this transcript
+35:09
+depois. Aí eu acho que algum currículatório.
+Copy link to this transcript
+35:13
+>> Currículo é obrigatório.
+Copy link to this transcript
+35:15
+>> Currículo é obrigatório, tá? Porque ele precisa avaliar aqueles currículos
+para
+Copy link to this transcript
+35:18
+dizer se o cara pode ser membro, pode não ser membro.
+Copy link to this transcript
+35:21
+>> Uhum. texto, né? Eh, eu não sei como é que tá no no ensino de física, se
+vocês
+Copy link to this transcript
+35:26
+estão cobrando também os préses, então tem que
+Copy link to this transcript
+35:30
+>> tem que ver como é que tá ali. Eu não tenho certeza, tá? Uhum.
+Copy link to this transcript
+35:33
+>> Ã, mas acho que a gente poderia se deixar como opcional aqui, mas nós
+Copy link to this transcript
+35:38
+cobramos também fios, a gente cobra o presto de lis para banda, né?
+Copy link to this transcript
+35:43
+>> Entendi.
+Copy link to this transcript
+35:43
+>> Outra coisa que pode ser opcional é o texto. Por quê? Porque muitas vezes o
+Copy link to this transcript
+35:48
+aluno tá ainda fechando o texto.
+Copy link to this transcript
+35:51
+>> Ele, ah, já tô agendando a banca, mas preciso aí de mais uma semana para
+Copy link to this transcript
+35:54
+fechar o texto.
+Copy link to this transcript
+35:56
+>> Aí a gente aprovaria a banca com essa condição, aguardando o texto para
+envio
+Copy link to this transcript
+36:01
+das cartas.
+Copy link to this transcript
+36:02
+>> Entendi. Entendi. Entendi. A gente pode, a gente pode fazer, a gente pode
+fazer
+Copy link to this transcript
+36:06
+assim, então, Tono, a gente deixa como opcional Uhum. E aí a gente põe ali um
+Copy link to this transcript
+36:10
+disclaimer do tipo, a, o envio do o não envio do do manuscrito do aluno
+Copy link to this transcript
+36:19
+pode ocasionar numa numa numa aceitação parcial,
+Copy link to this transcript
+36:24
+>> algo nesse algo nesse sentido.
+Copy link to this transcript
+36:26
+>> E aí vai do coordenador do curso olhar ali a banca, ver os documentos ver
+não
+Copy link to this transcript
+36:31
+tá faltando o texto, eu vou provar
+Copy link to this transcript
+36:33
+>> com a comp.
+Copy link to this transcript
+36:37
+>> Uhum. Entendi.
+Copy link to this transcript
+36:39
+>> Sim, sim. É, normalmente o orientador quando manda já o pedido e talvez
+fosse
+Copy link to this transcript
+36:44
+um também eh é importante isso, né? ter um um campo de de observações. A gente
+Copy link to this transcript
+36:53
+tem que tem que abrir na
+Copy link to this transcript
+36:56
+>> tu diz na
+Copy link to this transcript
+36:56
+>> quando na solicitação no envio do orientador lá, porque tem um campo lá
+Copy link to this transcript
+37:01
+que eles falam assim, ó, Lucas, eh, não tem um aqui para te mostrar, mas eles
+Copy link to this transcript
+37:06
+falam assim, ah, o professor tal tem experiência em tudo, blá, ele é tipo uma
+Copy link to this transcript
+37:11
+justificativa, entendeu? É logo após os membros da banca aqui, tá? Já tô te
+Copy link to this transcript
+37:17
+enchendo de informação aqui, mas é isso aqui eu acho que também é bem
+importante
+Copy link to this transcript
+37:21
+colocar, é justificativo.
+Copy link to this transcript
+37:24
+>> Não faz sentido. Faz sentido, faz
+Copy link to this transcript
+37:27
+>> faz sentido.
+Copy link to this transcript
+37:30
+>> Pode pode mandar aí, cara. Mas, mas eu acho que faz, eu acho que faz muito
+Copy link to this transcript
+37:33
+sentido a gente ter um campo de de observação.
+Copy link to this transcript
+37:37
+>> Uhum. que é um um campo de texto livre que o orientador vai mandar pro
+Copy link to this transcript
+37:42
+coordenador explicando alguma situação. Acho que
+Copy link to this transcript
+37:45
+>> é daqui a pouco que nem isso aí que eu te falei, ah, eu não tô com o texto,
+o
+Copy link to this transcript
+37:48
+texto o aluno vai precisar de uma semana,
+Copy link to this transcript
+37:51
+>> né?
+Copy link to this transcript
+37:51
+>> Isso aí. ele ele já fala, já vai informar ali. Daí o o daí o o
+Copy link to this transcript
+37:58
+coordenador vai poder aprovar, né, já com essa informação dizendo assim, ó,
+Copy link to this transcript
+38:03
+aprovada, né, com condição de
+Copy link to this transcript
+38:06
+>> de recebimento posterior da do texto.
+Copy link to this transcript
+38:11
+>> Uhum. Isso é algo que os que os coordenadores
+Copy link to this transcript
+38:14
+já fazem hoje, tipo assim, eles já respondem um e-mail e falam assim, é que
+Copy link to this transcript
+38:20
+daí eles não respondem para o orientador, eles respondem para nós,
+Copy link to this transcript
+38:25
+entendeu?
+Copy link to this transcript
+38:26
+>> Ele fala, é, o Jeferson, por exemplo, faz comigo assim, né? Ele manda ali,
+ele
+Copy link to this transcript
+38:30
+disse assim: "Ah, estamos aguardando a nova versão do PR release, mas banco
+Copy link to this transcript
+38:36
+aprovado."
+Copy link to this transcript
+38:37
+>> Perfeito,
+Copy link to this transcript
+38:37
+>> perfeito. É isso, é isso. É, é isso. Então,
+Copy link to this transcript
+38:41
+>> é,
+Copy link to this transcript
+38:41
+>> então eu eu acho que a gente pode fazer isso. A gente pode adicionar campos
+de
+Copy link to this transcript
+38:46
+arquivos, né? A gente deixa ali o eh o currículo dos professores com
+Copy link to this transcript
+38:52
+obrigatório.
+Copy link to this transcript
+38:53
+>> Uhum.
+Copy link to this transcript
+38:54
+>> Do dos membros, né? a gente deixa pr release os outros documentos como
+Copy link to this transcript
+38:59
+opcionais. a gente adiciona um campo de observação, um campo de justificativa,
+Copy link to this transcript
+39:03
+alguma coisa nesse sentido. E aí aquele texto a gente
+Copy link to this transcript
+39:08
+envia junto com o resto das informações pro coordenador. Aí o coordenador vai
+Copy link to this transcript
+39:14
+olhar, pode aprovar direto, pode aprovar com alguma ressalva e aí o e-mail, o
+Copy link to this transcript
+39:19
+e-mail de resposta, tanto o orientador quanto você, quanto você recebe. Aí os
+Copy link to this transcript
+39:23
+dois já ficam cientes.
+Copy link to this transcript
+39:25
+>> Uhum. Boa. É isso aí.
+Copy link to this transcript
+39:29
+Boa.
+Copy link to this transcript
+39:30
+>> Eu até abri aqui, ô Lucas, o que a gente falou aqui do desse campo
+Copy link to this transcript
+39:35
+livre, eles têm, na verdade, na minha resolução tem dois campos livres, tá? Um
+Copy link to this transcript
+39:40
+é sobre assim, comentário sobre o desempenho do estudante.
+Copy link to this transcript
+39:44
+>> Uhum.
+Copy link to this transcript
+39:45
+>> Tá. E também assim, por exemplo, no doutorado é importante para dizer assim,
+Copy link to this transcript
+39:51
+ah, porque ele já fez o o artigo, né? Precisa ter um artigo.
+Copy link to this transcript
+39:54
+>> Então, assim, ele vai dizer: "Ah, o aluno tá em fase final do artigo."
+Copy link to this transcript
+39:58
+>> Uhum. já submeteu o artigo, etc. Então, já vai falar um pouquinho aí sobre o
+Copy link to this transcript
+40:03
+aluno e no último campo aberto é justificativa para a escolha dos membros
+Copy link to this transcript
+40:08
+da banca,
+Copy link to this transcript
+40:09
+>> tá? E daí às vezes eles explicam isso, né? Ah, o professor tal tem
+experiência
+Copy link to this transcript
+40:14
+nessa temática porque já trabalhou com tal coisa em tal lugar, entendeu? Então
+Copy link to this transcript
+40:19
+ele explica um pouquinho ali sobre a composição da banca, né, para para
+Copy link to this transcript
+40:23
+justificar aquela escolha dos membros.
+Copy link to this transcript
+40:25
+>> Uhum.
+Copy link to this transcript
+40:26
+>> Tá. Então também é uma coisa que é importante, eu acho que colocar ali.
+Copy link to this transcript
+40:31
+>> Você acha que faz sentido a gente botar dois campos livres? Então um para
+cada
+Copy link to this transcript
+40:35
+>> Sim. E daí já vem a informação completa, né?
+Copy link to this transcript
+40:39
+>> Uhum. Não. Perfeito. Eh, ô Antônio, depois tu consegue me mandar por e-mail
+Copy link to this transcript
+40:45
+as resoluções que são relevantes. Cara, a Liana fez isso.
+Copy link to this transcript
+40:49
+>> Acho que eu acabei não não te pedindo, tá?
+Copy link to this transcript
+40:52
+>> Boa, cara.
+Copy link to this transcript
+40:53
+>> Eu eu eu te mando sim. Mando sim. Deixa eu voltar aqui. Eu tava abrindo
+aqui.
+Copy link to this transcript
+40:57
+Deixa eu voltar aqui paraa tela falar contigo aqui. Tá bom.
+Copy link to this transcript
+41:00
+>> Opa,
+Copy link to this transcript
+41:01
+>> boa.
+Copy link to this transcript
+41:02
+>> Aí, eh, e assim, e uma última coisinha, lógico, falamos um monte de coisa
+aqui,
+Copy link to this transcript
+41:08
+né?
+Copy link to this transcript
+41:08
+>> Aham.
+Copy link to this transcript
+41:09
+>> Né? Tu tu trouxe aqui um negócio que já avançou assim um monte, mas a gente
+já
+Copy link to this transcript
+41:14
+conversou sobre várias eh ajustezinhos assim, né?
+Copy link to this transcript
+41:17
+>> Uhum. Eh, mas uma última coisa, meu, que eu que eu queria também te lembrar
+Copy link to this transcript
+41:21
+assim, ó, naquele e-mail que vai lá para da aprova da do envio da banca.
+Copy link to this transcript
+41:27
+>> Uhum.
+Copy link to this transcript
+41:27
+>> Essa aí, ó. Não, pedido rejeitado naquele caso, tá? Mas novo pedido de
+Copy link to this transcript
+41:30
+banca aí mesmo.
+Copy link to this transcript
+41:32
+>> Esse aí se a gente for mandar daí direto pra gerência lá para
+Copy link to this transcript
+41:36
+>> para agendar a sala, precisa ter a sala aqui também, tá?
+Copy link to this transcript
+41:40
+>> Ah, boa, cara. Isso aqui eu acho que a gente pode até separar as duas
+coisas,
+Copy link to this transcript
+41:44
+tá, Antônio, tipo assim, eh, a gente manda,
+Copy link to this transcript
+41:48
+>> em vez da gente mandar esse e-mail aqui pra gerência também,
+Copy link to this transcript
+41:52
+>> Uhum.
+Copy link to this transcript
+41:52
+>> a gente espera a resposta do coordenador,
+Copy link to this transcript
+41:56
+>> sabe?
+Copy link to this transcript
+41:57
+>> Ah, sim, sim, sim.
+Copy link to this transcript
+41:58
+>> E aí quando quando ele aprova, a gente dispara o e-mail para você e e
+dispara
+Copy link to this transcript
+42:03
+um e-mail pra gerência também do tipo, ah, solicitação de de agendamento de
+Copy link to this transcript
+42:07
+sala tal dia, tal horário para tal banca. Uhum.
+Copy link to this transcript
+42:12
+>> Entendeu?
+Copy link to this transcript
+42:14
+>> Boa. Boa. Pode ser. Aí a panca tá aprovada. Daí se precisar fazer algum
+Copy link to this transcript
+42:19
+ajuste, a gente consegue daí alterar lá depois, né? Ah, por exemplo,
+Copy link to this transcript
+42:23
+>> o o aqui o orientador não define a sala mesmo. O nosso coorden
+Copy link to this transcript
+42:28
+>> o coordenador não define a sala, por exemplo, da banca, né? Ele vai fazer
+Copy link to this transcript
+42:33
+análise do mérito da banca. É, depois essa parte é o trâmite administrativo,
+Copy link to this transcript
+42:39
+>> é secretaria e gerência lá para agendar, né?
+Copy link to this transcript
+42:42
+>> Isso. Essa parte aqui, talvez essa parte aqui de data e local, talvez nem
+faça
+Copy link to this transcript
+42:46
+sentido a gente mandar pro coordenador.
+Copy link to this transcript
+42:48
+>> Uhum.
+Copy link to this transcript
+42:49
+>> Do curso, porque não não vai interferir assim no mérito da da banca, né?
+Talvez
+Copy link to this transcript
+42:55
+isso aqui a gente extraia e mande pro
+Copy link to this transcript
+42:59
+>> Isso é uma coisa bem objetiva para ele, até porque assim, tem um extrato só
+Copy link to this transcript
+43:03
+mesmo do que que chegou para ele depois acessar a página ali, né?
+Copy link to this transcript
+43:07
+>> Exatamente. Exatamente.
+Copy link to this transcript
+43:10
+>> Aham. Mas tá, tá bem legal, cara. Muito legal o projeto aí. Tá, tá, tá. Teve
+Copy link to this transcript
+43:15
+vários avanços assim, né, do que o projeto que a gente começou aqui, então
+Copy link to this transcript
+43:19
+dá dá para chamar de um de um novo mesmo, né?
+Copy link to this transcript
+43:22
+>> Gostou? Eh, eu tenho duas coisas ainda para para falar contigo sobre isso.
+Eh,
+Copy link to this transcript
+43:29
+sobre essa parte ali da esses trâmites que são mais burocráticos de
+Copy link to this transcript
+43:36
+de horário, de local. Talvez a gente precise pensar um pouco sobre isso.
+Copy link to this transcript
+43:41
+Assim, talvez não faça sentido esse trâmite ser via sistema, sabe? Pelo
+Copy link to this transcript
+43:46
+menos assim, eu vejo esse cria bancas mais como uma porta de entrada para
+Copy link to this transcript
+43:51
+iniciar os processos. Uhum.
+Copy link to this transcript
+43:53
+>> Sabe? Então, talvez a gente mande o e-mail ali pro paraa gerência do tipo,
+Copy link to this transcript
+43:58
+tá, tem essa nova solicitação de agendamento, por favor, entra em
+Copy link to this transcript
+44:03
+contato com o secretário para para para
+Copy link to this transcript
+44:09
+a resposta. Uhum.
+Copy link to this transcript
+44:10
+>> Sabe
+Copy link to this transcript
+44:11
+>> algo mais nesse sentido, até para eh diminuir um pouco a complexidade do do
+Copy link to this transcript
+44:15
+resto do projeto.
+Copy link to this transcript
+44:16
+>> Sim, sim, sim. Claro. Não, não precisa ficar tudo dentro do sistema, né?
+Copy link to this transcript
+44:20
+Isso é claro, eu acho que tu pode botar uma mensagem padrão botando para, por
+Copy link to this transcript
+44:24
+exemplo, responder para ou paraa CPG FIS ali que
+Copy link to this transcript
+44:30
+>> PPG ou responder também pro, no caso ali da CPG da Aliane. Eu não lembro
+como é
+Copy link to this transcript
+44:35
+que é o o e-mail ali dela agora, né?
+Copy link to this transcript
+44:38
+>> Uhum. Mas isso aí depois a gente consegue ver. Eh, cara, são três pontos,
+Copy link to this transcript
+44:43
+na verdade, tá? Esqueci. Desculpa. Tem esse ponto. O outro ponto é
+Copy link to this transcript
+44:47
+>> bastante tempo, falei, né? B, eu tenho 8 minutos, eu tenho uma
+Copy link to this transcript
+44:51
+outra reunião daqui a pouco. Lá, então acelera.
+Copy link to this transcript
+44:55
+>> Ah, o outro ponto é assim, a gente quer eventualmente adicionar mais coisas
+Copy link to this transcript
+44:58
+nesse projeto. Primeiro assim, a gente precisa separar os dois PPGs, né? A
+Copy link to this transcript
+45:03
+gente vai fazer isso
+Copy link to this transcript
+45:04
+>> e a gente também vai adicionar algum campo para vocês poderem subir
+templates
+Copy link to this transcript
+45:08
+novos
+Copy link to this transcript
+45:09
+>> para caso algum documento mude, tem algum campo extra, algum algum campo
+Copy link to this transcript
+45:15
+tenha que sair, tá?
+Copy link to this transcript
+45:16
+>> Ah, tá. A gente consegue fazer edição nós mesmos e v
+Copy link to this transcript
+45:19
+>> Isso. A gente quer poder que vocês consigam editar os muito legal, muito
+Copy link to this transcript
+45:24
+legal.
+Copy link to this transcript
+45:24
+>> Terceiro ponto, cara, a gente vai subir essas coisas numa infra que é que
+vai
+Copy link to this transcript
+45:29
+ser nossa por enquanto, tá? Mas se der certo, eu acho que seria legal a gente
+Copy link to this transcript
+45:34
+poder conversar com ATI da física para poder rostear internamente,
+Copy link to this transcript
+45:40
+saca? para para poder colocar no nosso
+Copy link to this transcript
+45:44
+servidor, por isso exatamente. E para não ser uma coisa fora aqui da da do da
+Copy link to this transcript
+45:51
+física, porque assim, tem questões que eu não sei se
+Copy link to this transcript
+45:56
+alguém vai querer encher o saco com relação a mandando e-mail de provedor
+Copy link to this transcript
+46:00
+externo, saca? Esse tipo de coisa.
+Copy link to this transcript
+46:03
+>> Então é algo que tem que deixar maqueiado também. Mas daí a gente vê
+Copy link to this transcript
+46:08
+>> pro pra versão final, digamos, né? Assim, eu acho que é é importante a
+Copy link to this transcript
+46:13
+questão eh a gerência dos dados, né? Ser uma coisa nossa para até porque
+envolve
+Copy link to this transcript
+46:21
+dados de alunos, né? Então são dados sensíveis, certo?
+Copy link to this transcript
+46:25
+>> Então isso tem que eh tem que vir numa versão final pro para nosso servidor,
+Copy link to this transcript
+46:32
+né?
+Copy link to this transcript
+46:32
+>> Isso aí
+Copy link to this transcript
+46:33
+>> e também o envio, né? se possível pelos próprios chasc etc aqui, né?
+Copy link to this transcript
+46:39
+>> Isso, isso aí, isso aí. E
+Copy link to this transcript
+46:41
+>> até o próprio, a gente usa o criancas, né? Mas o próprio Google aqui pelo CP
+Copy link to this transcript
+46:46
+tem uma questão de proteção de dados, não é, não é o software indicado, né? Tu
+Copy link to this transcript
+46:52
+lembra
+Copy link to this transcript
+46:52
+>> iso isso tu vê que então tem tem umas questões aí um pouco mais um pouco
+mais
+Copy link to this transcript
+46:56
+chatas assim que a gente não tá, pelo menos no momento a gente não tá lidando,
+Copy link to this transcript
+47:00
+né? Mas assim, a ideia é que a gente vá entregar um produto que funcione, que
+Copy link to this transcript
+47:06
+consiga mandar e-mail, consiga mandar e-mail de verdade, sabe?
+Copy link to this transcript
+47:09
+>> Sim, sim.
+Copy link to this transcript
+47:10
+>> E aí apresentar para vocês, talvez apresentar pro CPG, não sei, cara.
+Copy link to this transcript
+47:14
+>> E aí, se o pessoal gostar, achar que faz sentido,
+Copy link to this transcript
+47:18
+>> tentar integrar com a infra de vocês. E aí a gente começa a conversar com o
+Copy link to this transcript
+47:22
+pessoal de TI, saca?
+Copy link to this transcript
+47:24
+>> Mas aí é mais pro futuro.
+Copy link to this transcript
+47:26
+>> Sim. Não, mas tranquilo, cara. A questão só principal, né, Lucas, é a gente
+que a
+Copy link to this transcript
+47:31
+gente consiga fazer primeiro agora um sistema que que
+Copy link to this transcript
+47:35
+funcione legal pros dois, né?
+Copy link to this transcript
+47:37
+>> Uhum.
+Copy link to this transcript
+47:38
+>> Vai, eu acho que tá tá é uma ideia que tá tá legal assim, que já desenvolveu
+já
+Copy link to this transcript
+47:43
+para nós o cri bancas, tanto já tá um pouco mais apropriado também de como é
+Copy link to this transcript
+47:47
+que tá o processo, né?
+Copy link to this transcript
+47:49
+>> Ã, só que num segundo momento, sim, consiga esse sistema vir para pra gestão
+Copy link to this transcript
+47:54
+aqui do da nossa informática. né, pel uma questão de segurança da informação,
+Copy link to this transcript
+47:59
+tá?
+Copy link to this transcript
+48:00
+>> Uhum.
+Copy link to this transcript
+48:00
+>> E também não sei como é que é a questão de uma condicionar. Eh, e também é
+Copy link to this transcript
+48:08
+questão de de custos, né? Se, por exemplo, as ferramentas que vocês estão
+Copy link to this transcript
+48:13
+utilizando, se tem algum custo, né? Algum alguma coisa,
+Copy link to this transcript
+48:17
+>> cara? Cara, é open source na veia, cara. Tudo que a gente tá usando é open
+Copy link to this transcript
+48:21
+source. a gente provavelmente vai pagar alguma coisa assim de ah, a gente vai
+Copy link to this transcript
+48:26
+ter que alugar um servidor online, mas isso aí a gente é tipo 30, 40 pilas,
+Copy link to this transcript
+48:31
+isso aí para a gente
+Copy link to this transcript
+48:33
+>> a gente se resolve, entende?
+Copy link to this transcript
+48:35
+>> Tá? Mas depois assim, né, a gente consegue ver com o Gustavo aqui. Não se
+Copy link to this transcript
+48:39
+preocupa também que não é uma coisa assim que a gente
+Copy link to this transcript
+48:42
+>> eh deixa aí com vocês. A gente vai cons também aqui os edar. É é é que me é
+que
+Copy link to this transcript
+48:48
+a minha preocupação é que pro pessoal aderir tem eu imagino que provavelmente
+Copy link to this transcript
+48:54
+vai ter que passar pela CPG, o pessoal vai ter que olhar e esse tipo de questão
+Copy link to this transcript
+48:58
+vai ser levantada, entende?
+Copy link to this transcript
+49:01
+>> Uhum.
+Copy link to this transcript
+49:02
+>> Então é mais mas mas esse sentido aí. A a questão é assim, a gente aqui, né,
+tu
+Copy link to this transcript
+49:08
+sabe, no PPG físico, eu consigo ter um pouco mais de autonomia e e proponho
+Copy link to this transcript
+49:12
+assim, né,
+Copy link to this transcript
+49:13
+>> ali o pessoal eh vem com a gente, mas a a ali no ensino eles são um
+pouquinho
+Copy link to this transcript
+49:17
+mais resistentes essas mudanças, sabe?
+Copy link to this transcript
+49:20
+>> Então a gente vai ter que ver isso aí, mas não resistente a questão só de
+Copy link to this transcript
+49:24
+software, é a mudanças em sistemas, entendeu?
+Copy link to this transcript
+49:27
+>> Uhum.
+Copy link to this transcript
+49:28
+>> Porque vai ter que mudar uma cultura. Agora vai ser o próprio orientador ou
+ou
+Copy link to this transcript
+49:32
+o aluno ali com autorização do orientador
+Copy link to this transcript
+49:36
+fazendo a solicitação da banca.
+Copy link to this transcript
+49:39
+>> Então, eh a gente vai ter que só ver isso.
+Copy link to this transcript
+49:45
+>> Uhum.
+Copy link to this transcript
+49:45
+>> Assim, mas cara, é só a gente articular internamente aqui. Eu já insisti com
+a
+Copy link to this transcript
+49:52
+Liane, a gente tá com hoje é um núcleo aqui, não é um duas secretarias. Hoje
+Copy link to this transcript
+49:57
+nós somos um núcleo, então a gente tem que pensar como núcleo. Então, por
+Copy link to this transcript
+50:00
+exemplo, isso,
+Copy link to this transcript
+50:01
+>> alguns processos têm que ser unificados e essa esse processo acho que
+Copy link to this transcript
+50:06
+facilitaria bastante para nós.
+Copy link to this transcript
+50:08
+>> Uhum. Boa. Então, tá, Antônio, muito obrigado aí pelo pelo pelo papo, pela
+Copy link to this transcript
+50:13
+atenção, pelo tempo. Eh, eu vou ter que sair aqui rapidinho. Tem uma reunião no
+Copy link to this transcript
+50:17
+meu trabalho, cara. Desculpa,
+Copy link to this transcript
+50:18
+>> tá? Não, tranquilo. Mas assim, ô Lucas, eh, se tu quiser, a gente falou
+bastante
+Copy link to this transcript
+50:23
+coisa também de se tu quiser fazer uma última conversa antes, assim, talvez
+Copy link to this transcript
+50:27
+conversar com a Ariane ou antes de fechar aí
+Copy link to this transcript
+50:30
+>> alguma confirmação aí, tu também me aciona aí que eu tô à disposição aqui,
+Copy link to this transcript
+50:34
+tá?
+Copy link to this transcript
+50:35
+>> Cara, eu pretendo fazer mais reuniões com vocês, tá? Eu a não consigo
+Copy link to this transcript
+50:39
+participar hoje, eu pretendo mostrar para ela. E aí depois disso a gente vai
+Copy link to this transcript
+50:43
+fazer uma rodada de desenvolvimento aqui, fazer as coisas que a gente
+Copy link to this transcript
+50:47
+pretende fazer e depois mostrar para vocês de novo e aí pegar mais feedback
+Copy link to this transcript
+50:52
+e outra rodada de desenvolvimento, mais feedback. A gente tem que pegar o
+Copy link to this transcript
+50:57
+projeto daqui a mais ou menos um mês, tá? O prazo, falta mais ou menos 30 dias
+Copy link to this transcript
+51:02
+pra gente terminar isso. E a gente tem só isso assim para fazer na nessa
+Copy link to this transcript
+51:06
+cadeira específica. Então a ideia é bem mesmo desenvolver
+Copy link to this transcript
+51:10
+feedback, desenvolver feedback até ficar bonitinho.
+Copy link to this transcript
+51:15
+>> Beleza, Daniel, já tô te enviando também a resolução aqui das nossas bancas
+aqui
+Copy link to this transcript
+51:19
+do PPG FIS, tá?
+Copy link to this transcript
+51:20
+>> Boa, cara. Muito obrigado. Tu tem meu e-mail ainda?
+Copy link to this transcript
+51:23
+>> Tenho.
+Copy link to this transcript
+51:24
+>> Boa. Aí sim, mano. Valeu, Antônia. Obrigadão. Tchau, tchau. Bom trabalho e
+Copy link to this transcript
+51:30
+até mais. Что?
+Copy link to this transcript
