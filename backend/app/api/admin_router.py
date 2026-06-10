@@ -5,13 +5,15 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from app.application.admin_banca_service import AdminBancaService
-from app.deps import get_admin_banca_service
+from app.application.invite_service import InviteService
+from app.deps import get_admin_banca_service, get_invite_service
 from app.domain.errors import (
     BancaNotEditableError,
     BancaNotFoundError,
     BancaVersionNotFoundError,
     DocumentGenerationError,
     PersistenceError,
+    ValidationError,
 )
 from app.domain.models import (
     BancaAdminDetail,
@@ -21,6 +23,9 @@ from app.domain.models import (
     BancaStatus,
     BancaUpdateResponse,
     FileManifestEntry,
+    InviteItem,
+    SendInvitesRequest,
+    SendInvitesResponse,
 )
 from app.logger import get_logger
 from app.result import Err
@@ -37,12 +42,13 @@ def list_bancas(
     ata: int | None = None,
     student: str | None = None,
     orientador: str | None = None,
+    ppg: str | None = None,
     q: str | None = None,
 ) -> list[BancaListItem]:
-    filters = BancaListFilters(status=status, ata=ata, student=student, orientador=orientador, q=q)
+    filters = BancaListFilters(status=status, ata=ata, student=student, orientador=orientador, ppg=ppg, q=q)
     logger.info(
         "GET /admin/bancas.start",
-        {"status": status, "ata": ata, "student": student, "orientador": orientador, "q": q},
+        {"status": status, "ata": ata, "student": student, "orientador": orientador, "ppg": ppg, "q": q},
     )
     match admin_service.list_bancas(filters):
         case Err(PersistenceError(message=msg)):
@@ -82,6 +88,9 @@ def update_banca(
 ) -> BancaUpdateResponse:
     logger.info("PUT /admin/bancas/{token}.start", {"decision_token": token})
     match admin_service.update_banca(token, body):
+        case Err(ValidationError(details=details)):
+            logger.warn("PUT /admin/bancas/{token}.validation_failed", {"decision_token": token})
+            raise HTTPException(status_code=422, detail="; ".join(details))
         case Err(BancaNotFoundError(message=msg)):
             logger.warn("PUT /admin/bancas/{token}.not_found", {"decision_token": token})
             raise HTTPException(status_code=404, detail=msg)
@@ -195,3 +204,41 @@ def download_banca_files(
                 media_type=mime,
                 headers={"Content-Disposition": disposition},
             )
+
+
+@admin_router.get("/bancas/{token}/invites")
+def list_invites(
+    token: str,
+    invite_service: Annotated[InviteService, Depends(get_invite_service)],
+) -> list[InviteItem]:
+    logger.info("GET /admin/bancas/{token}/invites.start", {"decision_token": token})
+    match invite_service.list_invites(token):
+        case Err(BancaNotFoundError(message=msg)):
+            raise HTTPException(status_code=404, detail=msg)
+        case Err(PersistenceError(message=msg)):
+            raise HTTPException(status_code=503, detail=msg)
+        case ok:
+            logger.info("GET /admin/bancas/{token}/invites.end", {"decision_token": token, "count": len(ok.value)})
+            return ok.value
+
+
+@admin_router.post("/bancas/{token}/invites/send")
+def send_invites(
+    token: str,
+    body: SendInvitesRequest,
+    invite_service: Annotated[InviteService, Depends(get_invite_service)],
+) -> SendInvitesResponse:
+    logger.info("POST /admin/bancas/{token}/invites/send.start", {"decision_token": token, "item_ids": body.item_ids})
+    match invite_service.send_invites(token, body.item_ids):
+        case Err(BancaNotFoundError(message=msg)):
+            raise HTTPException(status_code=404, detail=msg)
+        case Err(BancaNotEditableError(message=msg, current_status=current_status)):
+            raise HTTPException(status_code=409, detail={"message": msg, "current_status": current_status})
+        case Err(PersistenceError(message=msg)):
+            raise HTTPException(status_code=503, detail=msg)
+        case ok:
+            logger.info(
+                "POST /admin/bancas/{token}/invites/send.end",
+                {"decision_token": token, "sent": sum(1 for r in ok.value.results if r.ok)},
+            )
+            return ok.value

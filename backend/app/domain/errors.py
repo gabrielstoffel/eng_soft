@@ -20,6 +20,11 @@ class PersistenceError(BancaError): ...
 
 
 @dataclass
+class ValidationError(BancaError):
+    details: list[str]
+
+
+@dataclass
 class BancaNotFoundError(BancaError): ...
 
 

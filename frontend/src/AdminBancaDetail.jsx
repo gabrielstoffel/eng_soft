@@ -62,6 +62,13 @@ export default function AdminBancaDetail() {
     const [selectedIds, setSelectedIds] = useState(new Set())
     const [downloadStatus, setDownloadStatus] = useState(null)
     const [downloadInFlight, setDownloadInFlight] = useState(null) // null | 'bulk' | <id>
+
+    const [invites, setInvites] = useState([])
+    const [invitesError, setInvitesError] = useState(null)
+    const [invitesLoading, setInvitesLoading] = useState(false)
+    const [sendInFlight, setSendInFlight] = useState(null) // null | 'convites' | 'pareceres' | <item_id>
+    const [sendStatus, setSendStatus] = useState(null)
+
     const previewForm = useForm({ defaultValues: newBancaDefaultValues })
     const editMethods = useForm({ defaultValues: newBancaDefaultValues })
 
@@ -114,6 +121,26 @@ export default function AdminBancaDetail() {
             })
         return () => { cancelled = true }
     }, [token, regenVersion])
+
+    useEffect(() => {
+        if (!detail) return
+        let cancelled = false
+        setInvitesLoading(true)
+        setInvitesError(null)
+        fetch(`/admin/bancas/${token}/invites`)
+            .then(async res => {
+                const data = await res.json()
+                if (cancelled) return
+                if (res.ok) setInvites(data)
+                else setInvitesError(typeof data.detail === 'string' ? data.detail : 'Erro ao listar convites.')
+            })
+            .catch(err => { if (!cancelled) setInvitesError('Erro de conexão: ' + err.message) })
+            .finally(() => { if (!cancelled) setInvitesLoading(false) })
+        return () => { cancelled = true }
+        // member emails can change when a new version is created, so refetch on
+        // status/version change rather than on every `detail` object identity.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token, detail?.status, detail?.current_version])
 
     const versionEntry = detail?.versions.find(v => v.version === selectedVersion)
         || detail?.versions[detail.versions.length - 1]
@@ -250,6 +277,46 @@ export default function AdminBancaDetail() {
             setDownloadInFlight(null)
         }
     }
+
+    async function sendInvites(itemIds, inFlightTag) {
+        if (itemIds.length === 0) return
+        setSendInFlight(inFlightTag)
+        setSendStatus(null)
+        try {
+            const res = await fetch(`/admin/bancas/${token}/invites/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_ids: itemIds }),
+            })
+            const data = await res.json()
+            if (!res.ok) {
+                const msg = typeof data.detail === 'string'
+                    ? data.detail
+                    : (data.detail?.message || 'Erro ao enviar.')
+                setSendStatus({ ok: false, message: msg })
+                return
+            }
+            const okCount = data.results.filter(r => r.ok).length
+            const failed = data.results.filter(r => !r.ok)
+            setSendStatus({
+                ok: failed.length === 0,
+                message: failed.length === 0
+                    ? `${okCount} envio(s) concluído(s).`
+                    : `${okCount} enviado(s), ${failed.length} com falha: ${failed.map(r => `${r.item_id} (${r.error})`).join('; ')}`,
+            })
+            // Refresh statuses
+            const refetch = await fetch(`/admin/bancas/${token}/invites`)
+            const refreshed = await refetch.json()
+            if (refetch.ok) setInvites(refreshed)
+        } catch (err) {
+            setSendStatus({ ok: false, message: 'Erro de conexão: ' + err.message })
+        } finally {
+            setSendInFlight(null)
+        }
+    }
+
+    const conviteItems = invites.filter(i => i.kind === 'carta_convite')
+    const parecerItems = invites.filter(i => i.kind === 'parecer')
 
     return (
         <div className="container">
@@ -471,6 +538,110 @@ export default function AdminBancaDetail() {
                     </div>
                 )}
             </section>
+
+            <section>
+                <h2>Envio de Convites e Pareceres</h2>
+                {!isApproved && (
+                    <p style={{ color: '#6b7280' }}>
+                        Disponível apenas após a aprovação da banca.
+                    </p>
+                )}
+                {isApproved && invitesError && <div className="alert alert-err">{invitesError}</div>}
+                {isApproved && invitesLoading && <p style={{ color: '#6b7280' }}>Carregando…</p>}
+
+                {isApproved && !invitesLoading && (
+                    <>
+                        <InviteGroup
+                            title="Cartas-convite"
+                            items={conviteItems}
+                            batchTag="convites"
+                            sendInFlight={sendInFlight}
+                            onSend={sendInvites}
+                        />
+                        <InviteGroup
+                            title="Pareceres"
+                            items={parecerItems}
+                            batchTag="pareceres"
+                            sendInFlight={sendInFlight}
+                            onSend={sendInvites}
+                        />
+                        {sendStatus && (
+                            <div className={sendStatus.ok ? 'alert alert-ok' : 'alert alert-err'}>
+                                {sendStatus.message}
+                            </div>
+                        )}
+                    </>
+                )}
+            </section>
+        </div>
+    )
+}
+
+function InviteGroup({ title, items, batchTag, sendInFlight, onSend }) {
+    if (items.length === 0) return null
+    const sendableIds = items.filter(i => i.recipient).map(i => i.item_id)
+    const busy = !!sendInFlight
+    return (
+        <div style={{ marginTop: '1rem' }}>
+            <h3>{title}</h3>
+            <table className="banca-table">
+                <thead>
+                    <tr>
+                        <th>Membro</th>
+                        <th>Destinatário</th>
+                        <th>Status</th>
+                        <th style={{ width: '8rem' }} aria-label="Ações"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {items.map(item => {
+                        const inFlight = sendInFlight === item.item_id
+                        return (
+                            <tr key={item.item_id}>
+                                <td>{item.member_name || '—'}</td>
+                                <td>{item.recipient || <span style={{ color: '#b91c1c' }}>sem e-mail</span>}</td>
+                                <td>
+                                    {item.sent
+                                        ? <span style={{ color: '#15803d' }}>Enviado — {formatTimestamp(item.sent_at)}</span>
+                                        : <span style={{ color: '#92400e' }}>Não enviado</span>}
+                                </td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        onClick={() => onSend([item.item_id], item.item_id)}
+                                        disabled={busy || !item.recipient}
+                                        style={{
+                                            padding: '0.35rem 0.75rem',
+                                            background: !item.recipient ? '#9ca3af' : '#1f2937',
+                                            color: '#fff', border: 'none', borderRadius: 4,
+                                            fontSize: '0.85rem',
+                                            cursor: (busy || !item.recipient) ? 'not-allowed' : 'pointer',
+                                            opacity: busy && !inFlight ? 0.5 : 1,
+                                        }}
+                                    >
+                                        {inFlight ? 'Enviando…' : (item.sent ? 'Reenviar' : 'Enviar')}
+                                    </button>
+                                </td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
+            </table>
+            <div style={{ marginTop: '0.5rem' }}>
+                <button
+                    type="button"
+                    onClick={() => onSend(sendableIds, batchTag)}
+                    disabled={busy || sendableIds.length === 0}
+                    style={{
+                        padding: '0.6rem 1.5rem',
+                        background: sendableIds.length === 0 ? '#9ca3af' : '#3b82f6',
+                        color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.95rem',
+                        cursor: (busy || sendableIds.length === 0) ? 'not-allowed' : 'pointer',
+                    }}
+                >
+                    {sendInFlight === batchTag ? 'Enviando…' : `Enviar todos (${sendableIds.length})`}
+                </button>
+            </div>
         </div>
     )
 }

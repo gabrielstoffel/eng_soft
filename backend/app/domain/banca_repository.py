@@ -12,6 +12,7 @@ from app.domain.models import (
     BancaRecord,
     BancaRequest,
     BancaStatus,
+    InviteStatus,
 )
 from app.result import Result
 
@@ -35,3 +36,8 @@ class BancaRepository(ABC):
     def append_version(
         self, token: str, req: BancaRequest
     ) -> Result[int, BancaNotFoundError | BancaNotEditableError | PersistenceError]: ...
+
+    @abstractmethod
+    def set_invite_status(
+        self, token: str, item_id: str, status: InviteStatus
+    ) -> Result[None, BancaNotFoundError | PersistenceError]: ...

@@ -50,6 +50,7 @@ export default function AdminBancaList() {
   const [filters, setFilters] = useState({
     status: '',
     ata: '',
+    ppg: '',
     q: '',
   })
   const [items, setItems] = useState([])
@@ -62,6 +63,7 @@ export default function AdminBancaList() {
       const params = new URLSearchParams()
       if (filters.status) params.set('status', filters.status)
       if (filters.ata) params.set('ata', filters.ata)
+      if (filters.ppg) params.set('ppg', filters.ppg)
       if (filters.q) params.set('q', filters.q)
       const qs = params.toString()
       const url = qs ? `/admin/bancas?${qs}` : '/admin/bancas'
@@ -97,6 +99,7 @@ export default function AdminBancaList() {
   }, [
     filters.status,
     filters.ata,
+    filters.ppg,
     filters.q,
   ])
 
@@ -165,6 +168,20 @@ export default function AdminBancaList() {
                     <option value="pending">Pendente</option>
                     <option value="approved">Aceita</option>
                     <option value="rejected">Recusada</option>
+                  </SelectInput>
+                </label>
+
+                <label className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <span className="text-sm font-semibold leading-5 text-slate-800">
+                    Programa (PPG)
+                  </span>
+                  <SelectInput
+                    value={filters.ppg}
+                    onChange={(e) => setF('ppg', e.target.value)}
+                  >
+                    <option value="">Todos</option>
+                    <option value="ppgfis">PPGFís</option>
+                    <option value="ppgenfis">PPGEnFis</option>
                   </SelectInput>
                 </label>
 

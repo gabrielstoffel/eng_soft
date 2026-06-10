@@ -15,6 +15,10 @@ class PpgProfile:
     gerencia_email: str
     roles_by_tipo: dict[int, dict[str, RoleMode]]
     antecedencia_dias: dict[int, int]
+    required_student_fields: list[str] = field(default_factory=list)
+    required_member_fields: list[str] = field(default_factory=list)
+    titulo_en_required: bool = False
+    default_video_link: str | None = None
 
 
 ROLES_BY_TIPO_PPGFIS: dict[int, dict[str, RoleMode]] = {
@@ -92,6 +96,10 @@ PPGFIS = PpgProfile(
     gerencia_email=os.getenv("PPGFIS_GERENCIA_EMAIL", "gerencia@if.ufrgs.br"),
     roles_by_tipo=ROLES_BY_TIPO_PPGFIS,
     antecedencia_dias={1: 20, 2: 30, 3: 30},
+    required_student_fields=[],
+    required_member_fields=[],
+    titulo_en_required=False,
+    default_video_link=None,
 )
 
 PPGENFIS = PpgProfile(
@@ -103,6 +111,10 @@ PPGENFIS = PpgProfile(
     gerencia_email=os.getenv("PPGENFIS_GERENCIA_EMAIL", "gerencia@if.ufrgs.br"),
     roles_by_tipo=ROLES_BY_TIPO_PPGENFIS,
     antecedencia_dias={1: 20, 2: 30, 3: 40},
+    required_student_fields=["cpf", "birth_date", "email"],
+    required_member_fields=["lattes", "doctorate_institution", "doctorate_year"],
+    titulo_en_required=False,
+    default_video_link=None,
 )
 
 _PROFILES: dict[str, PpgProfile] = {

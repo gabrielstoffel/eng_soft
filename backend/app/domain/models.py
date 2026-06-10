@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field
 
 
 class MemberInfo(BaseModel):
@@ -56,75 +56,11 @@ class BancaRequest(BaseModel):
     comentario_desempenho: str | None = None
     justificativa_membros: str | None = None
 
-    @model_validator(mode="after")
-    def _require_orientador_email(self) -> "BancaRequest":
-        if not self.orientador.email:
-            raise ValueError("orientador.email is required")
-        return self
-
-    @model_validator(mode="after")
-    def _validate_modalidade_fields(self) -> "BancaRequest":
-        if self.modalidade in ("presencial", "hibrida") and not self.sala_preferencia:
-            raise ValueError("sala_preferencia is required for presencial/híbrida")
-        return self
-
-    @model_validator(mode="after")
-    def _enforce_tipo_rules(self) -> "BancaRequest":
-        from app.config.ppg_profiles import get_profile
-        profile = get_profile(self.ppg)
-        rules = profile.roles_by_tipo[self.tipo]
-        for slot, presence in rules.items():
-            value = getattr(self, slot, None)
-            if presence == "required" and value is None:
-                raise ValueError(f"{slot} is required for {self.ppg} tipo {self.tipo}")
-            if presence == "hidden" and value is not None:
-                raise ValueError(f"{slot} must not be set for {self.ppg} tipo {self.tipo}")
-        return self
-
-    @model_validator(mode="after")
-    def _validate_antecedencia(self) -> "BancaRequest":
-        from app.config.ppg_profiles import get_profile
-        profile = get_profile(self.ppg)
-        min_days = profile.antecedencia_dias[self.tipo]
-        days_ahead = (self.data - date.today()).days
-        if days_ahead < min_days:
-            raise ValueError(
-                f"Data deve ter no mínimo {min_days} dias de antecedência "
-                f"para {self.ppg} tipo {self.tipo} (tem {days_ahead})"
-            )
-        return self
-
-    @model_validator(mode="after")
-    def _validate_ppg_specific_fields(self) -> "BancaRequest":
-        if self.ppg == "ppgenfis":
-            # Student fields required for PPGEnFis
-            if not self.nome.cpf:
-                raise ValueError("nome.cpf is required for ppgenfis")
-            if not self.nome.birth_date:
-                raise ValueError("nome.birth_date is required for ppgenfis")
-            if not self.nome.email:
-                raise ValueError("nome.email is required for ppgenfis")
-            # Member fields required for PPGEnFis
-            members = [
-                ("orientador", self.orientador),
-                ("coorientador", self.coorientador),
-                ("externo1", self.externo1),
-                ("externo2", self.externo2),
-                ("interno1", self.interno1),
-                ("interno2", self.interno2),
-                ("supl_int", self.supl_int),
-                ("supl_ext", self.supl_ext),
-            ]
-            for role, member in members:
-                if member is None:
-                    continue
-                if not member.lattes:
-                    raise ValueError(f"{role}.lattes is required for ppgenfis")
-                if not member.doctorate_institution:
-                    raise ValueError(f"{role}.doctorate_institution is required for ppgenfis")
-                if not member.doctorate_year:
-                    raise ValueError(f"{role}.doctorate_year is required for ppgenfis")
-        return self
+    # NOTE: business rules (antecedência, composição por tipo, campos obrigatórios
+    # por PPG, orientador.email) live in app.application.banca_validation — NOT as
+    # model validators. Keeping them off the model ensures records reconstructed
+    # from MongoDB are never re-validated against today's date and stay readable
+    # over time.
 
 
 BancaStatus = Literal["pending", "approved", "rejected"]
@@ -156,6 +92,13 @@ class BancaVersion(BaseModel):
     created_at: datetime
 
 
+class InviteStatus(BaseModel):
+    """Send status for a single carta-convite or parecer (keyed by manifest id)."""
+    sent: bool = False
+    sent_at: datetime | None = None
+    recipient: str | None = None
+
+
 class BancaRecord(BaseModel):
     versions: list[BancaVersion]
     current_version: int
@@ -167,6 +110,7 @@ class BancaRecord(BaseModel):
     ppg: str
     created_at: datetime
     decided_at: datetime | None = None
+    invite_status: dict[str, InviteStatus] = Field(default_factory=dict)
 
     @property
     def request(self) -> BancaRequest:
@@ -185,6 +129,8 @@ class BancaSubmitResponse(BaseModel):
 
 class BancaSummary(BaseModel):
     request: BancaRequest
+    ata: int
+    ppg: str
     status: BancaStatus
     rejection_reason: str | None = None
     approval_observation: str | None = None
@@ -242,3 +188,36 @@ class BancaAdminDetail(BaseModel):
 class BancaUpdateResponse(BaseModel):
     created_new_version: bool
     current_version: int
+
+
+# --- Envio de convites/pareceres (Secretaria) ---
+
+InviteKind = Literal["carta_convite", "parecer"]
+
+
+class InviteItem(BaseModel):
+    """A sendable document (carta-convite or parecer) for one banca member."""
+    item_id: str                       # manifest id, e.g. "carta_convite:externo1"
+    kind: InviteKind
+    label: str
+    member_role: MemberRole | None = None
+    member_name: str | None = None
+    recipient: str | None = None       # member email (None => cannot be sent)
+    sent: bool = False
+    sent_at: datetime | None = None
+
+
+class SendInvitesRequest(BaseModel):
+    item_ids: list[str] = Field(min_length=1)
+
+
+class InviteSendResult(BaseModel):
+    item_id: str
+    ok: bool
+    error: str | None = None
+    sent_at: datetime | None = None
+    recipient: str | None = None
+
+
+class SendInvitesResponse(BaseModel):
+    results: list[InviteSendResult]

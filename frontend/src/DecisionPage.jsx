@@ -13,6 +13,12 @@ const STATUS_LABEL = {
   rejected: 'Recusada',
 }
 
+const MODALIDADE_LABEL = {
+  presencial: 'Presencial',
+  hibrida: 'Híbrida',
+  remota: 'Remota',
+}
+
 const ROLE_LABEL = {
   orientador: 'Orientador(a)',
   coorientador: 'Coorientador(a)',
@@ -117,8 +123,10 @@ export default function DecisionPage() {
     )
   }
 
-  const { request: req, status, rejection_reason } = summary
+  const { request: req, ata, status, rejection_reason } = summary
   const isPending = status === 'pending'
+  const showSala = req.modalidade === 'presencial' || req.modalidade === 'hibrida'
+  const showLink = req.modalidade === 'remota' || req.modalidade === 'hibrida'
 
   return (
     <div className="container">
@@ -133,7 +141,7 @@ export default function DecisionPage() {
           </label>
           <label>
             Número da Ata
-            <input type="text" value={req.ata} readOnly />
+            <input type="text" value={ata ?? '—'} readOnly />
           </label>
         </div>
         {rejection_reason && (
@@ -165,30 +173,51 @@ export default function DecisionPage() {
           </label>
         </div>
 
+        {req.nome.cpf || req.nome.email || req.nome.birth_date ? (
+          <div className="row">
+            <label>
+              CPF
+              <input type="text" value={req.nome.cpf || '—'} readOnly />
+            </label>
+            <label>
+              Data de nascimento
+              <input type="text" value={formatDate(req.nome.birth_date)} readOnly />
+            </label>
+            <label>
+              E-mail do(a) aluno(a)
+              <input type="text" value={req.nome.email || '—'} readOnly />
+            </label>
+          </div>
+        ) : null}
+
         <div className="row">
           <label>
-            Data da defesa
+            Data sugerida
             <input type="text" value={formatDate(req.data)} readOnly />
           </label>
           <label>
-            Horário
+            Horário sugerido
             <input type="text" value={req.horario || '—'} readOnly />
           </label>
           <label>
-            Data dos convites
-            <input type="text" value={formatDate(req.data_convite)} readOnly />
+            Modalidade
+            <input type="text" value={MODALIDADE_LABEL[req.modalidade] || req.modalidade} readOnly />
           </label>
         </div>
 
         <div className="row">
-          <label>
-            Local
-            <input type="text" value={req.local_banca || '—'} readOnly />
-          </label>
-          <label>
-            Link (videoconferência)
-            <input type="text" value={req.link || '—'} readOnly />
-          </label>
+          {showSala && (
+            <label>
+              Sala de preferência
+              <input type="text" value={req.sala_preferencia || '—'} readOnly />
+            </label>
+          )}
+          {showLink && (
+            <label>
+              Link (videoconferência)
+              <input type="text" value={req.link || '—'} readOnly />
+            </label>
+          )}
         </div>
 
         <label>
@@ -197,8 +226,21 @@ export default function DecisionPage() {
         </label>
         <label>
           Title (EN)
-          <input type="text" value={req.titulo2} readOnly />
+          <input type="text" value={req.titulo2 || '—'} readOnly />
         </label>
+
+        {req.comentario_desempenho && (
+          <label>
+            Comentários sobre o desempenho do estudante
+            <textarea value={req.comentario_desempenho} readOnly rows={3} />
+          </label>
+        )}
+        {req.justificativa_membros && (
+          <label>
+            Justificativa para a escolha dos membros
+            <textarea value={req.justificativa_membros} readOnly rows={3} />
+          </label>
+        )}
       </section>
 
       <section>
@@ -208,7 +250,7 @@ export default function DecisionPage() {
           if (!m) return null
           return (
             <fieldset key={role}>
-              <legend>{ROLE_LABEL[role]}</legend>
+              <legend>{ROLE_LABEL[role]}{m.remoto ? ' — participação remota' : ''}</legend>
               <div className="member-grid">
                 <label>
                   Tratamento
