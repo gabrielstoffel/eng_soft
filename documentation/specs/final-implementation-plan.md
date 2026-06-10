@@ -15,6 +15,8 @@
 | Formulário espelha o `.doc` oficial | Campos do formulário oficial: Bolsista CNPq, PPG por membro, comentários, modalidade + videoconferência condicional. |
 | Local / videoconferência | Segue estrutura do formulário oficial: modalidade (presencial/híbrida/remota) → campos condicionais + flag `remoto` por membro. |
 | Engine de documentos | **Adiada**. Manter `criaBancas.py` (fpdf2) por enquanto. |
+| Data e horário | São **sugestões** do orientador (não compromisso final). Labels: "Data sugerida" / "Horário sugerido". |
+| Uploads | Armazenados via **GridFS** (MongoDB). Tipos: lattes_cv, texto, press_release, artigo. |
 
 ---
 
@@ -39,14 +41,14 @@
 | F2 | Remover campo `data_convite` | Remover do modelo e frontend |
 | F3 | Modalidade da defesa: presencial / híbrida / remota | Novo campo `modalidade` |
 | F4 | Sala de preferência (se presencial ou híbrida) — texto livre | Campo condicional |
-| F5 | Programa de videoconferência (se remota ou híbrida): Mconf / Outro (qual?) | Campo condicional |
-| F6 | Link de videoconferência (opcional — "se já disponível") | Campo condicional |
+| F5 | Link de videoconferência (se remota ou híbrida) — texto livre, opcional | Campo condicional |
+| F6 | Data e horário são **sugestões** (labels atualizados) | Renomear labels |
 | F7 | Participação remota **por membro** (bool) | Novo campo `remoto` em `MemberInfo` |
 | F8 | Comentários sobre o desempenho do estudante (texto livre) | Novo campo |
 | F9 | Justificativa para a escolha dos membros (texto livre) | Novo campo |
 | F10 | Título em inglês **não obrigatório** | Remover `required` |
 | F11 | Bolsista CNPq (sim/não) + nível por membro | Novos campos em `MemberInfo` |
-| F12 | PPG por membro local | Novo campo em `MemberInfo` |
+| F12 | PPG dos membros internos é implícito (= ppg da banca) | Sem campo no formulário |
 | F13 | Upload de anexos (ver C3–C6) | Nova seção |
 
 ### 2.3 Campos PPGEnFis (ocultos no PPGFis)
@@ -111,24 +113,22 @@ class BancaRequest(BaseModel):
     ppg: Literal["ppgfis", "ppgenfis"]
     nome: StudentInfo
     tipo: Literal[1, 2, 3]
-    data: date
-    horario: time
+    data: date                                 # data SUGERIDA
+    horario: time                              # horário SUGERIDO
     # REMOVIDOS: ata, data_convite
     modalidade: Literal["presencial", "hibrida", "remota"]
     sala_preferencia: str | None = None        # obrigatório se presencial/híbrida
-    programa_videoconf: Literal["mconf", "outro"] | None = None  # obrigatório se remota/híbrida
-    programa_outro: str | None = None          # obrigatório se programa_videoconf == "outro"
-    link: str | None = None                    # opcional ("se já disponível")
+    link: str | None = None                    # texto livre (se remota/híbrida, opcional)
     orientador: MemberInfo
     coorientador: MemberInfo | None = None
     externo1: MemberInfo | None = None
     externo2: MemberInfo | None = None
     interno1: MemberInfo | None = None
     interno2: MemberInfo | None = None
-    supl_int: MemberInfo                       # OBRIGATÓRIO (era optional)
+    supl_int: MemberInfo | None = None         # required PPGFis, optional PPGEnFis (per profile)
     supl_ext: MemberInfo | None = None
     titulo: str
-    titulo2: str | None = None                 # agora opcional
+    titulo2: str | None = None                 # opcional
     comentario_desempenho: str | None = None
     justificativa_membros: str | None = None
 ```
@@ -352,29 +352,39 @@ frontend/src/
 
 ---
 
-## 7. Regras de Validação
+## 7. Regras de Validação (Implementadas no Backend)
 
 ### PPGFis (Resolução 02/2025)
 
-| Regra | Detalhe |
-|---|---|
-| Antecedência mínima | Mestrado ≥ 20 dias; Qualificação/Doutorado ≥ 30 dias |
-| Suplente interno | Obrigatório todos os tipos |
-| Composição | Mestrado: 4 (orient + 1ext + 2int); Qualif: 4+; Dout: 5 (orient + 2ext + 2int) |
-| Lattes externo | PDF obrigatório (upload) |
-| Texto PDF | Obrigatório |
-| Press release | Obrigatório Mestrado e Doutorado |
-| Artigo | Obrigatório Doutorado |
-| Título inglês | Opcional |
-| Modalidade | `sala_preferencia` obrigatório se presencial/híbrida; `programa_videoconf` obrigatório se remota/híbrida |
+| Regra | Detalhe | Enforcement |
+|---|---|---|
+| Antecedência mínima | Mestrado ≥ 20 dias; Qualificação/Doutorado ≥ 30 dias | `_validate_antecedencia` |
+| Suplente interno | Obrigatório todos os tipos | `_enforce_tipo_rules` via perfil |
+| Composição | Mestrado: orient + 1ext + 2int; Qualif: 4+; Dout: orient + 2ext + 2int | `_enforce_tipo_rules` via perfil |
+| Lattes externo | PDF obrigatório (upload) | Pendente (validação de anexos) |
+| Texto PDF | Obrigatório | Pendente (validação de anexos) |
+| Press release | Obrigatório Mestrado e Doutorado | Pendente (validação de anexos) |
+| Artigo | Obrigatório Doutorado | Pendente (validação de anexos) |
+| Título inglês | Opcional | Campo `titulo2: str | None` |
+| Modalidade | `sala_preferencia` obrigatório se presencial/híbrida | `_validate_modalidade_fields` |
+| Campos PPGEnFis | Não exigidos | `_validate_ppg_specific_fields` (skip) |
 
-### PPGEnFis (herda PPGFis + extras)
+### PPGEnFis (Resoluções 2022/2023)
 
-| Regra | Detalhe |
-|---|---|
-| Aluno | Nome completo, CPF, data nascimento, email obrigatórios |
-| Membros | Lattes (link), conclusão doutorado (instituição + ano) obrigatórios |
-| Título inglês | Opcional |
+| Regra | Detalhe | Enforcement |
+|---|---|---|
+| Antecedência mínima | Mestrado ≥ 20; Qualif ≥ 30; **Doutorado ≥ 40 dias** | `_validate_antecedencia` |
+| Suplente interno | Opcional | `_enforce_tipo_rules` via perfil |
+| Composição | Mestrado/Qualif: 3 mín; Dout: 4 mín | `_enforce_tipo_rules` via perfil |
+| Aluno: CPF | Obrigatório | `_validate_ppg_specific_fields` |
+| Aluno: data nascimento | Obrigatório | `_validate_ppg_specific_fields` |
+| Aluno: email | Obrigatório | `_validate_ppg_specific_fields` |
+| Membros: Lattes (link) | Obrigatório | `_validate_ppg_specific_fields` |
+| Membros: inst. conclusão dout. | Obrigatório | `_validate_ppg_specific_fields` |
+| Membros: ano conclusão dout. | Obrigatório | `_validate_ppg_specific_fields` |
+| Título inglês | Opcional | Campo `titulo2: str | None` |
+| Modalidade | `sala_preferencia` obrigatório se presencial/híbrida | `_validate_modalidade_fields` |
+| PPG dos membros internos | Implícito (= ppg da banca, não há campo no formulário) | — |
 
 ---
 
@@ -425,14 +435,14 @@ frontend/src/
 | 4.4 | `email_service.py` suportar CC | `email_service.py` |
 | 4.5 | Observação incluída no email ao secretário | `petition_service.py` |
 
-### Fase 5 — Upload de Anexos
+### Fase 5 — Upload de Anexos ✅
 
-| # | Task | Arquivos |
-|---|---|---|
-| 5.1 | Endpoint upload + storage (GridFS) | Novo endpoint, novo model |
-| 5.2 | Validação de anexos obrigatórios por tipo+ppg | `banca_service.py` |
-| 5.3 | Frontend: `BancaAttachmentsSection.tsx` | Nova seção |
-| 5.4 | Lattes vinculado ao membro externo (por role) | UI + backend |
+| # | Task | Arquivos | Status |
+|---|---|---|---|
+| 5.1 | Endpoint upload + storage (GridFS) | `router.py` | ✅ Implementado |
+| 5.2 | Validação de anexos obrigatórios por tipo+ppg | `banca_service.py` | Pendente |
+| 5.3 | Frontend: `BancaAttachmentsSection.tsx` | Nova seção | ✅ Implementado |
+| 5.4 | Lattes vinculado ao membro externo (por role) | UI + backend | Pendente |
 
 ### Fase 6 — Envio de Convites/Pareceres
 
@@ -449,11 +459,11 @@ frontend/src/
 
 ## 9. Pontos Pendentes (Confirmar com Cliente)
 
-1. Aliases de email exatos por PPG (coordenador, CPG, gerência GIF).
-2. Link MCONF fixo do PPGFis.
-3. Regras de composição PPGEnFis — idênticas ao PPGFis ou diferentes?
-4. Storage: GridFS vs. filesystem? (Recomendação: GridFS.)
-5. Momento da ata: na submissão ou na aprovação?
+1. Aliases de email exatos por PPG (coordenador, CPG, gerência GIF) — configurar no `.env`.
+2. ~~Link MCONF fixo do PPGFis~~ → **Resolvido**: link é texto livre, orientador digita o que quiser.
+3. ~~Regras de composição PPGEnFis~~ → **Resolvido**: extraído das Resoluções 18/2022, 07/2023, 15/2023.
+4. ~~Storage: GridFS vs. filesystem~~ → **Resolvido**: GridFS.
+5. Momento da ata: atribuída na **submissão** (orientador vê imediatamente).
 
 ---
 
@@ -581,9 +591,11 @@ ROLES_BY_TIPO_PPGENFIS = {
 
 ### C.1 Link de Videoconferência
 
-Campo de link é **texto livre** (orientador digita MCONF, Zoom, etc.). Sem select de programa. Visível apenas se `modalidade` == `"remota"` ou `"hibrida"`.
+Campo de link é **texto livre** (orientador digita MCONF, Zoom, etc.). Visível apenas se `modalidade` == `"remota"` ou `"hibrida"`. Sem select de programa.
 
 ### C.2 Aliases de Email via `.env`
+
+Configurados em `backend/.env.example` (copiar para `.env`):
 
 ```env
 # PPGFis
@@ -599,6 +611,8 @@ PPGENFIS_CPG_ALIAS_EMAIL=ppgenfis@if.ufrgs.br
 PPGENFIS_GERENCIA_EMAIL=gerencia@if.ufrgs.br
 ```
 
+Lidos por `app/config/ppg_profiles.py` via `os.getenv()` com defaults. Arquivo `.env` é gitignored — cada dev copia de `.env.example`.
+
 ### C.3 Antecedência por PPG + Tipo
 
 | PPG | Mestrado | Qualificação | Doutorado |
@@ -613,8 +627,8 @@ class BancaRequest(BaseModel):
     ppg: Literal["ppgfis", "ppgenfis"]
     nome: StudentInfo
     tipo: Literal[1, 2, 3]
-    data: date
-    horario: time
+    data: date                                 # sugerida
+    horario: time                              # sugerido
     modalidade: Literal["presencial", "hibrida", "remota"]
     sala_preferencia: str | None = None        # obrigatório se presencial/híbrida
     link: str | None = None                    # texto livre (se remota/híbrida)
@@ -631,3 +645,16 @@ class BancaRequest(BaseModel):
     comentario_desempenho: str | None = None
     justificativa_membros: str | None = None
 ```
+
+### C.5 Uploads (GridFS)
+
+- Endpoint: `POST /banca/{token}/attachments` (multipart form-data)
+- Storage: GridFS (`fs.files` + `fs.chunks`) para binários, collection `attachments` para metadata
+- Tipos aceitos: `lattes_cv`, `texto`, `press_release`, `artigo`
+- Obrigatoriedade por tipo de banca:
+  - Lattes externos: sempre obrigatório
+  - Texto PDF: sempre obrigatório
+  - Press release: mestrado e doutorado
+  - Artigo: doutorado apenas
+- Frontend: `BancaAttachmentsSection.tsx` com inputs condicionais por tipo
+- Dependência: `python-multipart` (adicionada ao projeto)

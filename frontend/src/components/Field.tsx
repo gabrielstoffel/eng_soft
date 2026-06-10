@@ -5,6 +5,7 @@ type FieldProps = {
   required?: boolean;
   children: ReactNode;
   hint?: string;
+  error?: string;
   className?: string;
 };
 
@@ -13,6 +14,7 @@ export default function Field({
   required = false,
   children,
   hint,
+  error,
   className = "",
 }: FieldProps) {
   return (
@@ -22,6 +24,7 @@ export default function Field({
         {required ? <span className="ml-1 font-bold text-sky-700">*</span> : null}
       </span>
       {children}
+      {error ? <span className="text-xs text-red-600">{error}</span> : null}
       {hint ? <span className="text-[0.82rem] leading-5 text-slate-500">{hint}</span> : null}
     </label>
   );

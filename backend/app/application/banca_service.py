@@ -1,5 +1,6 @@
 from app.application import document_service, email_service, petition_service
-from app.config import COORDENADOR_EMAIL, FRONTEND_BASE_URL, SECRETARY_EMAIL
+from app.config import FRONTEND_BASE_URL
+from app.config.ppg_profiles import get_profile
 from app.domain.banca_repository import BancaRepository
 from app.domain.errors import (
     BancaAlreadyDecidedError,
@@ -25,65 +26,56 @@ class BancaService:
         self._repo = repo
 
     def submit_petition(self, req: BancaRequest) -> Result[BancaSubmitResponse, EmailError | PersistenceError]:
-        logger.info("submit_petition.start", {"ata": req.ata, "student": req.nome.name})
+        logger.info("submit_petition.start", {"student": req.nome.name, "ppg": req.ppg})
+        profile = get_profile(req.ppg)
 
         match self._repo.save(req):
             case Err() as err:
-                logger.error("submit_petition.save.error", {"message": err.error.message})
                 return err
             case ok:
                 token = ok.value
 
-        decision_link = f"{FRONTEND_BASE_URL}/decide/{token}"
-        logger.info(
-            "submit_petition.send_petition_email.start",
-            {"recipient": COORDENADOR_EMAIL, "decision_token": token},
-        )
-        subject = petition_service.build_petition_subject(req)
-        html = petition_service.build_petition_html(req, decision_link)
-        match email_service.send_petition_email(COORDENADOR_EMAIL, subject, html):
+        # Get the ata that was assigned
+        match self._repo.find_by_token(token):
             case Err() as err:
-                logger.error(
-                    "submit_petition.send_petition_email.error",
-                    {"message": err.error.message, "recipient": COORDENADOR_EMAIL},
-                )
-                return err
-        logger.info(
-            "submit_petition.send_petition_email.end",
-            {"recipient": COORDENADOR_EMAIL},
-        )
+                return Err(PersistenceError(message="Failed to retrieve saved banca"))
+            case ok:
+                record = ok.value
 
-        logger.info(
-            "submit_petition.end",
-            {"ata": req.ata, "decision_token": token, "status": "pending"},
-        )
+        decision_link = f"{FRONTEND_BASE_URL}/decide/{token}"
+        subject = petition_service.build_petition_subject(req, record.ata)
+        html = petition_service.build_petition_html(req, decision_link)
+        match email_service.send_email(profile.coordenador_email, subject, html):
+            case Err() as err:
+                return err
+
+        logger.info("submit_petition.end", {"ata": record.ata, "decision_token": token})
         return Ok(
             BancaSubmitResponse(
                 message="Pedido enviado ao coordenador.",
-                ata=req.ata,
+                ata=record.ata,
                 student_name=req.nome.name,
                 decision_token=token,
             )
         )
 
     def get_summary(self, token: str) -> Result[BancaSummary, BancaNotFoundError | PersistenceError]:
-        logger.info("get_summary.start", {"decision_token": token})
         match self._repo.find_by_token(token):
             case Err() as err:
                 return err
             case ok:
                 record = ok.value
-
-        summary = BancaSummary(
-            request=record.request,
-            status=record.status,
-            rejection_reason=record.rejection_reason,
+        return Ok(
+            BancaSummary(
+                request=record.request,
+                status=record.status,
+                rejection_reason=record.rejection_reason,
+                approval_observation=record.approval_observation,
+            )
         )
-        logger.info("get_summary.end", {"decision_token": token, "status": record.status})
-        return Ok(summary)
 
     def approve(
-        self, token: str
+        self, token: str, observation: str | None = None
     ) -> Result[
         BancaDecisionResponse,
         BancaNotFoundError | BancaAlreadyDecidedError | DocumentGenerationError | EmailError | PersistenceError,
@@ -97,10 +89,6 @@ class BancaService:
                 record = ok.value
 
         if record.status != "pending":
-            logger.warn(
-                "approve.already_decided",
-                {"decision_token": token, "current_status": record.status},
-            )
             return Err(
                 BancaAlreadyDecidedError(
                     message=f"Banca already decided (status={record.status})",
@@ -109,44 +97,40 @@ class BancaService:
             )
 
         req = record.request
+        profile = get_profile(record.ppg)
 
-        logger.info("approve.generate_documents.start", {"ata": req.ata})
+        # Generate documents
         match document_service.generate_documents(req):
             case Err() as err:
-                logger.error("approve.generate_documents.error", {"message": err.error.message})
                 return err
             case ok:
                 zip_bytes, zip_name = ok.value
-        logger.info("approve.generate_documents.end", {"zip": zip_name})
 
-        logger.info("approve.send_documents_email.start", {"recipient": SECRETARY_EMAIL})
-        docs_subject = f"[SigBah!] Documentos da Banca #{req.ata} — {req.nome.name}"
-        docs_html = petition_service.build_documents_html(req)
-        match email_service.send_documents_email(SECRETARY_EMAIL, docs_subject, docs_html, zip_bytes, zip_name):
+        # Send documents to secretary (with observation if present)
+        docs_subject = f"[SigBah!] Documentos da Banca #{record.ata} — {req.nome.name}"
+        docs_html = petition_service.build_documents_html(req, record.ata, observation)
+        match email_service.send_documents_email(profile.secretary_email, docs_subject, docs_html, zip_bytes, zip_name):
             case Err() as err:
-                logger.error(
-                    "approve.send_documents_email.error",
-                    {"message": err.error.message, "recipient": SECRETARY_EMAIL},
-                )
-                return err
-        logger.info("approve.send_documents_email.end", {"recipient": SECRETARY_EMAIL})
-
-        match self._repo.update_decision(token, "approved"):
-            case Err() as err:
-                logger.error(
-                    "approve.update_decision.error",
-                    {"decision_token": token, "message": err.error.message},
-                )
                 return err
 
-        logger.info(
-            "approve.end",
-            {"decision_token": token, "ata": req.ata, "status": "approved"},
-        )
+        # Send scheduling email to gerência with CC to CPG alias
+        gerencia_subject = f"[SigBah!] Solicitação de Agendamento — Banca #{record.ata}"
+        gerencia_html = petition_service.build_gerencia_html(req, record.ata, profile)
+        match email_service.send_email(profile.gerencia_email, gerencia_subject, gerencia_html, cc=profile.cpg_alias_email):
+            case Err() as err:
+                logger.error("approve.gerencia_email.error", {"message": err.error.message})
+                # Non-fatal: continue even if gerência email fails
+
+        # Update status
+        match self._repo.update_decision(token, "approved", observation=observation):
+            case Err() as err:
+                return err
+
+        logger.info("approve.end", {"decision_token": token, "ata": record.ata})
         return Ok(
             BancaDecisionResponse(
                 message="Banca aprovada e documentos enviados à secretaria.",
-                ata=req.ata,
+                ata=record.ata,
                 student_name=req.nome.name,
             )
         )
@@ -166,10 +150,6 @@ class BancaService:
                 record = ok.value
 
         if record.status != "pending":
-            logger.warn(
-                "reject.already_decided",
-                {"decision_token": token, "current_status": record.status},
-            )
             return Err(
                 BancaAlreadyDecidedError(
                     message=f"Banca already decided (status={record.status})",
@@ -181,39 +161,20 @@ class BancaService:
 
         match self._repo.update_decision(token, "rejected", reason=reason):
             case Err() as err:
-                logger.error(
-                    "reject.update_decision.error",
-                    {"decision_token": token, "message": err.error.message},
-                )
                 return err
 
         recipient = req.orientador.email
-        logger.info(
-            "reject.send_rejection_email.start",
-            {"recipient": recipient, "decision_token": token},
-        )
-        subject = petition_service.build_rejection_subject(req)
-        html = petition_service.build_rejection_html(req, reason)
-        match email_service.send_rejection_email(recipient, subject, html):
+        subject = petition_service.build_rejection_subject(req, record.ata)
+        html = petition_service.build_rejection_html(req, record.ata, reason)
+        match email_service.send_email(recipient, subject, html):
             case Err() as err:
-                logger.error(
-                    "reject.send_rejection_email.error",
-                    {"message": err.error.message, "recipient": recipient},
-                )
                 return err
-        logger.info(
-            "reject.send_rejection_email.end",
-            {"recipient": recipient},
-        )
 
-        logger.info(
-            "reject.end",
-            {"decision_token": token, "ata": req.ata, "status": "rejected"},
-        )
+        logger.info("reject.end", {"decision_token": token, "ata": record.ata})
         return Ok(
             BancaDecisionResponse(
                 message="Banca rejeitada e submetente notificado.",
-                ata=req.ata,
+                ata=record.ata,
                 student_name=req.nome.name,
             )
         )

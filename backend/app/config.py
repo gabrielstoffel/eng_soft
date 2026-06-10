@@ -1,14 +1,16 @@
-import os
+# Re-export for backward compatibility
+from app.config import (  # noqa: F401
+    FROM_ADDRESS,
+    FRONTEND_BASE_URL,
+    MONGO_DB,
+    MONGO_PASSWORD,
+    MONGO_URI,
+    MONGO_USERNAME,
+    SMTP_HOST,
+    SMTP_PORT,
+)
+from app.config.ppg_profiles import get_profile  # noqa: F401
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-MONGO_DB = os.getenv("MONGO_DB", "sigbah")
-MONGO_USERNAME = os.getenv("MONGO_USERNAME", "")
-MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "")
-
-SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "2525"))
-FROM_ADDRESS = os.getenv("SMTP_FROM", "sigbah@sigbah.local")
-COORDENADOR_EMAIL = os.getenv("COORDENADOR_EMAIL", "coordenador@if.ufrgs.br")
-SECRETARY_EMAIL = os.getenv("SECRETARY_EMAIL", "secretario@ufrgs.br")
-
-FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+# Legacy aliases — use get_profile(ppg) instead
+COORDENADOR_EMAIL = get_profile("ppgfis").coordenador_email
+SECRETARY_EMAIL = get_profile("ppgfis").secretary_email

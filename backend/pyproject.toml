@@ -12,6 +12,7 @@ dependencies = [
     "pymongo>=4.17.0",
     "python-dotenv>=1.2.2",
     "pydantic[email]>=2.0",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]

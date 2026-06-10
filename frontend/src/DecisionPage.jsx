@@ -42,6 +42,7 @@ export default function DecisionPage() {
 
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [reason, setReason] = useState('')
+  const [observation, setObservation] = useState('')
   const [actionStatus, setActionStatus] = useState(null)
   const [acting, setActing] = useState(false)
 
@@ -250,31 +251,42 @@ export default function DecisionPage() {
       )}
 
       {isPending && !showRejectForm && (
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <button
-            type="button"
-            onClick={() => postDecision('approve')}
-            disabled={acting}
-            style={{
-              flex: 1, padding: '0.7rem 2rem', background: '#16a34a', color: '#fff',
-              border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
-              opacity: acting ? 0.6 : 1,
-            }}
-          >
-            {acting ? 'Processando…' : 'Aceitar'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowRejectForm(true)}
-            disabled={acting}
-            style={{
-              flex: 1, padding: '0.7rem 2rem', background: '#dc2626', color: '#fff',
-              border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
-            }}
-          >
-            Recusar
-          </button>
-        </div>
+        <section>
+          <label>
+            Observação (opcional)
+            <textarea
+              rows={2}
+              value={observation}
+              onChange={e => setObservation(e.target.value)}
+              placeholder="Ex: aguardando texto do aluno, aguardando press release..."
+            />
+          </label>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <button
+              type="button"
+              onClick={() => postDecision('approve', observation ? { observation } : undefined)}
+              disabled={acting}
+              style={{
+                flex: 1, padding: '0.7rem 2rem', background: '#16a34a', color: '#fff',
+                border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
+                opacity: acting ? 0.6 : 1,
+              }}
+            >
+              {acting ? 'Processando…' : 'Aceitar'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowRejectForm(true)}
+              disabled={acting}
+              style={{
+                flex: 1, padding: '0.7rem 2rem', background: '#dc2626', color: '#fff',
+                border: 'none', borderRadius: 4, fontSize: '1rem', cursor: 'pointer',
+              }}
+            >
+              Recusar
+            </button>
+          </div>
+        </section>
       )}
 
       {isPending && showRejectForm && (
