@@ -1,5 +1,7 @@
+from datetime import datetime, timezone
 from typing import Annotated
 
+import gridfs
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 
 from app.application.banca_service import BancaService
@@ -10,7 +12,9 @@ from app.domain.errors import (
     DocumentGenerationError,
     EmailError,
     PersistenceError,
+    ValidationError,
 )
+from app.infrastructure.database import get_db
 from app.domain.models import (
     ApproveRequest,
     BancaDecisionResponse,
@@ -33,6 +37,8 @@ def submit_banca(
     banca_service: Annotated[BancaService, Depends(get_banca_service)],
 ) -> BancaSubmitResponse:
     match banca_service.submit_petition(req):
+        case Err(ValidationError(details=details)):
+            raise HTTPException(status_code=422, detail="; ".join(details))
         case Err(EmailError(message=msg, recipient=recipient)):
             raise HTTPException(status_code=502, detail=f"Email to {recipient} failed: {msg}")
         case Err(PersistenceError(message=msg)):
@@ -96,33 +102,55 @@ def reject_banca(
             return ok.value
 
 
+_ATTACHMENT_KINDS = ("lattes_cv", "texto", "press_release", "artigo")
+_PDF_CONTENT_TYPES = ("application/pdf", "application/x-pdf")
+
+
 @router.post("/banca/{token}/attachments")
 async def upload_attachments(
     token: str,
     files: list[UploadFile] = File(...),
     kinds: list[str] = Form(...),
+    roles: list[str] | None = Form(None),
 ):
-    """Upload PDF attachments for a banca (lattes_cv, texto, press_release, artigo)."""
-    from app.infrastructure.database import get_db
-    import gridfs
-    from datetime import datetime, timezone
+    """Upload PDF attachments for a banca (lattes_cv, texto, press_release, artigo).
 
+    `kinds` (and optional `roles`, used to bind a lattes_cv to its external member)
+    are positional, parallel to `files`. The lengths must match exactly — a
+    mismatch is rejected rather than silently truncated.
+    """
     db = get_db()
-    fs = gridfs.GridFS(db)
 
+    # Reject orphan uploads: the token must reference an existing banca.
+    if db["bancas"].find_one({"decision_token": token}, {"_id": 1}) is None:
+        raise HTTPException(status_code=404, detail=f"Banca with token {token} not found")
+
+    if len(files) != len(kinds):
+        raise HTTPException(status_code=400, detail="files and kinds must have the same length")
+    if roles is not None and len(roles) != len(files):
+        raise HTTPException(status_code=400, detail="roles, when provided, must match files length")
+
+    fs = gridfs.GridFS(db)
     saved = []
-    for file, kind in zip(files, kinds):
-        if kind not in ("lattes_cv", "texto", "press_release", "artigo"):
+    for idx, (file, kind) in enumerate(zip(files, kinds)):
+        if kind not in _ATTACHMENT_KINDS:
             raise HTTPException(status_code=400, detail=f"Invalid attachment kind: {kind}")
+        if file.content_type not in _PDF_CONTENT_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Attachment '{file.filename}' must be a PDF (got {file.content_type})",
+            )
+        member_role = roles[idx] if roles and roles[idx] else None
         content = await file.read()
         file_id = fs.put(content, filename=file.filename, content_type=file.content_type)
         db["attachments"].insert_one({
             "decision_token": token,
             "kind": kind,
+            "member_role": member_role,
             "filename": file.filename,
             "gridfs_id": file_id,
             "uploaded_at": datetime.now(timezone.utc),
         })
-        saved.append({"kind": kind, "filename": file.filename})
+        saved.append({"kind": kind, "member_role": member_role, "filename": file.filename})
 
     return {"uploaded": saved}

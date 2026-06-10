@@ -8,7 +8,7 @@ import traceback
 import zipfile
 
 from app.domain.errors import DocumentGenerationError
-from app.domain.models import BancaRequest, FileManifestEntry, MemberRole
+from app.domain.models import BancaRequest, FileManifestEntry, MemberInfo, MemberRole
 from app.logger import get_logger
 from app.result import Err, Ok, Result
 
@@ -34,26 +34,41 @@ _CONVITE_FUNCAO: dict[MemberRole, str] = {
 _PARECER_ROLES: tuple[MemberRole, ...] = ("externo1", "externo2", "interno1", "interno2")
 
 
+def _member_tuple(member: MemberInfo | None) -> tuple | None:
+    """Build the (gender, name, institution, ...) tuple criaBancas expects.
+
+    When the member participates remotely, annotate the institution field so the
+    information surfaces in the generated documents (ata, carta-convite, cartaz)
+    without having to alter the PDF generator itself.
+    """
+    if member is None:
+        return None
+    base = list(member.to_tuple())
+    if member.remoto and len(base) > 2:
+        base[2] = f"{base[2]} (participação remota)"
+    return tuple(base)
+
+
 @contextlib.contextmanager
-def _build_banca(req: BancaRequest):
+def _build_banca(req: BancaRequest, ata: int):
     tmp_dir = tempfile.mkdtemp(prefix="sigbah_banca_")
     banca = Banca(
         nome=req.nome.to_tuple(),
         tipo=req.tipo,
         data=req.data,
         horario=req.horario,
-        data_convite=req.data_convite,
-        ata=req.ata,
-        local_banca=req.local_banca,
+        data_convite=None,  # campo removido do modelo; criaBancas usa `data` como fallback
+        ata=ata,
+        local_banca=req.sala_preferencia,  # substitui o antigo local_banca
         link=req.link,
-        orientador=req.orientador.to_tuple(),
-        coorientador=req.coorientador.to_tuple() if req.coorientador else None,
-        externo1=req.externo1.to_tuple() if req.externo1 else None,
-        externo2=req.externo2.to_tuple() if req.externo2 else None,
-        interno1=req.interno1.to_tuple() if req.interno1 else None,
-        interno2=req.interno2.to_tuple() if req.interno2 else None,
-        supl_int=req.supl_int.to_tuple() if req.supl_int else None,
-        supl_ext=req.supl_ext.to_tuple() if req.supl_ext else None,
+        orientador=_member_tuple(req.orientador),
+        coorientador=_member_tuple(req.coorientador),
+        externo1=_member_tuple(req.externo1),
+        externo2=_member_tuple(req.externo2),
+        interno1=_member_tuple(req.interno1),
+        interno2=_member_tuple(req.interno2),
+        supl_int=_member_tuple(req.supl_int),
+        supl_ext=_member_tuple(req.supl_ext),
         titulo=req.titulo,
         titulo2=req.titulo2,
     )
@@ -87,8 +102,8 @@ def _generate_all(banca: Banca) -> None:
         banca.criaRelatoriaAvaliacao(save=True)
 
 
-def _zip_filename(req: BancaRequest) -> str:
-    return f"banca_{req.ata}_{req.nome.name.replace(' ', '_')}.zip"
+def _zip_filename(req: BancaRequest, ata: int) -> str:
+    return f"banca_{ata}_{req.nome.name.replace(' ', '_')}.zip"
 
 
 def _member_prefix(gender: int) -> str:
@@ -163,13 +178,13 @@ def file_manifest(req: BancaRequest) -> list[FileManifestEntry]:
     return items
 
 
-def generate_documents(req: BancaRequest) -> Result[tuple[io.BytesIO, str], DocumentGenerationError]:
-    logger.info("generate_documents.start", {"ata": req.ata, "tipo": req.tipo})
+def generate_documents(req: BancaRequest, ata: int) -> Result[tuple[io.BytesIO, str], DocumentGenerationError]:
+    logger.info("generate_documents.start", {"ata": ata, "tipo": req.tipo})
     try:
-        with _build_banca(req) as banca:
+        with _build_banca(req, ata) as banca:
             _generate_all(banca)
             buf = _zip_dir(banca.dir)
-            zip_name = _zip_filename(req)
+            zip_name = _zip_filename(req, ata)
             logger.info("generate_documents.end", {"zip": zip_name})
             return Ok((buf, zip_name))
     except Exception as e:
@@ -177,12 +192,12 @@ def generate_documents(req: BancaRequest) -> Result[tuple[io.BytesIO, str], Docu
         return Err(DocumentGenerationError(message=str(e)))
 
 
-def generate_files(req: BancaRequest, ids: list[str]) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
+def generate_files(req: BancaRequest, ids: list[str], ata: int) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
     """Generate the PDFs identified by `ids`. Returns single PDF if one id, zip otherwise.
 
     Each id is a manifest entry id (e.g. `ata`, `cartaz`, `carta_convite:orientador`).
     """
-    logger.info("generate_files.start", {"ata": req.ata, "tipo": req.tipo, "ids": ids})
+    logger.info("generate_files.start", {"ata": ata, "tipo": req.tipo, "ids": ids})
 
     if not ids:
         return Err(DocumentGenerationError(message="No files selected."))
@@ -198,7 +213,7 @@ def generate_files(req: BancaRequest, ids: list[str]) -> Result[tuple[io.BytesIO
     needed_kinds = {entry.kind for entry in requested}
 
     try:
-        with _build_banca(req) as banca:
+        with _build_banca(req, ata) as banca:
             if "ata" in needed_kinds:
                 banca.criaAta(save=True)
             if "cartaz" in needed_kinds:
@@ -227,7 +242,7 @@ def generate_files(req: BancaRequest, ids: list[str]) -> Result[tuple[io.BytesIO
                 for label, path in picked:
                     zf.write(path, arcname=label)
             buf.seek(0)
-            return Ok((buf, _zip_filename(req), "application/zip"))
+            return Ok((buf, _zip_filename(req, ata), "application/zip"))
     except Exception as e:
         logger.error(
             "generate_files.error",

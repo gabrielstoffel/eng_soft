@@ -29,6 +29,8 @@ export const modalidadeLabelByValue = {
   remota: 'Remota',
 } as const
 
+export const langSchema = z.union([z.literal('pt'), z.literal('en')])
+
 export const studentInfoSchema = z.object({
   gender: genderSchema,
   name: z.string(),
@@ -42,7 +44,7 @@ export const memberInfoSchema = z.object({
   name: z.string(),
   institution: z.string(),
   location: z.string(),
-  lang: z.string(),
+  lang: langSchema,
   email: z.string().nullable(),
   remoto: z.boolean(),
   ppg: z.string().nullable().optional(),
@@ -58,7 +60,7 @@ export const memberFormSchema = z.object({
   name: z.string(),
   institution: z.string(),
   location: z.string(),
-  lang: z.string(),
+  lang: langSchema,
   email: z.string().refine((v) => v === "" || z.string().email().safeParse(v).success, { message: "E-mail inválido" }),
   remoto: z.boolean(),
   ppg: z.string(),
@@ -173,7 +175,7 @@ function serializeMemberForm(member: MemberForm | null): MemberInfo | null {
     email: member.email || null,
     remoto: member.remoto,
     ppg: member.ppg || null,
-    bolsista_cnpq: member.bolsista_cnpq || null,
+    bolsista_cnpq: member.bolsista_cnpq ?? null,
     nivel_cnpq: member.nivel_cnpq || null,
     lattes: member.lattes || null,
     doctorate_institution: member.doctorate_institution || null,

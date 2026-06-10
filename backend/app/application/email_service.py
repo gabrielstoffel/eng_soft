@@ -50,6 +50,36 @@ def send_documents_email(
     return _send(recipients, msg)
 
 
+def send_attachment_email(
+    to: str,
+    subject: str,
+    html_body: str,
+    attachment: bytes,
+    filename: str,
+    mime_type: str = "application/pdf",
+    cc: str | None = None,
+) -> Result[None, EmailError]:
+    """Send an HTML email with a single binary attachment (e.g. a single PDF)."""
+    logger.info("send_attachment_email.start", {"to": to, "filename": filename})
+    maintype, _, subtype = mime_type.partition("/")
+    msg = MIMEMultipart("mixed")
+    msg["Subject"] = subject
+    msg["From"] = FROM_ADDRESS
+    msg["To"] = to
+    if cc:
+        msg["Cc"] = cc
+    msg.attach(MIMEText(html_body, "html"))
+
+    part = MIMEBase(maintype or "application", subtype or "octet-stream")
+    part.set_payload(attachment)
+    encoders.encode_base64(part)
+    part.add_header("Content-Disposition", "attachment", filename=filename)
+    msg.attach(part)
+
+    recipients = [to] + ([cc] if cc else [])
+    return _send(recipients, msg)
+
+
 # Legacy aliases for backward compatibility
 def send_petition_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
     return send_email(to, subject, html_body)

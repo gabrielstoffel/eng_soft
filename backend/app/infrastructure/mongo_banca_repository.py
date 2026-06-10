@@ -14,6 +14,7 @@ from app.domain.models import (
     BancaRecord,
     BancaRequest,
     BancaStatus,
+    InviteStatus,
 )
 from app.infrastructure.database import get_db
 from app.logger import get_logger
@@ -56,6 +57,7 @@ class MongoBancaRepository(BancaRepository):
                 "ppg": req.ppg,
                 "created_at": now,
                 "decided_at": None,
+                "invite_status": {},
             }
             get_db()["bancas"].insert_one(doc)
             logger.info("save.end", {"ata": ata, "decision_token": token})
@@ -199,6 +201,23 @@ class MongoBancaRepository(BancaRepository):
             logger.error("append_version.error", {"decision_token": token, "message": str(e)})
             return Err(PersistenceError(message=str(e)))
 
+    def set_invite_status(
+        self, token: str, item_id: str, status: InviteStatus
+    ) -> Result[None, BancaNotFoundError | PersistenceError]:
+        logger.info("set_invite_status.start", {"decision_token": token, "item_id": item_id})
+        try:
+            result = get_db()["bancas"].update_one(
+                {"decision_token": token},
+                {"$set": {f"invite_status.{item_id}": status.model_dump(mode="json")}},
+            )
+            if result.matched_count == 0:
+                return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
+            logger.info("set_invite_status.end", {"decision_token": token, "item_id": item_id})
+            return Ok(None)
+        except Exception as e:
+            logger.error("set_invite_status.error", {"decision_token": token, "message": str(e)})
+            return Err(PersistenceError(message=str(e)))
+
     def _doc_to_record(self, doc: dict) -> BancaRecord:
         doc = dict(doc)
         doc.pop("_id", None)
@@ -217,4 +236,5 @@ class MongoBancaRepository(BancaRepository):
         doc.setdefault("ata", 0)
         doc.setdefault("ppg", "ppgfis")
         doc.setdefault("approval_observation", None)
+        doc.setdefault("invite_status", {})
         return BancaRecord(**doc)

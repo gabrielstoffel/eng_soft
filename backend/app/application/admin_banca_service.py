@@ -1,6 +1,6 @@
 import io
 
-from app.application import document_service
+from app.application import banca_validation, document_service
 from app.domain.banca_repository import BancaRepository
 from app.domain.errors import (
     BancaNotEditableError,
@@ -8,6 +8,7 @@ from app.domain.errors import (
     BancaVersionNotFoundError,
     DocumentGenerationError,
     PersistenceError,
+    ValidationError,
 )
 from app.domain.models import (
     BancaAdminDetail,
@@ -57,8 +58,11 @@ class AdminBancaService:
             decision_token=record.decision_token,
             status=record.status,
             rejection_reason=record.rejection_reason,
+            approval_observation=record.approval_observation,
             current_version=record.current_version,
             versions=record.versions,
+            ata=record.ata,
+            ppg=record.ppg,
             created_at=record.created_at,
             decided_at=record.decided_at,
         )
@@ -72,13 +76,19 @@ class AdminBancaService:
         self, token: str, new_req: BancaRequest
     ) -> Result[
         BancaUpdateResponse,
-        BancaNotFoundError | BancaNotEditableError | PersistenceError,
+        ValidationError | BancaNotFoundError | BancaNotEditableError | PersistenceError,
     ]:
         # No-op contract: equality is computed via Pydantic-normalized JSON dump
         # of the latest stored version vs. the submitted request. Both sides go
         # through `BancaRequest.model_dump(mode="json")` so dates/times round-trip
         # identically. New scalar field types should be checked against this contract.
         logger.info("admin.update_banca.start", {"decision_token": token})
+
+        errors = banca_validation.validate_edit(new_req)
+        if errors:
+            logger.info("admin.update_banca.validation_failed", {"decision_token": token, "errors": errors})
+            return Err(ValidationError(message="; ".join(errors), details=errors))
+
         match self._repo.find_by_token(token):
             case Err() as err:
                 return err
@@ -132,9 +142,10 @@ class AdminBancaService:
     def _resolve_version_request(
         self, token: str, version: int | None
     ) -> Result[
-        BancaRequest,
+        tuple[BancaRequest, int],
         BancaNotFoundError | BancaVersionNotFoundError | PersistenceError,
     ]:
+        """Return the (request, ata) for the requested version of a banca."""
         match self._repo.find_by_token(token):
             case Err() as err:
                 return err
@@ -154,7 +165,7 @@ class AdminBancaService:
                     version=target_version,
                 )
             )
-        return Ok(selected.request)
+        return Ok((selected.request, record.ata))
 
     def list_files(
         self, token: str, version: int | None = None
@@ -167,7 +178,7 @@ class AdminBancaService:
             case Err() as err:
                 return err
             case ok:
-                req = ok.value
+                req, _ata = ok.value
         manifest = document_service.file_manifest(req)
         logger.info(
             "admin.list_files.end",
@@ -189,9 +200,9 @@ class AdminBancaService:
             case Err() as err:
                 return err
             case ok:
-                req = ok.value
+                req, ata = ok.value
 
-        match document_service.generate_files(req, ids):
+        match document_service.generate_files(req, ids, ata):
             case Err() as err:
                 return err
             case ok:
