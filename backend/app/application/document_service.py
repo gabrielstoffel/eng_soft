@@ -192,7 +192,9 @@ def generate_documents(req: BancaRequest, ata: int) -> Result[tuple[io.BytesIO, 
         return Err(DocumentGenerationError(message=str(e)))
 
 
-def generate_files(req: BancaRequest, ids: list[str], ata: int) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
+def generate_files(
+    req: BancaRequest, ids: list[str], ata: int
+) -> Result[tuple[io.BytesIO, str, str], DocumentGenerationError]:
     """Generate the PDFs identified by `ids`. Returns single PDF if one id, zip otherwise.
 
     Each id is a manifest entry id (e.g. `ata`, `cartaz`, `carta_convite:orientador`).

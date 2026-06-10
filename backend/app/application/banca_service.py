@@ -114,7 +114,10 @@ class BancaService:
         # safely retried (instead of getting stuck "approved" but undelivered).
         match document_service.generate_documents(req, record.ata):
             case Err() as err:
-                logger.error("approve.document_generation.error", {"decision_token": token, "message": err.error.message})
+                logger.error(
+                    "approve.document_generation.error",
+                    {"decision_token": token, "message": err.error.message},
+                )
                 return err
             case ok:
                 zip_bytes, zip_name = ok.value

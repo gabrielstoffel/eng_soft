@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass, field
 
-
 RoleMode = str  # "required" | "optional" | "hidden"
 
 

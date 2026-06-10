@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 
 import SelectInput from './components/SelectInput'
 import TextInput from './components/TextInput'
+import { apiFetch, clearSession, getUser, ppgLabel } from './auth'
 
 const TIPO_LABEL = {
   1: 'Mestrado',
@@ -47,12 +48,17 @@ function ResultMeta({ label, value }) {
 
 export default function AdminBancaList() {
   const navigate = useNavigate()
+  const user = getUser()
   const [filters, setFilters] = useState({
     status: '',
     ata: '',
-    ppg: '',
     q: '',
   })
+
+  function logout() {
+    clearSession()
+    navigate('/admin/login')
+  }
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -63,14 +69,13 @@ export default function AdminBancaList() {
       const params = new URLSearchParams()
       if (filters.status) params.set('status', filters.status)
       if (filters.ata) params.set('ata', filters.ata)
-      if (filters.ppg) params.set('ppg', filters.ppg)
       if (filters.q) params.set('q', filters.q)
       const qs = params.toString()
       const url = qs ? `/admin/bancas?${qs}` : '/admin/bancas'
 
       setLoading(true)
       setError(null)
-      fetch(url)
+      apiFetch(url)
         .then(async (res) => {
           const data = await res.json()
           if (cancelled) return
@@ -99,7 +104,6 @@ export default function AdminBancaList() {
   }, [
     filters.status,
     filters.ata,
-    filters.ppg,
     filters.q,
   ])
 
@@ -110,13 +114,25 @@ export default function AdminBancaList() {
   return (
     <div className="min-h-screen bg-stone-100 text-slate-900">
       <div className="mx-auto w-full max-w-6xl px-3 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <header className="mb-6 space-y-2">
-          <div className="text-xs font-semibold tracking-[0.18em] text-sky-700 uppercase">
-            Administração
+        <header className="mb-6 flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <div className="text-xs font-semibold tracking-[0.18em] text-sky-700 uppercase">
+              Administração — {ppgLabel(user?.ppg)}
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              Bancas cadastradas
+            </h1>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-            Bancas cadastradas
-          </h1>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="text-slate-600">{user?.username}</span>
+            <button
+              type="button"
+              onClick={logout}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
+            >
+              Sair
+            </button>
+          </div>
         </header>
 
         <section className="overflow-hidden rounded-xl bg-white shadow-[0_20px_50px_-40px_rgba(15,23,42,0.35)]">
@@ -168,20 +184,6 @@ export default function AdminBancaList() {
                     <option value="pending">Pendente</option>
                     <option value="approved">Aceita</option>
                     <option value="rejected">Recusada</option>
-                  </SelectInput>
-                </label>
-
-                <label className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <span className="text-sm font-semibold leading-5 text-slate-800">
-                    Programa (PPG)
-                  </span>
-                  <SelectInput
-                    value={filters.ppg}
-                    onChange={(e) => setF('ppg', e.target.value)}
-                  >
-                    <option value="">Todos</option>
-                    <option value="ppgfis">PPGFís</option>
-                    <option value="ppgenfis">PPGEnFis</option>
                   </SelectInput>
                 </label>
 
