@@ -1,3 +1,4 @@
+from app.config.ppg_profiles import PpgProfile
 from app.domain.models import BancaRequest, MemberInfo
 
 _TIPO_LABEL = {
@@ -6,13 +7,19 @@ _TIPO_LABEL = {
     3: "Tese de Doutorado",
 }
 
+_MODALIDADE_LABEL = {
+    "presencial": "Presencial",
+    "hibrida": "Híbrida",
+    "remota": "Remota",
+}
+
 
 def tipo_label(tipo: int) -> str:
     return _TIPO_LABEL[tipo]
 
 
-def build_petition_subject(req: BancaRequest) -> str:
-    return f"[SigBah!] Novo Pedido de Banca #{req.ata} — {req.nome.name}"
+def build_petition_subject(req: BancaRequest, ata: int) -> str:
+    return f"[SigBah!] Novo Pedido de Banca #{ata} — {req.nome.name}"
 
 
 _DECISION_BUTTON_STYLE = (
@@ -22,6 +29,7 @@ _DECISION_BUTTON_STYLE = (
 
 
 def build_petition_html(req: BancaRequest, decision_link: str) -> str:
+    """Email to coordenador — no date/location, includes commentary fields."""
     membros_rows = ""
     pairs: list[tuple[str, MemberInfo | None]] = [
         ("Orientador", req.orientador),
@@ -36,15 +44,26 @@ def build_petition_html(req: BancaRequest, decision_link: str) -> str:
     for label, member in pairs:
         if member is None:
             continue
-        membros_rows += f"<tr><td><b>{label}</b></td><td>{member.name}</td><td>{member.institution}</td></tr>\n"
+        remoto_badge = ' <span style="color:#6366f1;">(remoto)</span>' if member.remoto else ""
+        membros_rows += f"<tr><td><b>{label}</b></td><td>{member.name}{remoto_badge}</td><td>{member.institution}</td></tr>\n"
 
-    local_parts = []
-    if req.local_banca:
-        local_parts.append(req.local_banca)
-    if req.link:
-        local_parts.append(f'<a href="{req.link}">{req.link}</a>')
-    local_str = " / ".join(local_parts) if local_parts else "—"
-    data_hora = f"{req.data.strftime('%d/%m/%Y')} às {req.horario.strftime('%H:%M')}"
+    comentario_section = ""
+    if req.comentario_desempenho:
+        comentario_section += f"""
+    <h3>Comentários sobre o desempenho do estudante</h3>
+    <blockquote style="border-left:3px solid #93c5fd;padding:0.5rem 1rem;margin:0.5rem 0;background:#eff6ff;">
+      {req.comentario_desempenho}
+    </blockquote>"""
+    if req.justificativa_membros:
+        comentario_section += f"""
+    <h3>Justificativa para a escolha dos membros</h3>
+    <blockquote style="border-left:3px solid #93c5fd;padding:0.5rem 1rem;margin:0.5rem 0;background:#eff6ff;">
+      {req.justificativa_membros}
+    </blockquote>"""
+
+    titulo2_row = ""
+    if req.titulo2:
+        titulo2_row = f'<tr><td><b>Title (EN)</b></td><td colspan="2">{req.titulo2}</td></tr>'
 
     return f"""\
 <html>
@@ -54,18 +73,16 @@ def build_petition_html(req: BancaRequest, decision_link: str) -> str:
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><td><b>Aluno</b></td><td colspan="2">{req.nome.name}</td></tr>
       <tr><td><b>Tipo</b></td><td colspan="2">{tipo_label(req.tipo)}</td></tr>
-      <tr><td><b>Data</b></td><td colspan="2">{data_hora}</td></tr>
-      <tr><td><b>Local / Link</b></td><td colspan="2">{local_str}</td></tr>
-      <tr><td><b>Número da Ata</b></td><td colspan="2">{req.ata}</td></tr>
       <tr><td><b>Título (PT)</b></td><td colspan="2">{req.titulo}</td></tr>
-      <tr><td><b>Title (EN)</b></td><td colspan="2">{req.titulo2}</td></tr>
+      {titulo2_row}
     </table>
     <h3>Membros da Banca</h3>
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><th>Função</th><th>Nome</th><th>Instituição</th></tr>
       {membros_rows}
     </table>
-    <p style="margin-top: 1.5rem;">
+    {comentario_section}
+    <p style="margin-top:1.5rem;">
       <a href="{decision_link}" style="{_DECISION_BUTTON_STYLE}">Acessar página de decisão</a>
     </p>
     <p>Atenciosamente,<br>Sistema SigBah!</p>
@@ -74,11 +91,19 @@ def build_petition_html(req: BancaRequest, decision_link: str) -> str:
 """
 
 
-def build_documents_html(req: BancaRequest) -> str:
+def build_documents_html(req: BancaRequest, ata: int, observation: str | None = None) -> str:
+    obs_section = ""
+    if observation:
+        obs_section = f"""
+    <h3>Observação do coordenador</h3>
+    <blockquote style="border-left:3px solid #fbbf24;padding:0.5rem 1rem;margin:0.5rem 0;background:#fffbeb;">
+      {observation}
+    </blockquote>"""
+
     return f"""\
 <html>
   <body>
-    <h2>Documentos da Banca — SigBah!</h2>
+    <h2>Documentos da Banca #{ata} — SigBah!</h2>
     <p>Os documentos foram gerados e estão em anexo (arquivo zip).</p>
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><td><b>Aluno</b></td><td>{req.nome.name}</td></tr>
@@ -86,17 +111,41 @@ def build_documents_html(req: BancaRequest) -> str:
       <tr><td><b>Data</b></td><td>{req.data.strftime("%d/%m/%Y")} às {req.horario.strftime("%H:%M")}</td></tr>
       <tr><td><b>Orientador</b></td><td>{req.orientador.name}</td></tr>
     </table>
+    {obs_section}
     <p>Atenciosamente,<br>Sistema SigBah!</p>
   </body>
 </html>
 """
 
 
-def build_rejection_subject(req: BancaRequest) -> str:
-    return f"[SigBah!] Pedido de Banca #{req.ata} rejeitado — {req.nome.name}"
+def build_gerencia_html(req: BancaRequest, ata: int, profile: PpgProfile) -> str:
+    sala = req.sala_preferencia or "—"
+    return f"""\
+<html>
+  <body>
+    <h2>Solicitação de Agendamento — SigBah!</h2>
+    <p>Uma banca foi aprovada e requer agendamento de sala.</p>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr><td><b>Banca</b></td><td>#{ata}</td></tr>
+      <tr><td><b>Tipo</b></td><td>{tipo_label(req.tipo)}</td></tr>
+      <tr><td><b>Data sugerida</b></td><td>{req.data.strftime("%d/%m/%Y")} às {req.horario.strftime("%H:%M")}</td></tr>
+      <tr><td><b>Local de preferência</b></td><td>{sala}</td></tr>
+      <tr><td><b>Modalidade</b></td><td>{_MODALIDADE_LABEL.get(req.modalidade, req.modalidade)}</td></tr>
+      <tr><td><b>Aluno</b></td><td>{req.nome.name}</td></tr>
+      <tr><td><b>Orientador</b></td><td>{req.orientador.name}</td></tr>
+    </table>
+    <p>Solicitamos o agendamento da sala. Favor responder para <b>{profile.cpg_alias_email}</b>.</p>
+    <p>Atenciosamente,<br>Sistema SigBah!</p>
+  </body>
+</html>
+"""
 
 
-def build_rejection_html(req: BancaRequest, reason: str) -> str:
+def build_rejection_subject(req: BancaRequest, ata: int) -> str:
+    return f"[SigBah!] Pedido de Banca #{ata} rejeitado — {req.nome.name}"
+
+
+def build_rejection_html(req: BancaRequest, ata: int, reason: str) -> str:
     return f"""\
 <html>
   <body>
@@ -105,10 +154,10 @@ def build_rejection_html(req: BancaRequest, reason: str) -> str:
     <table border="1" cellpadding="6" cellspacing="0">
       <tr><td><b>Aluno</b></td><td>{req.nome.name}</td></tr>
       <tr><td><b>Tipo</b></td><td>{tipo_label(req.tipo)}</td></tr>
-      <tr><td><b>Número da Ata</b></td><td>{req.ata}</td></tr>
+      <tr><td><b>Número da Ata</b></td><td>{ata}</td></tr>
     </table>
     <h3>Motivo</h3>
-    <blockquote style="border-left: 3px solid #fca5a5; padding: 0.5rem 1rem; margin: 0.5rem 0; background: #fef2f2;">
+    <blockquote style="border-left:3px solid #fca5a5;padding:0.5rem 1rem;margin:0.5rem 0;background:#fef2f2;">
       {reason}
     </blockquote>
     <p>Atenciosamente,<br>Sistema SigBah!</p>

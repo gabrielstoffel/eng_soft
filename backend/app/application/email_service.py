@@ -13,44 +13,31 @@ from app.result import Err, Ok, Result
 logger = get_logger(__name__)
 
 
-def send_petition_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
-    logger.info("send_petition_email.start", {"to": to})
+def send_email(
+    to: str, subject: str, html_body: str, cc: str | None = None
+) -> Result[None, EmailError]:
+    logger.info("send_email.start", {"to": to, "cc": cc})
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = FROM_ADDRESS
     msg["To"] = to
+    if cc:
+        msg["Cc"] = cc
     msg.attach(MIMEText(html_body, "html"))
-    match result := _send(to, msg):
-        case Err(error):
-            logger.error("send_petition_email.error", {"to": to, "message": error.message})
-        case _:
-            logger.info("send_petition_email.end", {"to": to})
-    return result
-
-
-def send_rejection_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
-    logger.info("send_rejection_email.start", {"to": to})
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = FROM_ADDRESS
-    msg["To"] = to
-    msg.attach(MIMEText(html_body, "html"))
-    match result := _send(to, msg):
-        case Err(error):
-            logger.error("send_rejection_email.error", {"to": to, "message": error.message})
-        case _:
-            logger.info("send_rejection_email.end", {"to": to})
-    return result
+    recipients = [to] + ([cc] if cc else [])
+    return _send(recipients, msg)
 
 
 def send_documents_email(
-    to: str, subject: str, html_body: str, zip_bytes: BytesIO, zip_name: str
+    to: str, subject: str, html_body: str, zip_bytes: BytesIO, zip_name: str, cc: str | None = None
 ) -> Result[None, EmailError]:
     logger.info("send_documents_email.start", {"to": to, "zip": zip_name})
     msg = MIMEMultipart("mixed")
     msg["Subject"] = subject
     msg["From"] = FROM_ADDRESS
     msg["To"] = to
+    if cc:
+        msg["Cc"] = cc
     msg.attach(MIMEText(html_body, "html"))
 
     part = MIMEBase("application", "zip")
@@ -59,21 +46,25 @@ def send_documents_email(
     part.add_header("Content-Disposition", "attachment", filename=zip_name)
     msg.attach(part)
 
-    match result := _send(to, msg):
-        case Err(error):
-            logger.error("send_documents_email.error", {"to": to, "message": error.message})
-        case _:
-            logger.info("send_documents_email.end", {"to": to})
-    return result
+    recipients = [to] + ([cc] if cc else [])
+    return _send(recipients, msg)
 
 
-def _send(to: str, msg: MIMEMultipart) -> Result[None, EmailError]:
-    logger.info("_send.start", {"to": to, "host": SMTP_HOST, "port": SMTP_PORT})
+# Legacy aliases for backward compatibility
+def send_petition_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
+    return send_email(to, subject, html_body)
+
+
+def send_rejection_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
+    return send_email(to, subject, html_body)
+
+
+def _send(recipients: list[str], msg: MIMEMultipart) -> Result[None, EmailError]:
     try:
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-            server.sendmail(msg["From"], [to], msg.as_string())
-        logger.info("_send.end", {"to": to})
+            server.sendmail(msg["From"], recipients, msg.as_string())
+        logger.info("_send.end", {"recipients": recipients})
         return Ok(None)
     except Exception as e:
-        logger.error("_send.error", {"to": to, "message": str(e)})
-        return Err(EmailError(message=str(e), recipient=to))
+        logger.error("_send.error", {"recipients": recipients, "message": str(e)})
+        return Err(EmailError(message=str(e), recipient=recipients[0]))

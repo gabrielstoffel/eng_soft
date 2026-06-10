@@ -23,9 +23,20 @@ logger = get_logger(__name__)
 
 
 class MongoBancaRepository(BancaRepository):
+    def next_ata(self, ppg: str, tipo: int) -> int:
+        """Atomically increment and return the next ata number for ppg+tipo."""
+        result = get_db()["ata_counters"].find_one_and_update(
+            {"ppg": ppg, "tipo": tipo},
+            {"$inc": {"last_ata": 1}},
+            upsert=True,
+            return_document=True,
+        )
+        return result["last_ata"]
+
     def save(self, req: BancaRequest) -> Result[str, PersistenceError]:
-        logger.info("save.start", {"ata": req.ata, "student": req.nome.name})
+        logger.info("save.start", {"student": req.nome.name, "ppg": req.ppg})
         try:
+            ata = self.next_ata(req.ppg, req.tipo)
             token = str(uuid.uuid4())
             now = datetime.now(timezone.utc)
             doc = {
@@ -40,14 +51,17 @@ class MongoBancaRepository(BancaRepository):
                 "decision_token": token,
                 "status": "pending",
                 "rejection_reason": None,
+                "approval_observation": None,
+                "ata": ata,
+                "ppg": req.ppg,
                 "created_at": now,
                 "decided_at": None,
             }
             get_db()["bancas"].insert_one(doc)
-            logger.info("save.end", {"ata": req.ata, "decision_token": token, "status": "pending"})
+            logger.info("save.end", {"ata": ata, "decision_token": token})
             return Ok(token)
         except Exception as e:
-            logger.error("save.error", {"ata": req.ata, "message": str(e)})
+            logger.error("save.error", {"message": str(e)})
             return Err(PersistenceError(message=str(e)))
 
     def find_by_token(self, token: str) -> Result[BancaRecord, BancaNotFoundError | PersistenceError]:
@@ -55,17 +69,15 @@ class MongoBancaRepository(BancaRepository):
         try:
             doc = get_db()["bancas"].find_one({"decision_token": token})
             if doc is None:
-                logger.warn("find_by_token.not_found", {"decision_token": token})
                 return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
             record = self._doc_to_record(doc)
-            logger.info("find_by_token.end", {"decision_token": token, "status": record.status})
             return Ok(record)
         except Exception as e:
             logger.error("find_by_token.error", {"decision_token": token, "message": str(e)})
             return Err(PersistenceError(message=str(e)))
 
     def update_decision(
-        self, token: str, status: BancaStatus, reason: str | None = None
+        self, token: str, status: BancaStatus, reason: str | None = None, observation: str | None = None
     ) -> Result[None, BancaNotFoundError | BancaAlreadyDecidedError | PersistenceError]:
         logger.info("update_decision.start", {"decision_token": token, "target_status": status})
         try:
@@ -75,6 +87,8 @@ class MongoBancaRepository(BancaRepository):
             }
             if reason is not None:
                 update_fields["rejection_reason"] = reason
+            if observation is not None:
+                update_fields["approval_observation"] = observation
 
             result = get_db()["bancas"].update_one(
                 {"decision_token": token, "status": "pending"},
@@ -82,18 +96,10 @@ class MongoBancaRepository(BancaRepository):
             )
 
             if result.matched_count == 0:
-                existing = get_db()["bancas"].find_one(
-                    {"decision_token": token},
-                    {"status": 1},
-                )
+                existing = get_db()["bancas"].find_one({"decision_token": token}, {"status": 1})
                 if existing is None:
-                    logger.warn("update_decision.not_found", {"decision_token": token})
                     return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
                 current_status = existing.get("status", "unknown")
-                logger.warn(
-                    "update_decision.already_decided",
-                    {"decision_token": token, "current_status": current_status},
-                )
                 return Err(
                     BancaAlreadyDecidedError(
                         message=f"Banca already decided (status={current_status})",
@@ -108,37 +114,23 @@ class MongoBancaRepository(BancaRepository):
             return Err(PersistenceError(message=str(e)))
 
     def list(self, filters: BancaListFilters) -> Result[list[BancaListItem], PersistenceError]:
-        logger.info(
-            "list.start",
-            {
-                "status": filters.status,
-                "ata": filters.ata,
-                "student": filters.student,
-                "orientador": filters.orientador,
-                "q": filters.q,
-            },
-        )
+        logger.info("list.start", {"filters": filters.model_dump(exclude_none=True)})
         try:
             mongo_filter: dict = {}
             if filters.status is not None:
                 mongo_filter["status"] = filters.status
+            if filters.ppg is not None:
+                mongo_filter["ppg"] = filters.ppg
             cursor = get_db()["bancas"].find(mongo_filter).sort("created_at", -1)
 
             items: list[BancaListItem] = []
             for doc in cursor:
                 try:
                     record = self._doc_to_record(doc)
-                except Exception as parse_err:
-                    logger.warn(
-                        "list.skip_invalid_doc",
-                        {
-                            "decision_token": doc.get("decision_token"),
-                            "message": str(parse_err),
-                        },
-                    )
+                except Exception:
                     continue
                 req = record.request
-                if filters.ata is not None and req.ata != filters.ata:
+                if filters.ata is not None and record.ata != filters.ata:
                     continue
                 if filters.student and filters.student.lower() not in req.nome.name.lower():
                     continue
@@ -146,19 +138,20 @@ class MongoBancaRepository(BancaRepository):
                     continue
                 if filters.q:
                     q = filters.q.lower()
-                    haystack = " ".join([req.nome.name, req.orientador.name, req.titulo, req.titulo2]).lower()
-                    if q not in haystack:
+                    haystack = f"{req.nome.name} {req.orientador.name} {req.titulo} {req.titulo2 or ''}"
+                    if q not in haystack.lower():
                         continue
                 items.append(
                     BancaListItem(
                         decision_token=record.decision_token,
-                        ata=req.ata,
+                        ata=record.ata,
                         student_name=req.nome.name,
                         status=record.status,
                         current_version=record.current_version,
                         tipo=req.tipo,
                         data=req.data,
                         orientador_name=req.orientador.name,
+                        ppg=record.ppg,
                         created_at=record.created_at,
                     )
                 )
@@ -175,15 +168,10 @@ class MongoBancaRepository(BancaRepository):
         try:
             existing = get_db()["bancas"].find_one({"decision_token": token})
             if existing is None:
-                logger.warn("append_version.not_found", {"decision_token": token})
                 return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
 
             current_status = existing.get("status", "unknown")
             if current_status != "approved":
-                logger.warn(
-                    "append_version.not_editable",
-                    {"decision_token": token, "current_status": current_status},
-                )
                 return Err(
                     BancaNotEditableError(
                         message=f"Banca cannot be edited (status={current_status})",
@@ -198,33 +186,14 @@ class MongoBancaRepository(BancaRepository):
                 "request": req.model_dump(mode="json"),
                 "created_at": datetime.now(timezone.utc),
             }
-            result = get_db()["bancas"].update_one(
+            get_db()["bancas"].update_one(
                 {"decision_token": token, "status": "approved"},
                 {
                     "$push": {"versions": new_entry},
                     "$set": {"current_version": next_version},
                 },
             )
-            if result.matched_count == 0:
-                existing2 = get_db()["bancas"].find_one({"decision_token": token}, {"status": 1})
-                if existing2 is None:
-                    return Err(BancaNotFoundError(message=f"Banca with token {token} not found"))
-                current2 = existing2.get("status", "unknown")
-                logger.warn(
-                    "append_version.race_status_changed",
-                    {"decision_token": token, "current_status": current2},
-                )
-                return Err(
-                    BancaNotEditableError(
-                        message=f"Banca cannot be edited (status={current2})",
-                        current_status=current2,
-                    )
-                )
-
-            logger.info(
-                "append_version.end",
-                {"decision_token": token, "new_version": next_version},
-            )
+            logger.info("append_version.end", {"decision_token": token, "new_version": next_version})
             return Ok(next_version)
         except Exception as e:
             logger.error("append_version.error", {"decision_token": token, "message": str(e)})
@@ -243,6 +212,9 @@ class MongoBancaRepository(BancaRepository):
                 }
             ]
             doc["current_version"] = 1
-        elif "current_version" not in doc:
+        if "current_version" not in doc:
             doc["current_version"] = max(v.get("version", 1) for v in doc["versions"])
+        doc.setdefault("ata", 0)
+        doc.setdefault("ppg", "ppgfis")
+        doc.setdefault("approval_observation", None)
         return BancaRecord(**doc)

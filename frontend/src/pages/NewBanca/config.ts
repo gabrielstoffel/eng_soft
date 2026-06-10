@@ -1,4 +1,4 @@
-import type { BancaType } from '../../types/new-banca.ts'
+import type { BancaType, Ppg } from '../../types/new-banca.ts'
 
 export type MemberRole =
   | 'orientador'
@@ -35,7 +35,7 @@ export const OPTIONAL_MEMBER_ROLES = [
   'supl_ext',
 ] as const satisfies readonly OptionalMemberRole[]
 
-export const ROLES_BY_TIPO: Record<BancaType, Record<MemberRole, RoleMode>> = {
+const ROLES_BY_TIPO_PPGFIS: Record<BancaType, Record<MemberRole, RoleMode>> = {
   1: {
     orientador: 'required',
     coorientador: 'optional',
@@ -43,7 +43,7 @@ export const ROLES_BY_TIPO: Record<BancaType, Record<MemberRole, RoleMode>> = {
     externo2: 'hidden',
     interno1: 'required',
     interno2: 'required',
-    supl_int: 'optional',
+    supl_int: 'required',
     supl_ext: 'optional',
   },
   2: {
@@ -53,7 +53,7 @@ export const ROLES_BY_TIPO: Record<BancaType, Record<MemberRole, RoleMode>> = {
     externo2: 'optional',
     interno1: 'required',
     interno2: 'required',
-    supl_int: 'optional',
+    supl_int: 'required',
     supl_ext: 'optional',
   },
   3: {
@@ -63,9 +63,47 @@ export const ROLES_BY_TIPO: Record<BancaType, Record<MemberRole, RoleMode>> = {
     externo2: 'required',
     interno1: 'required',
     interno2: 'required',
+    supl_int: 'required',
+    supl_ext: 'optional',
+  },
+}
+
+const ROLES_BY_TIPO_PPGENFIS: Record<BancaType, Record<MemberRole, RoleMode>> = {
+  1: {
+    orientador: 'required',
+    coorientador: 'optional',
+    externo1: 'required',
+    externo2: 'optional',
+    interno1: 'required',
+    interno2: 'optional',
     supl_int: 'optional',
     supl_ext: 'optional',
   },
+  2: {
+    orientador: 'required',
+    coorientador: 'optional',
+    externo1: 'required',
+    externo2: 'optional',
+    interno1: 'required',
+    interno2: 'optional',
+    supl_int: 'optional',
+    supl_ext: 'optional',
+  },
+  3: {
+    orientador: 'required',
+    coorientador: 'optional',
+    externo1: 'required',
+    externo2: 'required',
+    interno1: 'required',
+    interno2: 'optional',
+    supl_int: 'optional',
+    supl_ext: 'optional',
+  },
+}
+
+export const ROLES_BY_TIPO: Record<Ppg, Record<BancaType, Record<MemberRole, RoleMode>>> = {
+  ppgfis: ROLES_BY_TIPO_PPGFIS,
+  ppgenfis: ROLES_BY_TIPO_PPGENFIS,
 }
 
 export const ROLE_LABELS: Record<MemberRole, string> = {
