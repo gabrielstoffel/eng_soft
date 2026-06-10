@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { Link, useParams } from 'react-router-dom'
 import { newBancaDefaultValues } from './types/new-banca.ts'
+import { apiFetch } from './auth'
 import { deserializeBanca, serializeBanca } from './pages/NewBanca/form/BancaForm'
 import BancaGeneralSection from './pages/NewBanca/form/BancaGeneralSection'
 import BancaCompositionSection from './pages/NewBanca/form/BancaCompositionSection'
@@ -77,7 +78,7 @@ export default function AdminBancaDetail() {
         async function load() {
             setLoading(true)
             try {
-                const res = await fetch(`/admin/bancas/${token}`)
+                const res = await apiFetch(`/admin/bancas/${token}`)
                 const data = await res.json()
                 if (cancelled) return
                 if (res.ok) {
@@ -102,7 +103,7 @@ export default function AdminBancaDetail() {
         let cancelled = false
         setFilesLoading(true)
         setFilesError(null)
-        fetch(`/admin/bancas/${token}/files?version=${regenVersion}`)
+        apiFetch(`/admin/bancas/${token}/files?version=${regenVersion}`)
             .then(async res => {
                 const data = await res.json()
                 if (cancelled) return
@@ -127,7 +128,7 @@ export default function AdminBancaDetail() {
         let cancelled = false
         setInvitesLoading(true)
         setInvitesError(null)
-        fetch(`/admin/bancas/${token}/invites`)
+        apiFetch(`/admin/bancas/${token}/invites`)
             .then(async res => {
                 const data = await res.json()
                 if (cancelled) return
@@ -191,7 +192,7 @@ export default function AdminBancaDetail() {
         setSaveStatus(null)
         try {
             const body = serializeBanca(editMethods.getValues())
-            const res = await fetch(`/admin/bancas/${token}`, {
+            const res = await apiFetch(`/admin/bancas/${token}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -203,7 +204,7 @@ export default function AdminBancaDetail() {
                 } else {
                     setSaveStatus({ ok: true, message: 'Sem alterações detectadas; nenhuma nova versão criada.' })
                 }
-                const refetch = await fetch(`/admin/bancas/${token}`)
+                const refetch = await apiFetch(`/admin/bancas/${token}`)
                 const refreshed = await refetch.json()
                 if (refetch.ok) {
                     setDetail(refreshed)
@@ -254,7 +255,7 @@ export default function AdminBancaDetail() {
             const params = new URLSearchParams()
             params.set('version', regenVersion)
             for (const id of ids) params.append('id', id)
-            const res = await fetch(`/admin/bancas/${token}/files/download?${params.toString()}`)
+            const res = await apiFetch(`/admin/bancas/${token}/files/download?${params.toString()}`)
             if (!res.ok) {
                 let msg
                 try {
@@ -283,7 +284,7 @@ export default function AdminBancaDetail() {
         setSendInFlight(inFlightTag)
         setSendStatus(null)
         try {
-            const res = await fetch(`/admin/bancas/${token}/invites/send`, {
+            const res = await apiFetch(`/admin/bancas/${token}/invites/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ item_ids: itemIds }),
@@ -305,7 +306,7 @@ export default function AdminBancaDetail() {
                     : `${okCount} enviado(s), ${failed.length} com falha: ${failed.map(r => `${r.item_id} (${r.error})`).join('; ')}`,
             })
             // Refresh statuses
-            const refetch = await fetch(`/admin/bancas/${token}/invites`)
+            const refetch = await apiFetch(`/admin/bancas/${token}/invites`)
             const refreshed = await refetch.json()
             if (refetch.ok) setInvites(refreshed)
         } catch (err) {

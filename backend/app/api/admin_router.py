@@ -4,10 +4,13 @@ from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
+from app.api.auth_deps import get_current_user, require_banca_access
 from app.application.admin_banca_service import AdminBancaService
+from app.application.auth_service import AuthService
 from app.application.invite_service import InviteService
-from app.deps import get_admin_banca_service, get_invite_service
+from app.deps import get_admin_banca_service, get_auth_service, get_invite_service
 from app.domain.errors import (
+    AuthError,
     BancaNotEditableError,
     BancaNotFoundError,
     BancaVersionNotFoundError,
@@ -22,8 +25,11 @@ from app.domain.models import (
     BancaRequest,
     BancaStatus,
     BancaUpdateResponse,
+    CurrentUser,
     FileManifestEntry,
     InviteItem,
+    LoginRequest,
+    LoginResponse,
     SendInvitesRequest,
     SendInvitesResponse,
 )
@@ -35,20 +41,42 @@ logger = get_logger(__name__)
 admin_router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+@admin_router.post("/auth/login")
+def login(
+    body: LoginRequest,
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
+) -> LoginResponse:
+    logger.info("POST /admin/auth/login.start", {"username": body.username})
+    match auth_service.login(body.username, body.password):
+        case Err(AuthError(message=msg)):
+            raise HTTPException(status_code=401, detail=msg)
+        case Err(PersistenceError(message=msg)):
+            raise HTTPException(status_code=503, detail=msg)
+        case ok:
+            return ok.value
+
+
+@admin_router.get("/auth/me")
+def me(user: Annotated[CurrentUser, Depends(get_current_user)]) -> CurrentUser:
+    return user
+
+
 @admin_router.get("/bancas")
 def list_bancas(
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
+    user: Annotated[CurrentUser, Depends(get_current_user)],
     status: BancaStatus | None = None,
     ata: int | None = None,
     student: str | None = None,
     orientador: str | None = None,
-    ppg: str | None = None,
     q: str | None = None,
 ) -> list[BancaListItem]:
-    filters = BancaListFilters(status=status, ata=ata, student=student, orientador=orientador, ppg=ppg, q=q)
+    # PPG segmentation: the listing is always scoped to the caller's own PPG,
+    # regardless of any client-supplied value.
+    filters = BancaListFilters(status=status, ata=ata, student=student, orientador=orientador, ppg=user.ppg, q=q)
     logger.info(
         "GET /admin/bancas.start",
-        {"status": status, "ata": ata, "student": student, "orientador": orientador, "ppg": ppg, "q": q},
+        {"status": status, "ata": ata, "student": student, "orientador": orientador, "ppg": user.ppg, "q": q},
     )
     match admin_service.list_bancas(filters):
         case Err(PersistenceError(message=msg)):
@@ -63,6 +91,7 @@ def list_bancas(
 def get_banca_detail(
     token: str,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
 ) -> BancaAdminDetail:
     logger.info("GET /admin/bancas/{token}.start", {"decision_token": token})
     match admin_service.get_detail(token):
@@ -85,8 +114,12 @@ def update_banca(
     token: str,
     body: BancaRequest,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
 ) -> BancaUpdateResponse:
     logger.info("PUT /admin/bancas/{token}.start", {"decision_token": token})
+    # Segmentation: a user cannot move a banca into another PPG.
+    if body.ppg != user.ppg:
+        raise HTTPException(status_code=403, detail="Não é permitido alterar o PPG da banca.")
     match admin_service.update_banca(token, body):
         case Err(ValidationError(details=details)):
             logger.warn("PUT /admin/bancas/{token}.validation_failed", {"decision_token": token})
@@ -122,6 +155,7 @@ def update_banca(
 def list_banca_files(
     token: str,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
     version: Annotated[int | None, Query()] = None,
 ) -> list[FileManifestEntry]:
     logger.info(
@@ -156,6 +190,7 @@ def list_banca_files(
 def download_banca_files(
     token: str,
     admin_service: Annotated[AdminBancaService, Depends(get_admin_banca_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
     id: Annotated[list[str], Query()] = [],
     version: Annotated[int | None, Query()] = None,
 ) -> StreamingResponse:
@@ -210,6 +245,7 @@ def download_banca_files(
 def list_invites(
     token: str,
     invite_service: Annotated[InviteService, Depends(get_invite_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
 ) -> list[InviteItem]:
     logger.info("GET /admin/bancas/{token}/invites.start", {"decision_token": token})
     match invite_service.list_invites(token):
@@ -227,6 +263,7 @@ def send_invites(
     token: str,
     body: SendInvitesRequest,
     invite_service: Annotated[InviteService, Depends(get_invite_service)],
+    user: Annotated[CurrentUser, Depends(require_banca_access)],
 ) -> SendInvitesResponse:
     logger.info("POST /admin/bancas/{token}/invites/send.start", {"decision_token": token, "item_ids": body.item_ids})
     match invite_service.send_invites(token, body.item_ids):

@@ -3,6 +3,12 @@ import NewBancaPage from './pages/NewBanca/NewBancaPage'
 import DecisionPage from './DecisionPage.jsx'
 import AdminBancaList from './AdminBancaList.jsx'
 import AdminBancaDetail from './AdminBancaDetail.jsx'
+import AdminLogin from './AdminLogin.jsx'
+import { isAuthenticated } from './auth'
+
+function RequireAuth({ children }) {
+  return isAuthenticated() ? children : <Navigate to="/admin/login" replace />
+}
 
 function LandingPage() {
   return (
@@ -30,8 +36,9 @@ export default function App() {
       <Route path="/ppgfis/new" element={<NewBancaPage ppg="ppgfis" />} />
       <Route path="/ppgenfis/new" element={<NewBancaPage ppg="ppgenfis" />} />
       <Route path="/decide/:token" element={<DecisionPage />} />
-      <Route path="/admin" element={<AdminBancaList />} />
-      <Route path="/admin/banca/:token" element={<AdminBancaDetail />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<RequireAuth><AdminBancaList /></RequireAuth>} />
+      <Route path="/admin/banca/:token" element={<RequireAuth><AdminBancaDetail /></RequireAuth>} />
     </Routes>
   )
 }

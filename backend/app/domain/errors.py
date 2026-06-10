@@ -25,6 +25,14 @@ class ValidationError(BancaError):
 
 
 @dataclass
+class AuthError(BancaError): ...
+
+
+@dataclass
+class ForbiddenError(BancaError): ...
+
+
+@dataclass
 class BancaNotFoundError(BancaError): ...
 
 

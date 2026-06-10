@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 import gridfs
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app.application.banca_service import BancaService
 from app.deps import get_banca_service
@@ -14,7 +14,6 @@ from app.domain.errors import (
     PersistenceError,
     ValidationError,
 )
-from app.infrastructure.database import get_db
 from app.domain.models import (
     ApproveRequest,
     BancaDecisionResponse,
@@ -23,6 +22,7 @@ from app.domain.models import (
     BancaSummary,
     RejectRequest,
 )
+from app.infrastructure.database import get_db
 from app.logger import get_logger
 from app.result import Err
 

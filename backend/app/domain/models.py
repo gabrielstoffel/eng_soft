@@ -221,3 +221,29 @@ class InviteSendResult(BaseModel):
 
 class SendInvitesResponse(BaseModel):
     results: list[InviteSendResult]
+
+
+# --- Admin auth ---
+
+class AdminUserRecord(BaseModel):
+    """Stored admin user, including the password hash (never sent to clients)."""
+    username: str
+    ppg: str
+    password_hash: str
+
+
+class CurrentUser(BaseModel):
+    """The authenticated admin extracted from a bearer token."""
+    username: str
+    ppg: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginResponse(BaseModel):
+    token: str
+    username: str
+    ppg: str

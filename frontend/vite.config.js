@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/banca': 'http://localhost:8000',
       '/admin/bancas': 'http://localhost:8000',
+      '/admin/auth': 'http://localhost:8000',
     },
   },
 })

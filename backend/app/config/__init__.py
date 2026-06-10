@@ -10,3 +10,13 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "2525"))
 FROM_ADDRESS = os.getenv("SMTP_FROM", "sigbah@sigbah.local")
 
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+
+# --- Admin auth ---
+AUTH_SECRET = os.getenv("AUTH_SECRET", "dev-insecure-secret-change-me")
+AUTH_TOKEN_TTL_SECONDS = int(os.getenv("AUTH_TOKEN_TTL_SECONDS", str(8 * 60 * 60)))
+
+# Seed credentials for the two per-PPG admin users (created on startup if absent).
+PPGFIS_ADMIN_USERNAME = os.getenv("PPGFIS_ADMIN_USERNAME", "admin.fis")
+PPGFIS_ADMIN_PASSWORD = os.getenv("PPGFIS_ADMIN_PASSWORD", "ppgfis123")
+PPGENFIS_ADMIN_USERNAME = os.getenv("PPGENFIS_ADMIN_USERNAME", "admin.enfis")
+PPGENFIS_ADMIN_PASSWORD = os.getenv("PPGENFIS_ADMIN_PASSWORD", "ppgenfis123")
