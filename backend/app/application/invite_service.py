@@ -6,9 +6,11 @@ ids produced by `document_service` (e.g. "carta_convite:externo1",
 "parecer:interno1"), so status keys line up 1:1 with generated PDFs.
 """
 
+import io
+import zipfile
 from datetime import datetime, timezone
 
-from app.application import document_service, email_service, petition_service
+from app.application import attachment_service, document_service, email_service, petition_service
 from app.config.ppg_profiles import get_profile
 from app.domain.banca_repository import BancaRepository
 from app.domain.errors import (
@@ -29,6 +31,31 @@ from app.result import Err, Ok, Result
 logger = get_logger(__name__)
 
 _INVITE_KINDS = ("carta_convite", "parecer")
+
+# Above this size the thesis/dissertation PDF is zipped before being attached.
+_MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
+
+
+def _zip_one(filename: str, content: bytes) -> tuple[str, bytes, str]:
+    """Zip a single file; returns (zip_name, zip_bytes, mime)."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(filename, content)
+    buf.seek(0)
+    zip_name = filename.rsplit(".", 1)[0] + ".zip"
+    return zip_name, buf.read(), "application/zip"
+
+
+def _prepare_thesis_attachments(token: str) -> list[tuple[str, bytes, str]]:
+    """Load the uploaded thesis/dissertation/exam PDF(s), zipping any that are large."""
+    prepared: list[tuple[str, bytes, str]] = []
+    for filename, content, content_type in attachment_service.load_attachments(token, kind="texto"):
+        if len(content) > _MAX_ATTACHMENT_BYTES:
+            name, data, mime = _zip_one(filename, content)
+            prepared.append((name, data, mime))
+        else:
+            prepared.append((filename, content, content_type))
+    return prepared
 
 
 class InviteService:
@@ -97,6 +124,9 @@ class InviteService:
         req = record.request
         profile = get_profile(record.ppg)
 
+        # The thesis/dissertation/exam PDF travels with every invite.
+        thesis_attachments = _prepare_thesis_attachments(token)
+
         results: list[InviteSendResult] = []
         for item_id in item_ids:
             item = items_by_id.get(item_id)
@@ -120,10 +150,11 @@ class InviteService:
                 case ok:
                     buf, filename, mime = ok.value
 
-            subject = petition_service.build_invite_subject(req, record.ata, item.kind)
-            html = petition_service.build_invite_html(req, record.ata, item.kind, member)
-            match email_service.send_attachment_email(
-                item.recipient, subject, html, buf.read(), filename, mime, cc=profile.secretary_email
+            subject = petition_service.build_invite_subject(req, item.kind)
+            html = petition_service.build_invite_html(req, item.kind, member)
+            attachments = [(filename, buf.read(), mime), *thesis_attachments]
+            match email_service.send_email_with_attachments(
+                item.recipient, subject, html, attachments, cc=profile.secretary_email
             ):
                 case Err() as err:
                     logger.error("invite.send.email_error", {"item_id": item_id, "message": err.error.message})
