@@ -10,7 +10,7 @@ load_dotenv()
 
 from app.api.admin_router import admin_router
 from app.api.router import router
-from app.deps import get_auth_service
+from app.deps import get_auth_service, seed_ata_counters
 from app.logger import get_logger
 
 logging.basicConfig(
@@ -31,6 +31,11 @@ async def lifespan(app: FastAPI):
         get_auth_service().seed_default_users()
     except Exception as e:  # pragma: no cover - defensive
         _logger.error("startup.seed_admin_users.error", {"message": str(e)})
+    # Seed the ata counters from the configured starting numbers (idempotent).
+    try:
+        seed_ata_counters()
+    except Exception as e:  # pragma: no cover - defensive
+        _logger.error("startup.seed_ata_counters.error", {"message": str(e)})
     yield
 
 

@@ -14,6 +14,8 @@ class PpgProfile:
     gerencia_email: str
     roles_by_tipo: dict[int, dict[str, RoleMode]]
     antecedencia_dias: dict[int, int]
+    # Ata base per tipo — the first banca created gets this value + 1 (so 0 → 1).
+    ata_start: dict[int, int] = field(default_factory=lambda: {1: 0, 2: 0, 3: 0})
     required_student_fields: list[str] = field(default_factory=list)
     required_member_fields: list[str] = field(default_factory=list)
     titulo_en_required: bool = False
@@ -95,6 +97,11 @@ PPGFIS = PpgProfile(
     gerencia_email=os.getenv("PPGFIS_GERENCIA_EMAIL", "gerencia@if.ufrgs.br"),
     roles_by_tipo=ROLES_BY_TIPO_PPGFIS,
     antecedencia_dias={1: 20, 2: 30, 3: 30},
+    ata_start={
+        1: int(os.getenv("PPGFIS_ATA_START_MESTRADO", "0")),
+        2: int(os.getenv("PPGFIS_ATA_START_QUALIFICACAO", "0")),
+        3: int(os.getenv("PPGFIS_ATA_START_DOUTORADO", "0")),
+    },
     required_student_fields=[],
     required_member_fields=[],
     titulo_en_required=False,
@@ -110,6 +117,11 @@ PPGENFIS = PpgProfile(
     gerencia_email=os.getenv("PPGENFIS_GERENCIA_EMAIL", "gerencia@if.ufrgs.br"),
     roles_by_tipo=ROLES_BY_TIPO_PPGENFIS,
     antecedencia_dias={1: 20, 2: 30, 3: 40},
+    ata_start={
+        1: int(os.getenv("PPGENFIS_ATA_START_MESTRADO", "0")),
+        2: int(os.getenv("PPGENFIS_ATA_START_QUALIFICACAO", "0")),
+        3: int(os.getenv("PPGENFIS_ATA_START_DOUTORADO", "0")),
+    },
     required_student_fields=["cpf", "birth_date", "email"],
     required_member_fields=["lattes", "doctorate_institution", "doctorate_year"],
     titulo_en_required=False,
