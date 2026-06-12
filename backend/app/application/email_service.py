@@ -80,6 +80,39 @@ def send_attachment_email(
     return _send(recipients, msg)
 
 
+def send_email_with_attachments(
+    to: str,
+    subject: str,
+    html_body: str,
+    attachments: list[tuple[str, bytes, str]],
+    cc: str | None = None,
+) -> Result[None, EmailError]:
+    """Send an HTML email with N binary attachments.
+
+    Each attachment is a `(filename, content, mime_type)` tuple. With an empty
+    list this is equivalent to a plain HTML email.
+    """
+    logger.info("send_email_with_attachments.start", {"to": to, "count": len(attachments)})
+    msg = MIMEMultipart("mixed")
+    msg["Subject"] = subject
+    msg["From"] = FROM_ADDRESS
+    msg["To"] = to
+    if cc:
+        msg["Cc"] = cc
+    msg.attach(MIMEText(html_body, "html"))
+
+    for filename, content, mime_type in attachments:
+        maintype, _, subtype = mime_type.partition("/")
+        part = MIMEBase(maintype or "application", subtype or "octet-stream")
+        part.set_payload(content)
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", "attachment", filename=filename)
+        msg.attach(part)
+
+    recipients = [to] + ([cc] if cc else [])
+    return _send(recipients, msg)
+
+
 # Legacy aliases for backward compatibility
 def send_petition_email(to: str, subject: str, html_body: str) -> Result[None, EmailError]:
     return send_email(to, subject, html_body)
