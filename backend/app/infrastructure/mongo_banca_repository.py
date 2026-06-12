@@ -24,6 +24,18 @@ logger = get_logger(__name__)
 
 
 class MongoBancaRepository(BancaRepository):
+    def ensure_ata_start(self, ppg: str, tipo: int, base: int) -> None:
+        """Seed the ata counter to `base` so the first generated ata is base + 1.
+
+        Only applies when the counter doesn't exist yet ($setOnInsert) — never
+        rewinds or resets an already-running sequence.
+        """
+        get_db()["ata_counters"].update_one(
+            {"ppg": ppg, "tipo": tipo},
+            {"$setOnInsert": {"last_ata": max(base, 0)}},
+            upsert=True,
+        )
+
     def next_ata(self, ppg: str, tipo: int) -> int:
         """Atomically increment and return the next ata number for ppg+tipo."""
         result = get_db()["ata_counters"].find_one_and_update(
