@@ -43,6 +43,9 @@ class BancaRequest(BaseModel):
     modalidade: Literal["presencial", "hibrida", "remota"]
     sala_preferencia: str | None = None
     link: str | None = None
+    # ppgenfis: data de envio do parecer individual mostrada nas cartas-convite.
+    # Opcional; quando ausente o gerador usa a data da defesa como fallback.
+    data_parecer: date | None = None
     orientador: MemberInfo
     coorientador: MemberInfo | None = None
     externo1: MemberInfo | None = None
