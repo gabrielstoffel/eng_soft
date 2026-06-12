@@ -94,14 +94,14 @@ export default function MemberField({
 
         {showPpgEnfisFields && (
           <>
-            <Field label="Lattes" required>
-              <TextInput type="url" required disabled={disabled} placeholder="http://lattes.cnpq.br/..." {...register(`${prefix}.lattes` as any)} />
+            <Field label="Lattes" required error={fieldErrors?.lattes?.message}>
+              <TextInput type="text" required disabled={disabled} hasError={!!fieldErrors?.lattes} placeholder="lattes.cnpq.br/... ou http://lattes.cnpq.br/..." {...register(`${prefix}.lattes` as any)} />
             </Field>
-            <Field label="Instituição conclusão doutorado" required>
-              <TextInput type="text" required disabled={disabled} {...register(`${prefix}.doctorate_institution` as any)} />
+            <Field label="Instituição conclusão doutorado" required error={fieldErrors?.doctorate_institution?.message}>
+              <TextInput type="text" required disabled={disabled} hasError={!!fieldErrors?.doctorate_institution} {...register(`${prefix}.doctorate_institution` as any)} />
             </Field>
-            <Field label="Ano conclusão doutorado" required>
-              <TextInput type="text" required disabled={disabled} placeholder="2015" {...register(`${prefix}.doctorate_year` as any)} />
+            <Field label="Ano conclusão doutorado" required error={fieldErrors?.doctorate_year?.message}>
+              <TextInput type="text" required disabled={disabled} hasError={!!fieldErrors?.doctorate_year} placeholder="2015" {...register(`${prefix}.doctorate_year` as any)} />
             </Field>
           </>
         )}

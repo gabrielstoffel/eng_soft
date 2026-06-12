@@ -103,14 +103,14 @@ export default function BancaGeneralSection({
 
           {ppg === "ppgenfis" && (
             <div className="grid gap-4 sm:grid-cols-3">
-              <Field label="CPF" required>
-                <TextInput type="text" required disabled={disabled} {...register("nome.cpf")} />
+              <Field label="CPF" required error={errors.nome?.cpf?.message}>
+                <TextInput type="text" required disabled={disabled} hasError={!!errors.nome?.cpf} {...register("nome.cpf")} />
               </Field>
-              <Field label="Data de nascimento" required>
-                <TextInput type="date" required disabled={disabled} {...register("nome.birth_date")} />
+              <Field label="Data de nascimento" required error={errors.nome?.birth_date?.message}>
+                <TextInput type="date" required disabled={disabled} hasError={!!errors.nome?.birth_date} {...register("nome.birth_date")} />
               </Field>
-              <Field label="E-mail do aluno" required>
-                <TextInput type="email" required disabled={disabled} {...register("nome.email")} />
+              <Field label="E-mail do aluno" required error={errors.nome?.email?.message}>
+                <TextInput type="email" required disabled={disabled} hasError={!!errors.nome?.email} {...register("nome.email")} />
               </Field>
             </div>
           )}
@@ -153,8 +153,8 @@ export default function BancaGeneralSection({
           </div>
 
           {showSala && (
-            <Field label="Sala de preferência" required>
-              <TextInput type="text" required disabled={disabled} placeholder="Ex: Sala de videoconferências, Anfiteatro..." {...register("sala_preferencia")} />
+            <Field label="Sala de preferência" required error={errors.sala_preferencia?.message}>
+              <TextInput type="text" required disabled={disabled} hasError={!!errors.sala_preferencia} placeholder="Ex: Sala de videoconferências, Anfiteatro..." {...register("sala_preferencia")} />
             </Field>
           )}
 

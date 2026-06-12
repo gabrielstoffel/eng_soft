@@ -32,12 +32,16 @@ const ROLES_BY_TAB: Record<CompositionTab, readonly (typeof ALL_ROLES)[number][]
   externos: ["externo1", "externo2", "supl_ext"],
 };
 
+const TAB_ORDER: CompositionTab[] = ["orientacao", "internos", "externos"];
+
 export default function BancaCompositionSection({ disabled = false }: BancaCompositionSectionProps) {
-  const { setValue, watch } = useFormContext<NewBancaFormState>();
+  const { setValue, watch, formState } = useFormContext<NewBancaFormState>();
   const [activeTab, setActiveTab] = useState<CompositionTab>("orientacao");
   const tipo = watch("tipo");
   const ppg = watch("ppg");
-  const visibleRoles = ROLES_BY_TIPO[ppg][tipo];
+  // Guard against a momentarily-undefined ppg/tipo (e.g. while a form's default
+  // values load) so a bad lookup can never crash the whole page.
+  const visibleRoles = ROLES_BY_TIPO[ppg]?.[tipo] ?? ROLES_BY_TIPO.ppgfis[1];
 
   const activeRoles = ALL_ROLES.filter((role) => {
     if (visibleRoles[role] === "required") return true;
@@ -81,6 +85,21 @@ export default function BancaCompositionSection({ disabled = false }: BancaCompo
       setActiveTab(availableTabs[0] ?? "orientacao");
     }
   }, [activeTab, availableTabs]);
+
+  // On a failed submit, jump to the tab holding the first errored member so the
+  // page-level scroll-to-error can reach it (tabs only render their own roles).
+  useEffect(() => {
+    if (formState.submitCount === 0) return;
+    const errors = formState.errors as Record<string, unknown>;
+    const tabWithError = TAB_ORDER.find((tab) =>
+      activeRolesByTab[tab].some((role) => errors[role]),
+    );
+    if (tabWithError && tabWithError !== activeTab) {
+      setActiveTab(tabWithError);
+    }
+    // Re-run only when a new submit attempt happens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formState.submitCount]);
 
   function toggleOptionalRole(role: OptionalMemberRole) {
     const currentValue = watch(role);
@@ -130,7 +149,7 @@ export default function BancaCompositionSection({ disabled = false }: BancaCompo
                 label={ROLE_LABELS[role]}
                 name={role}
                 required={visibleRoles[role] === "required"}
-                requireEmail={role === "orientador"}
+                requireEmail
                 disabled={disabled}
                 ppg={ppg}
                 onRemove={visibleRoles[role] === "optional" ? () => setValue(role, null) : undefined}

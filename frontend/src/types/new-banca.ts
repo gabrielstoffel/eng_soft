@@ -98,7 +98,69 @@ export const newBancaFormStateSchema = z.object({
   titulo2: z.string(),
   comentario_desempenho: z.string(),
   justificativa_membros: z.string(),
-})
+}).superRefine(applyBancaBusinessRules)
+
+// Member slots, in the same order the backend validates them.
+const _MEMBER_ROLES = [
+  'orientador', 'coorientador', 'externo1', 'externo2',
+  'interno1', 'interno2', 'supl_int', 'supl_ext',
+] as const
+
+// Minimum days of notice required between submission and the defesa date,
+// mirroring the backend `antecedencia_dias` per PPG and tipo.
+const _ANTECEDENCIA_DIAS: Record<Ppg, Record<BancaType, number>> = {
+  ppgfis: { 1: 20, 2: 30, 3: 30 },
+  ppgenfis: { 1: 20, 2: 30, 3: 40 },
+}
+
+/**
+ * Business rules that the plain field schema can't express (they depend on
+ * ppg/tipo/modalidade). Each violation is reported at the exact field path so
+ * react-hook-form marks that field — giving it a red outline — without surfacing
+ * any backend-style field detail to the user.
+ */
+function applyBancaBusinessRules(form: NewBancaFormState, ctx: z.RefinementCtx) {
+  const required = (path: Array<string | number>) =>
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Obrigatório", path })
+
+  const missing = (v: unknown) => !v || (typeof v === "string" && v.trim() === "")
+
+  // E-mail is mandatory for every member — it's the recipient for the
+  // convites/pareceres sent from the admin page after approval.
+  for (const role of _MEMBER_ROLES) {
+    const member = form[role]
+    if (member && missing(member.email)) required([role, "email"])
+  }
+
+  // Presencial/híbrida require a preferred room.
+  if ((form.modalidade === "presencial" || form.modalidade === "hibrida") && missing(form.sala_preferencia)) {
+    required(["sala_preferencia"])
+  }
+
+  // PPGEnFis-specific requirements.
+  if (form.ppg === "ppgenfis") {
+    if (missing(form.nome.cpf)) required(["nome", "cpf"])
+    if (missing(form.nome.birth_date)) required(["nome", "birth_date"])
+    if (missing(form.nome.email)) required(["nome", "email"])
+
+    for (const role of _MEMBER_ROLES) {
+      const member = form[role]
+      if (!member) continue
+      if (missing(member.lattes)) required([role, "lattes"])
+      if (missing(member.doctorate_institution)) required([role, "doctorate_institution"])
+      if (missing(member.doctorate_year)) required([role, "doctorate_year"])
+    }
+  }
+
+  // Minimum-notice rule on the suggested date.
+  if (form.data) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const target = new Date(`${form.data}T00:00:00`)
+    const daysAhead = Math.round((target.getTime() - today.getTime()) / 86_400_000)
+    if (daysAhead < _ANTECEDENCIA_DIAS[form.ppg][form.tipo]) required(["data"])
+  }
+}
 
 export const bancaRequestSchema = z.object({
   ppg: ppgSchema,
