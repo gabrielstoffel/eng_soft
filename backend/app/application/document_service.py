@@ -8,16 +8,42 @@ import traceback
 import zipfile
 
 from app.domain.errors import DocumentGenerationError
-from app.domain.models import BancaRequest, FileManifestEntry, MemberInfo, MemberRole
+from app.domain.models import BancaRequest, DocumentKind, FileManifestEntry, MemberInfo, MemberRole
 from app.logger import get_logger
 from app.result import Err, Ok, Result
 
 logger = get_logger(__name__)
 
 _CRIABANCAS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "criaBancas")
+_CRIABANCAS_ENFIS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "criaBancasEnfis")
 sys.path.insert(0, os.path.abspath(_CRIABANCAS_DIR))
+sys.path.insert(0, os.path.abspath(_CRIABANCAS_ENFIS_DIR))
 
-from criaBancas import Banca  # noqa: E402
+from criaBancas import Banca as _BancaFis  # noqa: E402
+from criaBancasEnfis import Banca as _BancaEnfis  # noqa: E402
+
+# Per-PPG PDF generator. Both classes share the same constructor contract; they
+# differ in which `cria*` methods (i.e. which document kinds) they implement.
+_PPG_GENERATOR = {
+    "ppgfis": _BancaFis,
+    "ppgenfis": _BancaEnfis,
+}
+
+# Which document kinds each PPG's generator can produce. The ppgenfis generator
+# (ported from the legacy `cria_cartas.php`) only emits cartas-convite.
+_ALL_KINDS: set[DocumentKind] = {"ata", "cartaz", "parecer", "carta_convite", "relatoria_avaliacao"}
+_PPG_DOC_KINDS: dict[str, set[DocumentKind]] = {
+    "ppgfis": _ALL_KINDS,
+    "ppgenfis": {"carta_convite"},
+}
+
+
+def _generator_class(ppg: str):
+    return _PPG_GENERATOR.get(ppg, _BancaFis)
+
+
+def _supported_kinds(ppg: str) -> set[DocumentKind]:
+    return _PPG_DOC_KINDS.get(ppg, _ALL_KINDS)
 
 # Mirrors the role index → "FUNCAO" mapping inside criaBancas.criaCartaConvite.
 _CONVITE_FUNCAO: dict[MemberRole, str] = {
@@ -52,12 +78,13 @@ def _member_tuple(member: MemberInfo | None) -> tuple | None:
 @contextlib.contextmanager
 def _build_banca(req: BancaRequest, ata: int):
     tmp_dir = tempfile.mkdtemp(prefix="sigbah_banca_")
-    banca = Banca(
+    cls = _generator_class(req.ppg)
+    kwargs = dict(
         nome=req.nome.to_tuple(),
         tipo=req.tipo,
         data=req.data,
         horario=req.horario,
-        data_convite=None,  # campo removido do modelo; criaBancas usa `data` como fallback
+        data_convite=None,  # campo removido do modelo; o gerador usa `data` como fallback
         ata=ata,
         local_banca=req.sala_preferencia,  # substitui o antigo local_banca
         link=req.link,
@@ -72,6 +99,11 @@ def _build_banca(req: BancaRequest, ata: int):
         titulo=req.titulo,
         titulo2=req.titulo2,
     )
+    # The ppgenfis cartas carry a parecer-submission date the ppgfis generator
+    # has no concept of; only pass it to the generator that accepts it.
+    if req.ppg == "ppgenfis":
+        kwargs["data_parecer"] = req.data_parecer
+    banca = cls(**kwargs)
     original_dir = banca.dir
     banca.dir = tmp_dir
     try:
@@ -93,12 +125,16 @@ def _zip_dir(directory: str) -> io.BytesIO:
     return buf
 
 
-def _generate_all(banca: Banca) -> None:
-    banca.criaAta(save=True)
-    banca.criaCartaConvite(save=True)
-    banca.criaParecer(save=True)
-    banca.criaCartaz(save=True)
-    if banca.tipo == 2:
+def _generate_all(banca, kinds: set[DocumentKind]) -> None:
+    if "ata" in kinds:
+        banca.criaAta(save=True)
+    if "carta_convite" in kinds:
+        banca.criaCartaConvite(save=True)
+    if "parecer" in kinds:
+        banca.criaParecer(save=True)
+    if "cartaz" in kinds:
+        banca.criaCartaz(save=True)
+    if "relatoria_avaliacao" in kinds and banca.tipo == 2:
         banca.criaRelatoriaAvaliacao(save=True)
 
 
@@ -117,8 +153,9 @@ def file_manifest(req: BancaRequest) -> list[FileManifestEntry]:
     """
     items: list[FileManifestEntry] = []
     student = req.nome.name
+    kinds = _supported_kinds(req.ppg)
 
-    if req.tipo != 2:
+    if "ata" in kinds and req.tipo != 2:
         items.append(
             FileManifestEntry(
                 id="ata",
@@ -128,16 +165,17 @@ def file_manifest(req: BancaRequest) -> list[FileManifestEntry]:
             )
         )
 
-    items.append(
-        FileManifestEntry(
-            id="cartaz",
-            label=f"Cartaz - {student}.pdf",
-            kind="cartaz",
-            member_role=None,
+    if "cartaz" in kinds:
+        items.append(
+            FileManifestEntry(
+                id="cartaz",
+                label=f"Cartaz - {student}.pdf",
+                kind="cartaz",
+                member_role=None,
+            )
         )
-    )
 
-    if req.tipo == 2:
+    if "relatoria_avaliacao" in kinds and req.tipo == 2:
         items.append(
             FileManifestEntry(
                 id="relatoria_avaliacao",
@@ -147,33 +185,35 @@ def file_manifest(req: BancaRequest) -> list[FileManifestEntry]:
             )
         )
 
-    for role, funcao in _CONVITE_FUNCAO.items():
-        member = getattr(req, role)
-        if member is None:
-            continue
-        full = f"{_member_prefix(member.gender)}{member.name}"
-        items.append(
-            FileManifestEntry(
-                id=f"carta_convite:{role}",
-                label=f"Carta Convite {funcao} - {full}.pdf",
-                kind="carta_convite",
-                member_role=role,
+    if "carta_convite" in kinds:
+        for role, funcao in _CONVITE_FUNCAO.items():
+            member = getattr(req, role)
+            if member is None:
+                continue
+            full = f"{_member_prefix(member.gender)}{member.name}"
+            items.append(
+                FileManifestEntry(
+                    id=f"carta_convite:{role}",
+                    label=f"Carta Convite {funcao} - {full}.pdf",
+                    kind="carta_convite",
+                    member_role=role,
+                )
             )
-        )
 
-    for role in _PARECER_ROLES:
-        member = getattr(req, role)
-        if member is None:
-            continue
-        full = f"{_member_prefix(member.gender)}{member.name}"
-        items.append(
-            FileManifestEntry(
-                id=f"parecer:{role}",
-                label=f"Parecer - {full}.pdf",
-                kind="parecer",
-                member_role=role,
+    if "parecer" in kinds:
+        for role in _PARECER_ROLES:
+            member = getattr(req, role)
+            if member is None:
+                continue
+            full = f"{_member_prefix(member.gender)}{member.name}"
+            items.append(
+                FileManifestEntry(
+                    id=f"parecer:{role}",
+                    label=f"Parecer - {full}.pdf",
+                    kind="parecer",
+                    member_role=role,
+                )
             )
-        )
 
     return items
 
@@ -182,7 +222,7 @@ def generate_documents(req: BancaRequest, ata: int) -> Result[tuple[io.BytesIO, 
     logger.info("generate_documents.start", {"ata": ata, "tipo": req.tipo})
     try:
         with _build_banca(req, ata) as banca:
-            _generate_all(banca)
+            _generate_all(banca, _supported_kinds(req.ppg))
             buf = _zip_dir(banca.dir)
             zip_name = _zip_filename(req, ata)
             logger.info("generate_documents.end", {"zip": zip_name})
