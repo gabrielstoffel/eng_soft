@@ -1,8 +1,7 @@
 import { IconUpload, IconX } from "@tabler/icons-react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import type { NewBancaFormState } from "../../../types/new-banca.ts";
-import Field from "../../../components/Field";
 
 type Props = { disabled?: boolean };
 type FileEntry = { file: File; kind: string; id: string };
@@ -19,12 +18,17 @@ export default function BancaAttachmentsSection({ disabled = false }: Props) {
 
   const addFiles = useCallback((e: React.ChangeEvent<HTMLInputElement>, kind: string) => {
     const input = e.target;
-    const newFiles = input.files;
-    if (!newFiles || newFiles.length === 0) return;
+    if (!input.files || input.files.length === 0) return;
+
+    // Snapshot the FileList into a real array NOW: input.files is a live
+    // reference that input.value = "" empties, and the state updater below runs
+    // afterwards — iterating the live list there would yield nothing.
+    const picked = Array.from(input.files);
+    input.value = ""; // let the user re-pick the same file later
 
     setFiles((prev) => {
       const next = [...prev];
-      for (const file of Array.from(newFiles)) {
+      for (const file of picked) {
         const existingIdx = next.findIndex((f) => f.kind === kind && f.file.name === file.name);
         const entry: FileEntry = { file, kind, id: `file-${++fileIdCounter}` };
         if (existingIdx >= 0) {
@@ -35,8 +39,6 @@ export default function BancaAttachmentsSection({ disabled = false }: Props) {
       }
       return next;
     });
-
-    input.value = "";
   }, []);
 
   const removeFile = useCallback((id: string) => {
@@ -91,19 +93,32 @@ function FileField({ label, required, multiple, kind, files, disabled, onAdd, on
   onRemove: (id: string) => void;
   hint?: string;
 }) {
-  const inputId = `file-input-${kind}`;
+  const inputRef = useRef<HTMLInputElement>(null);
   const statusText = files.length === 0
     ? "Nenhum arquivo selecionado"
     : `${files.length} arquivo${files.length > 1 ? "s" : ""} selecionado${files.length > 1 ? "s" : ""}`;
 
+  // The picker is opened by a <button> that calls input.click() via a ref —
+  // deliberately NOT a <label htmlFor>. A label (especially one wrapped by
+  // another label) can dispatch a second click at the input, reopening the
+  // dialog and silently dropping the chosen file.
   return (
-    <Field label={label} required={required}>
+    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <span className="text-sm font-semibold leading-5 text-slate-800">
+        {label}
+        {required ? <span className="ml-1 font-bold text-sky-700">*</span> : null}
+      </span>
       <div className="flex items-center gap-3">
-        <label htmlFor={inputId} className={`inline-flex cursor-pointer items-center rounded-lg bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 ${disabled ? "pointer-events-none opacity-50" : ""}`}>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled}
+          className={`inline-flex cursor-pointer items-center rounded-lg bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-700 transition hover:bg-sky-100 ${disabled ? "pointer-events-none opacity-50" : ""}`}
+        >
           Escolher arquivo{multiple ? "s" : ""}
-        </label>
+        </button>
         <span className="text-sm text-slate-500">{statusText}</span>
-        <input id={inputId} type="file" accept=".pdf" multiple={multiple} disabled={disabled} onChange={(e) => onAdd(e, kind)} className="hidden" />
+        <input ref={inputRef} type="file" accept=".pdf" multiple={multiple} disabled={disabled} onChange={(e) => onAdd(e, kind)} className="hidden" />
       </div>
       {files.length > 0 && (
         <ul className="mt-2 space-y-1">
@@ -119,6 +134,6 @@ function FileField({ label, required, multiple, kind, files, disabled, onAdd, on
         </ul>
       )}
       {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
-    </Field>
+    </div>
   );
 }
