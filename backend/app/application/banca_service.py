@@ -1,4 +1,5 @@
-from app.application import banca_validation, document_service, email_service, petition_service
+from app.application import attachment_service, banca_validation, email_service, petition_service
+from app.application.attachment_service import AttachmentUpload
 from app.config import FRONTEND_BASE_URL
 from app.config.ppg_profiles import get_profile
 from app.domain.banca_repository import BancaRepository
@@ -27,9 +28,13 @@ class BancaService:
         self._repo = repo
 
     def submit_petition(
-        self, req: BancaRequest
+        self, req: BancaRequest, attachments: list[AttachmentUpload] | None = None
     ) -> Result[BancaSubmitResponse, ValidationError | EmailError | PersistenceError]:
-        logger.info("submit_petition.start", {"student": req.nome.name, "ppg": req.ppg})
+        attachments = attachments or []
+        logger.info(
+            "submit_petition.start",
+            {"student": req.nome.name, "ppg": req.ppg, "attachments": len(attachments)},
+        )
         profile = get_profile(req.ppg)
 
         errors = banca_validation.validate_submission(req)
@@ -50,12 +55,28 @@ class BancaService:
             case ok:
                 record = ok.value
 
+        # Persist the uploaded PDFs (system of record) and attach them to the
+        # coordenador email so they travel with the petition.
+        attachment_service.store_attachments(token, attachments)
+
         decision_link = f"{FRONTEND_BASE_URL}/decide/{token}"
-        subject = petition_service.build_petition_subject(req, record.ata)
+        admin_link = f"{FRONTEND_BASE_URL}/admin"
+        subject = petition_service.build_petition_subject(req)
         html = petition_service.build_petition_html(req, decision_link)
-        match email_service.send_email(profile.coordenador_email, subject, html):
+        email_files = [(a.filename, a.content, a.content_type) for a in attachments]
+        match email_service.send_email_with_attachments(
+            profile.coordenador_email, subject, html, email_files
+        ):
             case Err() as err:
                 return err
+
+        # Also notify the secretary that a new banca arrived for evaluation.
+        sec_subject = petition_service.build_secretary_notification_subject(req)
+        sec_html = petition_service.build_secretary_notification_html(req, admin_link)
+        match email_service.send_email(profile.secretary_email, sec_subject, sec_html):
+            case Err() as err:
+                logger.error("submit_petition.secretary_email.error", {"message": err.error.message})
+                # Non-fatal: the coordenador (the decision-maker) was already notified.
 
         logger.info("submit_petition.end", {"ata": record.ata, "decision_token": token})
         return Ok(
@@ -109,37 +130,35 @@ class BancaService:
         req = record.request
         profile = get_profile(record.ppg)
 
-        # Generate documents FIRST. Generation is pure and has no side effects,
-        # so a failure here leaves the banca "pending" and the approval can be
-        # safely retried (instead of getting stuck "approved" but undelivered).
-        match document_service.generate_documents(req, record.ata):
-            case Err() as err:
-                logger.error(
-                    "approve.document_generation.error",
-                    {"decision_token": token, "message": err.error.message},
-                )
-                return err
-            case ok:
-                zip_bytes, zip_name = ok.value
-
         # Commit the decision via the atomic pending→approved transition, BEFORE
         # sending any email. Under concurrency/retries only the caller that wins
-        # this transition reaches the email sends, so the documents/scheduling
+        # this transition reaches the email sends, so the notification/scheduling
         # emails can never be fired twice.
         match self._repo.update_decision(token, "approved", observation=observation):
             case Err() as err:
                 return err
 
-        # Send documents to secretary (with observation if present)
-        docs_subject = f"[SigBah!] Documentos da Banca #{record.ata} — {req.nome.name}"
-        docs_html = petition_service.build_documents_html(req, record.ata, observation)
-        match email_service.send_documents_email(profile.secretary_email, docs_subject, docs_html, zip_bytes, zip_name):
+        # Notify the secretary (no attachments — documents are downloaded from the
+        # admin panel; cartas-convite/pareceres are sent separately from there).
+        docs_subject = f"[SigBah!] Documentos — {petition_service.tipo_label(req.tipo)} — {req.nome.name}"
+        admin_link = f"{FRONTEND_BASE_URL}/admin"
+        docs_html = petition_service.build_documents_html(req, admin_link, observation)
+        match email_service.send_email(profile.secretary_email, docs_subject, docs_html):
             case Err() as err:
                 return err
 
+        # Notify the orientador that the banca was approved.
+        if req.orientador.email:
+            orient_subject = petition_service.build_orientador_approval_subject(req)
+            orient_html = petition_service.build_orientador_approval_html(req, observation)
+            match email_service.send_email(req.orientador.email, orient_subject, orient_html):
+                case Err() as err:
+                    logger.error("approve.orientador_email.error", {"message": err.error.message})
+                    # Non-fatal: the banca is already approved.
+
         # Send scheduling email to gerência with CC to CPG alias
-        gerencia_subject = f"[SigBah!] Solicitação de Agendamento — Banca #{record.ata}"
-        gerencia_html = petition_service.build_gerencia_html(req, record.ata, profile)
+        gerencia_subject = f"[SigBah!] Solicitação de Agendamento — {petition_service.tipo_label(req.tipo)} — {req.nome.name}"
+        gerencia_html = petition_service.build_gerencia_html(req, profile)
         match email_service.send_email(profile.gerencia_email, gerencia_subject, gerencia_html, cc=profile.cpg_alias_email):
             case Err() as err:
                 logger.error("approve.gerencia_email.error", {"message": err.error.message})
@@ -183,8 +202,8 @@ class BancaService:
                 return err
 
         recipient = req.orientador.email
-        subject = petition_service.build_rejection_subject(req, record.ata)
-        html = petition_service.build_rejection_html(req, record.ata, reason)
+        subject = petition_service.build_rejection_subject(req)
+        html = petition_service.build_rejection_html(req, reason)
         match email_service.send_email(recipient, subject, html):
             case Err() as err:
                 return err
