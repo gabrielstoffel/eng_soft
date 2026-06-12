@@ -15,18 +15,19 @@ package "SigBah! Frontend" <<system>> {
         note as NP
             NewBancaPage (.tsx)
             DecisionPage (.jsx)
+            AdminLogin (.jsx)
             AdminBancaList (.jsx)
             AdminBancaDetail (.jsx)
         end note
     }
     package "Components" <<subsystem>> {
     }
-    package "Config" <<subsystem>> {
+    package "Auth (token)" <<subsystem>> {
     }
     note right of "SigBah! Frontend"
-        React 19 + Vite
+        React + Vite
         JavaScript + TypeScript
-        SPA (Single Page Application)
+        SPA, rotas por PPG (/ppgfis, /ppgenfis)
     end note
 }
 
@@ -37,9 +38,10 @@ package "SigBah! Backend" <<system>> {
 
     package "api" <<subsystem>> {
         note as N1
-            FastAPI routes (router.py, admin_router.py)
-            HTTP request/response
-            Injecao de Dependencia (deps.py)
+            router.py (submissao/decisao publica)
+            admin_router.py (painel, auth Bearer)
+            auth_deps.py (usuario atual + PPG)
+            deps.py (Injecao de Dependencia)
             Mapeamento erro -> HTTP status
         end note
     }
@@ -47,17 +49,27 @@ package "SigBah! Backend" <<system>> {
     package "application" <<subsystem>> {
         note as N2
             Casos de uso:
-            - BancaService
-            - AdminBancaService
-            - document_service
-            - email_service
-            - petition_service
+            - BancaService / AdminBancaService
+            - InviteService / AuthService
+            - document_service / attachment_service
+            - email_service / petition_service
+            - banca_validation
+        end note
+    }
+
+    package "config" <<subsystem>> {
+        note as NC
+            ppg_profiles:
+            perfil por PPG (e-mails,
+            composicao, antecedencia,
+            campos obrigatorios)
         end note
     }
 
     package "domain" <<subsystem>> {
         note as N3
-            Contratos (ABCs)
+            Contratos (ABCs): BancaRepository,
+            UserRepository
             Modelos (Pydantic)
             Erros tipados
             SEM dependencias externas
@@ -67,24 +79,23 @@ package "SigBah! Backend" <<system>> {
     package "infrastructure" <<subsystem>> {
         note as N4
             MongoBancaRepository
-            Conexao com banco de dados
-            Cliente SMTP
+            MongoUserRepository
+            Cliente SMTP / armazenamento de anexos
         end note
     }
 
-    package "criaBancas" <<library>> {
+    package "criaBancas / criaBancasEnfis" <<library>> {
         note as N5
             Geracao de documentos PDF
-            (cartas-convite, atas,
-            folhas de conceito)
+            por PPG (cartas-convite, atas,
+            cartazes, pareceres, relatorias)
         end note
     }
 
     note bottom of "SigBah! Backend"
-        Python 3.12
-        FastAPI + Pydantic
-        PyMongo
-        uvicorn (ASGI)
+        Python 3.12 + FastAPI + Pydantic
+        PyMongo + uvicorn (ASGI)
+        Padrao Result (sem excecoes na borda)
     end note
 }
 
@@ -92,7 +103,7 @@ package "SigBah! Backend" <<system>> {
 ' TOP-LEVEL SYSTEM: INFRASTRUCTURE SERVICES
 ' ============================================================
 package "Servicos de Infraestrutura" <<system>> {
-    package "MongoDB 7" <<framework>> {
+    package "MongoDB" <<framework>> {
     }
     package "Postfix" <<framework>> {
     }
@@ -108,23 +119,18 @@ package "Servicos de Infraestrutura" <<system>> {
 ' DEPENDENCIAS
 ' ============================================================
 
-' Frontend -> Backend (via HTTP)
 "SigBah! Frontend" ..> "api" : <<use>>\nHTTP/JSON REST
 
-' Camadas internas do Backend (deps apontam para dentro)
 "api" ..> "application" : <<use>>
 "api" ..> "domain" : <<use>>\n(modelos, erros)
 "application" ..> "domain" : <<use>>
+"application" ..> "config" : <<use>>\n(perfil PPG)
 "infrastructure" ..> "domain" : <<import>>\n(implementa ABCs)
 
-' Application usa biblioteca de PDF
-"application" ..> "criaBancas" : <<use>>\n(geracao PDF)
+"application" ..> "criaBancas / criaBancasEnfis" : <<use>>\n(geracao PDF)
 
-' Infrastructure -> Servicos externos
-"infrastructure" ..> "MongoDB 7" : <<use>>\n(PyMongo, porta 27017)
-"infrastructure" ..> "Postfix" : <<use>>\n(SMTP, porta 2525)
-
-' Postfix relay para Mailpit
+"infrastructure" ..> "MongoDB" : <<use>>\n(PyMongo, 27017)
+"infrastructure" ..> "Postfix" : <<use>>\n(SMTP, 2525)
 "Postfix" ..> "Mailpit" : <<use>>\n(relay SMTP)
 
 @enduml

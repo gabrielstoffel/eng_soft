@@ -4,7 +4,7 @@
 skinparam shadowing false
 skinparam classAttributeIconSize 0
 
-title Diagrama de Classes — Modelo de Dominio\nSigBah! (app/domain/)
+title Diagrama de Classes — Modelo de Dominio\nSigBah! (app/domain/ + contratos de application/)
 
 ' ============================================================
 ' VALUE OBJECTS
@@ -13,6 +13,9 @@ title Diagrama de Classes — Modelo de Dominio\nSigBah! (app/domain/)
 class StudentInfo {
     - gender: Literal[0, 1]
     - name: str
+    - cpf: str | None
+    - birth_date: date | None
+    - email: EmailStr | None
     + to_tuple(): tuple
 }
 
@@ -23,6 +26,13 @@ class MemberInfo {
     - location: str
     - lang: Literal["pt", "en"]
     - email: EmailStr | None
+    - remoto: bool
+    - ppg: str | None
+    - bolsista_cnpq: bool | None
+    - nivel_cnpq: str | None
+    - lattes: str | None
+    - doctorate_institution: str | None
+    - doctorate_year: int | None
     + to_tuple(): tuple
 }
 
@@ -31,28 +41,28 @@ class MemberInfo {
 ' ============================================================
 
 class BancaRequest {
+    - ppg: Literal["ppgfis", "ppgenfis"]
     - nome: StudentInfo
     - tipo: Literal[1, 2, 3]
     - data: date
     - horario: time
-    - data_convite: date | None
-    - ata: int
-    - local_banca: str | None
+    - modalidade: Literal["presencial","hibrida","remota"]
+    - sala_preferencia: str | None
     - link: str | None
+    - data_parecer: date | None
     - orientador: MemberInfo
     - coorientador: MemberInfo | None
-    - externo1: MemberInfo | None
-    - externo2: MemberInfo | None
-    - interno1: MemberInfo | None
-    - interno2: MemberInfo | None
-    - supl_int: MemberInfo | None
-    - supl_ext: MemberInfo | None
+    - externo1..2: MemberInfo | None
+    - interno1..2: MemberInfo | None
+    - supl_int / supl_ext: MemberInfo | None
     - titulo: str
-    - titulo2: str
+    - titulo2: str | None
+    - comentario_desempenho: str | None
+    - justificativa_membros: str | None
 }
 
 ' ============================================================
-' VERSIONING
+' VERSIONING + PERSISTED RECORD
 ' ============================================================
 
 class BancaVersion {
@@ -61,9 +71,11 @@ class BancaVersion {
     - created_at: datetime
 }
 
-' ============================================================
-' PERSISTED RECORD
-' ============================================================
+class InviteStatus {
+    - sent: bool
+    - sent_at: datetime | None
+    - recipient: str | None
+}
 
 class BancaRecord {
     - versions: list[BancaVersion]
@@ -71,8 +83,12 @@ class BancaRecord {
     - decision_token: str
     - status: BancaStatus
     - rejection_reason: str | None
+    - approval_observation: str | None
+    - ata: int
+    - ppg: str
     - created_at: datetime
     - decided_at: datetime | None
+    - invite_status: dict[str, InviteStatus]
     + request: BancaRequest <<property>>
 }
 
@@ -80,72 +96,6 @@ enum BancaStatus {
     pending
     approved
     rejected
-}
-
-' ============================================================
-' RESPONSE MODELS
-' ============================================================
-
-class BancaSubmitResponse {
-    - message: str
-    - ata: int
-    - student_name: str
-    - decision_token: str
-}
-
-class BancaSummary {
-    - request: BancaRequest
-    - status: BancaStatus
-    - rejection_reason: str | None
-}
-
-class BancaDecisionResponse {
-    - message: str
-    - ata: int
-    - student_name: str
-}
-
-class RejectRequest {
-    - reason: str
-}
-
-' ============================================================
-' ADMIN MODELS
-' ============================================================
-
-class BancaListFilters {
-    - status: BancaStatus | None
-    - ata: int | None
-    - student: str | None
-    - orientador: str | None
-    - q: str | None
-}
-
-class BancaListItem {
-    - decision_token: str
-    - ata: int
-    - student_name: str
-    - status: BancaStatus
-    - current_version: int
-    - tipo: Literal[1, 2, 3]
-    - data: date
-    - orientador_name: str
-    - created_at: datetime
-}
-
-class BancaAdminDetail {
-    - decision_token: str
-    - status: BancaStatus
-    - rejection_reason: str | None
-    - current_version: int
-    - versions: list[BancaVersion]
-    - created_at: datetime
-    - decided_at: datetime | None
-}
-
-class BancaUpdateResponse {
-    - created_new_version: bool
-    - current_version: int
 }
 
 ' ============================================================
@@ -161,14 +111,10 @@ enum DocumentKind {
 }
 
 enum MemberRole {
-    orientador
-    coorientador
-    externo1
-    externo2
-    interno1
-    interno2
-    supl_int
-    supl_ext
+    orientador / coorientador
+    externo1 / externo2
+    interno1 / interno2
+    supl_int / supl_ext
 }
 
 class FileManifestEntry {
@@ -178,47 +124,109 @@ class FileManifestEntry {
     - member_role: MemberRole | None
 }
 
+class AttachmentUpload {
+    - filename: str
+    - content: bytes
+    - content_type: str
+    - kind: str
+    - member_role: str | None
+}
+
 ' ============================================================
-' REPOSITORY (INTERFACE + IMPLEMENTACAO)
+' INVITE / AUTH MODELS
+' ============================================================
+
+class InviteItem {
+    - item_id: str
+    - kind: InviteKind
+    - label: str
+    - member_role: MemberRole | None
+    - member_name: str | None
+    - recipient: str | None
+    - sent: bool
+    - sent_at: datetime | None
+}
+
+class AdminUserRecord {
+    - username: str
+    - ppg: str
+    - password_hash: str
+}
+
+class CurrentUser {
+    - username: str
+    - ppg: str
+}
+
+' ============================================================
+' REPOSITORIES (INTERFACE + IMPLEMENTACAO)
 ' ============================================================
 
 interface BancaRepository <<interface>> {
-    + save(req: BancaRequest): Result[str, PersistenceError]
-    + find_by_token(token: str): Result[BancaRecord, Error]
-    + update_decision(token, status, reason): Result[None, Error]
-    + list(filters: BancaListFilters): Result[list[BancaListItem], PersistenceError]
-    + append_version(token: str, req: BancaRequest): Result[int, Error]
+    + save(req): Result[str, Error]
+    + find_by_token(token): Result[BancaRecord, Error]
+    + update_decision(token, status, reason, observation): Result[None, Error]
+    + list(filters): Result[list[BancaListItem], Error]
+    + append_version(token, req): Result[int, Error]
+    + set_invite_status(token, item_id, status): Result[None, Error]
 }
 
 class MongoBancaRepository {
     - _collection: Collection
-    + save(req: BancaRequest): Result[str, PersistenceError]
-    + find_by_token(token: str): Result[BancaRecord, Error]
-    + update_decision(token, status, reason): Result[None, Error]
-    + list(filters: BancaListFilters): Result[list[BancaListItem], PersistenceError]
-    + append_version(token: str, req: BancaRequest): Result[int, Error]
+}
+
+interface UserRepository <<interface>> {
+    + find_by_username(username): Result[AdminUserRecord | None, Error]
+    + upsert(user): Result[None, Error]
+}
+
+class MongoUserRepository {
+    - _collection: Collection
 }
 
 ' ============================================================
-' SERVICES
+' SERVICES (application/)
 ' ============================================================
 
 class BancaService {
     - _repo: BancaRepository
-    + submit_petition(req: BancaRequest): Result[BancaSubmitResponse, Error]
-    + get_summary(token: str): Result[BancaSummary, Error]
-    + approve(token: str): Result[BancaDecisionResponse, Error]
-    + reject(token: str, reason: str): Result[BancaDecisionResponse, Error]
+    + submit_petition(req, attachments): Result[BancaSubmitResponse, Error]
+    + get_summary(token): Result[BancaSummary, Error]
+    + approve(token, observation): Result[BancaDecisionResponse, Error]
+    + reject(token, reason): Result[BancaDecisionResponse, Error]
 }
 
 class AdminBancaService {
     - _repo: BancaRepository
-    + list_bancas(filters: BancaListFilters): Result[list[BancaListItem], Error]
-    + get_detail(token: str): Result[BancaAdminDetail, Error]
+    + list_bancas(filters): Result[..., Error]
+    + get_detail(token): Result[BancaAdminDetail, Error]
     + update_banca(token, new_req): Result[BancaUpdateResponse, Error]
     + list_files(token, version): Result[list[FileManifestEntry], Error]
     + download_files(token, ids, version): Result[tuple, Error]
 }
+
+class InviteService {
+    - _repo: BancaRepository
+    + list_invites(token): Result[list[InviteItem], Error]
+    + send_invites(token, item_ids): Result[SendInvitesResponse, Error]
+}
+
+class AuthService {
+    - _repo: UserRepository
+    + seed_default_users(): Result[None, Error]
+    + login(username, password): Result[LoginResponse, Error]
+}
+
+note as N_HELPERS
+  Modulos funcionais de application/:
+  - document_service: gera PDFs por PPG
+    (criaBancas / criaBancasEnfis)
+  - attachment_service: persiste/recupera anexos
+  - petition_service: monta assunto/HTML dos e-mails
+  - email_service: envio SMTP (com anexos)
+  - banca_validation: regras de submissao por PPG
+  - ppg_profiles (config): perfil por PPG
+end note
 
 ' ============================================================
 ' ERROR HIERARCHY
@@ -227,28 +235,23 @@ class AdminBancaService {
 abstract class BancaError {
     - message: str
 }
-
-class DocumentGenerationError {
-}
-
+class DocumentGenerationError
 class EmailError {
     - recipient: str
 }
-
-class PersistenceError {
+class PersistenceError
+class ValidationError {
+    - details: list[str]
 }
-
-class BancaNotFoundError {
-}
-
+class AuthError
+class ForbiddenError
+class BancaNotFoundError
 class BancaAlreadyDecidedError {
     - current_status: str
 }
-
 class BancaNotEditableError {
     - current_status: str
 }
-
 class BancaVersionNotFoundError {
     - version: int
 }
@@ -257,37 +260,31 @@ class BancaVersionNotFoundError {
 ' RELACIONAMENTOS
 ' ============================================================
 
-' Composicao: BancaRequest contem StudentInfo e MemberInfo
 BancaRequest *-- "1" StudentInfo : nome
 BancaRequest *-- "1..8" MemberInfo : membros
-
-' Composicao: BancaVersion contem BancaRequest
 BancaVersion *-- "1" BancaRequest : request
-
-' Composicao: BancaRecord contem BancaVersion(s)
 BancaRecord *-- "1..*" BancaVersion : versions
+BancaRecord *-- "0..*" InviteStatus : invite_status
 BancaRecord --> BancaStatus : status
 
-' BancaAdminDetail contem BancaVersion(s)
-BancaAdminDetail *-- "1..*" BancaVersion : versions
-
-' BancaSummary referencia BancaRequest
-BancaSummary --> BancaRequest : request
-
-' FileManifestEntry usa DocumentKind e MemberRole
 FileManifestEntry --> DocumentKind : kind
+FileManifestEntry --> MemberRole : member_role
+InviteItem --> MemberRole : member_role
 
-' Realizacao: MongoBancaRepository implementa BancaRepository
 MongoBancaRepository ..|> BancaRepository
+MongoUserRepository ..|> UserRepository
 
-' Dependencia: Services dependem de BancaRepository (injecao)
 BancaService --> BancaRepository : <<use>>
 AdminBancaService --> BancaRepository : <<use>>
+InviteService --> BancaRepository : <<use>>
+AuthService --> UserRepository : <<use>>
 
-' Hierarquia de erros
 DocumentGenerationError --|> BancaError
 EmailError --|> BancaError
 PersistenceError --|> BancaError
+ValidationError --|> BancaError
+AuthError --|> BancaError
+ForbiddenError --|> BancaError
 BancaNotFoundError --|> BancaError
 BancaAlreadyDecidedError --|> BancaError
 BancaNotEditableError --|> BancaError
