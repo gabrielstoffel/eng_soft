@@ -2,32 +2,46 @@
 !theme plain
 skinparam shadowing false
 
-title Diagrama de Sequencia — UC1: Formalizar Pedido de Banca
+title Diagrama de Sequencia — UC1: Formalizar Pedido de Banca\n(submissao multipart: dados + anexos PDF)
 
 actor "Orientador" as orientador
 participant "NewBancaPage\n(Frontend)" as frontend
 participant "router\n(api)" as router
 participant "BancaService\n(application)" as service
+participant "banca_validation" as valid
 participant "MongoBancaRepository\n(infrastructure)" as repo
 database "MongoDB" as db
-participant "petition_service\n(application)" as petition
-participant "email_service\n(application)" as email
+participant "attachment_service" as att
+participant "petition_service" as petition
+participant "email_service" as email
 participant "Postfix\n(SMTP)" as smtp
 
 ' ============================================================
 ' FLUXO PRINCIPAL
 ' ============================================================
 
-orientador -> frontend : Preenche formulario\n(aluno, tipo, membros, data)
+orientador -> frontend : Preenche formulario e\nseleciona anexos (texto, Lattes,\npress release)
 activate frontend
 
-frontend -> router : POST /banca\n(BancaRequest JSON)
+frontend -> router : POST /banca (multipart)\npayload JSON + files[] + kinds[]
 activate router
 
-router -> service : submit_petition(req)
+note right of router
+    Valida tipo/conteudo dos PDFs e
+    o limite total (150 MB) e monta
+    a lista de AttachmentUpload.
+end note
+
+router -> service : submit_petition(req, attachments)
 activate service
 
-' --- Persistencia ---
+' --- Validacao de negocio por PPG ---
+service -> valid : validate_submission(req)
+activate valid
+valid --> service : [] (sem erros)
+deactivate valid
+
+' --- Persistencia (ata atribuida por PPG/tipo) ---
 service -> repo : save(req)
 activate repo
 repo -> db : insert_one(document)
@@ -37,19 +51,29 @@ deactivate db
 repo --> service : Ok(decision_token)
 deactivate repo
 
-' --- Construcao do email ---
-service -> petition : build_petition_subject(req)
+' --- Armazena os anexos (sistema de registro) ---
+service -> att : store_attachments(token, attachments)
+activate att
+att --> service : OK
+deactivate att
+
+' --- E-mail ao coordenador (com anexos) ---
+service -> petition : build_petition_subject/html(req, link)
 activate petition
-petition --> service : subject
+petition --> service : subject, html
 deactivate petition
 
-service -> petition : build_petition_html(req, decision_link)
-activate petition
-petition --> service : html
-deactivate petition
+service -> email : send_email_with_attachments(\ncoordenador_email, subject, html, files)
+activate email
+email -> smtp : SMTP send (com anexos)
+activate smtp
+smtp --> email : OK
+deactivate smtp
+email --> service : Ok(None)
+deactivate email
 
-' --- Envio do email ---
-service -> email : send_petition_email(\ncoordenador_email, subject, html)
+' --- Notificacao a secretaria (sem anexos) ---
+service -> email : send_email(secretary_email, ...)
 activate email
 email -> smtp : SMTP send
 activate smtp
@@ -65,43 +89,43 @@ deactivate service
 router --> frontend : HTTP 200\n{message, ata, student_name, decision_token}
 deactivate router
 
-frontend --> orientador : Exibe confirmacao:\n"Pedido enviado ao coordenador"
+frontend --> orientador : "Pedido enviado ao coordenador"
 deactivate frontend
 
 ' ============================================================
-' FLUXO ALTERNATIVO: Dados invalidos
+' FLUXO ALTERNATIVO: Validacao de schema (Pydantic)
 ' ============================================================
-== Fluxo Alternativo 8a: Dados invalidos ==
+== Fluxo Alternativo: Dados invalidos (schema) ==
 
-orientador -> frontend : Submete formulario\ncom dados incompletos
-activate frontend
-frontend -> router : POST /banca\n(dados invalidos)
-activate router
-router --> frontend : HTTP 422\n(Validation Error)
-deactivate router
-frontend --> orientador : Exibe campos\ncom erro
-deactivate frontend
-
-' ============================================================
-' FLUXO ALTERNATIVO: Erro de persistencia
-' ============================================================
-== Fluxo Alternativo: Erro de persistencia ==
-
-orientador -> frontend : Submete formulario
+orientador -> frontend : Submete dados incompletos
 activate frontend
 frontend -> router : POST /banca
 activate router
-router -> service : submit_petition(req)
-activate service
-service -> repo : save(req)
-activate repo
-repo --> service : Err(PersistenceError)
-deactivate repo
-service --> router : Err(PersistenceError)
-deactivate service
-router --> frontend : HTTP 503\n(Service Unavailable)
+router --> frontend : HTTP 422 (Validation Error)
 deactivate router
-frontend --> orientador : Exibe mensagem\nde erro
+frontend --> orientador : Destaca campos com erro
+deactivate frontend
+
+' ============================================================
+' FLUXO ALTERNATIVO: Regras de negocio por PPG
+' ============================================================
+== Fluxo Alternativo: Regra de negocio violada ==
+
+orientador -> frontend : Submete (ex.: antecedencia\ninsuficiente, campo obrigatorio do PPG)
+activate frontend
+frontend -> router : POST /banca
+activate router
+router -> service : submit_petition(req, attachments)
+activate service
+service -> valid : validate_submission(req)
+activate valid
+valid --> service : [erros]
+deactivate valid
+service --> router : Err(ValidationError)
+deactivate service
+router --> frontend : HTTP 400 (detalhes)
+deactivate router
+frontend --> orientador : Exibe mensagem de erro
 deactivate frontend
 
 @enduml

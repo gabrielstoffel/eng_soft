@@ -19,7 +19,7 @@ node "Maquina Local" as devmachine {
 
     node "Python 3.12 + uvicorn" <<executionEnvironment>> as python_env {
         component "SigBah! Backend\n(FastAPI)" as backend
-        component "criaBancas\n(PDF generation)" as pdf
+        component "criaBancas / criaBancasEnfis\n(PDF generation por PPG)" as pdf
     }
 
     node "Node.js + Vite Dev Server" <<executionEnvironment>> as node_env {

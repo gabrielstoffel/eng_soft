@@ -6,8 +6,9 @@
 |---------|------|-----------|
 | `package-diagram.puml` | Diagrama de Pacotes | Estilo arquitetural (Clean Architecture), subsistemas e dependencias |
 | `use-case-diagram.puml` | Diagrama de Casos de Uso | Atores, casos de uso e relacionamentos (include, extend, generalizacao) |
-| `sequence-uc1-submit.puml` | Diagrama de Sequencia | UC1: Formalizar Pedido de Banca |
-| `sequence-uc3-approve.puml` | Diagrama de Sequencia | UC3: Aprovar Banca (aprovacao e recusa) |
+| `sequence-uc1-submit.puml` | Diagrama de Sequencia | UC1: Formalizar Pedido de Banca (submissao multipart + anexos) |
+| `sequence-uc3-approve.puml` | Diagrama de Sequencia | UC3/UC4: Aprovar ou Recusar Banca |
+| `sequence-uc9-invite.puml` | Diagrama de Sequencia | UC9: Enviar Cartas-convite (parecer anexado) |
 | `class-diagram.puml` | Diagrama de Classes | Modelo de dominio (entidades, repositorio, servico, erros) |
 | `deployment-diagram.puml` | Diagrama de Deployment | Disposicao fisica dos componentes (Docker, uvicorn, Vite) |
 

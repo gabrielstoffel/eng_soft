@@ -3,18 +3,20 @@
 !theme plain
 skinparam shadowing false
 
-title Diagrama de Casos de Uso — SigBah!\nSistema de Gestao de Bancas Academicas
+title Diagrama de Casos de Uso — SigBah!\nSistema de Gestao de Bancas Academicas (multi-PPG: PPGFis e PPGEnFis)
 
 left to right direction
 
 ' ============================================================
-' ESTILOS: implementado vs planejado
+' ESTILOS: implementado vs planejado vs automatico
 ' ============================================================
 skinparam usecase {
     BackgroundColor<<implementado>> #D5E8D4
     BorderColor<<implementado>> #82B366
     BackgroundColor<<planejado>> #FFF2CC
     BorderColor<<planejado>> #D6B656
+    BackgroundColor<<sistema>> #DAE8FC
+    BorderColor<<sistema>> #6C8EBF
 }
 
 ' ============================================================
@@ -23,30 +25,37 @@ skinparam usecase {
 actor "Orientador" as orientador
 actor "Coordenador\ndo PPG" as coordenador
 actor "Secretario\ndo PPG" as secretario
+actor "Gerencia /\nCPG" as gerencia
 
 ' ============================================================
 ' FRONTEIRA DO SISTEMA
 ' ============================================================
 rectangle "SigBah!" {
 
-    ' --- Casos de uso do Orientador ---
+    ' --- Submissao (Orientador, sem login) ---
     usecase "UC1: Formalizar\nPedido de Banca" as UC1 <<implementado>>
+    usecase "UC2: Anexar Documentos\n(texto, Lattes, press release)" as UC2 <<implementado>>
 
-    ' --- Casos de uso do Sistema (include/extend) ---
-    usecase "UC2: Enviar Email para\nCoordenador/Secretario" as UC2 <<implementado>>
-    usecase "UC10: Notificar\nOrientador" as UC10 <<implementado>>
-    usecase "UC4: Gerar\nDocumentos" as UC4 <<implementado>>
-
-    ' --- Casos de uso do Coordenador ---
+    ' --- Decisao por link (Coordenador, sem login) ---
     usecase "UC3: Aprovar\nBanca" as UC3 <<implementado>>
+    usecase "UC4: Recusar\nBanca" as UC4 <<implementado>>
 
-    ' --- Casos de uso do Secretario ---
-    usecase "UC5: Enviar Documentos\nda Banca" as UC5 <<implementado>>
-    usecase "UC6: Enviar\nAtestados" as UC6 <<planejado>>
-    usecase "UC7: Pesquisar\nBancas" as UC7 <<implementado>>
-    usecase "UC8: Editar\nDocumentos" as UC8 <<implementado>>
-    usecase "UC9: Gerar Relatorio\nde Bancas" as UC9 <<planejado>>
-    usecase "UC11: Enviar\nDocumentos" as UC11 <<implementado>>
+    ' --- Painel administrativo (Secretario, autenticado) ---
+    usecase "UC5: Autenticar\n(login por PPG)" as UC5 <<implementado>>
+    usecase "UC6: Pesquisar\nBancas" as UC6 <<implementado>>
+    usecase "UC7: Editar Banca\n(cria nova versao)" as UC7 <<implementado>>
+    usecase "UC8: Gerar e Baixar\nDocumentos" as UC8 <<implementado>>
+    usecase "UC9: Enviar Cartas-convite\n(parecer anexo)" as UC9 <<implementado>>
+
+    ' --- Casos de uso automaticos (executados pelo Sistema) ---
+    usecase "Gerar Documentos\n(PDF por PPG)" as UCGEN <<sistema>>
+    usecase "Notificar Coordenador\ne Secretaria" as UCNOT <<sistema>>
+    usecase "Solicitar Agendamento\n(Gerencia/CPG)" as UCAGEN <<sistema>>
+    usecase "Notificar Orientador\n(aprovacao/recusa)" as UCORI <<sistema>>
+
+    ' --- Planejados ---
+    usecase "UC10: Gerar Relatorio\nde Bancas" as UC10 <<planejado>>
+    usecase "UC11: Enviar\nAtestados" as UC11 <<planejado>>
 }
 
 ' ============================================================
@@ -55,13 +64,18 @@ rectangle "SigBah!" {
 orientador --> UC1
 
 coordenador --> UC3
+coordenador --> UC4
 
 secretario --> UC5
 secretario --> UC6
 secretario --> UC7
 secretario --> UC8
 secretario --> UC9
+secretario --> UC10
 secretario --> UC11
+
+' Gerencia/CPG recebe a solicitacao de agendamento
+UCAGEN --> gerencia
 
 ' ============================================================
 ' RELACIONAMENTOS ENTRE CASOS DE USO
@@ -69,23 +83,28 @@ secretario --> UC11
 
 ' Include
 UC1 ..> UC2 : <<include>>
-UC3 ..> UC10 : <<include>>
+UC1 ..> UCNOT : <<include>>
+UC3 ..> UCGEN : <<include>>
+UC3 ..> UCAGEN : <<include>>
+UC3 ..> UCORI : <<include>>
+UC4 ..> UCORI : <<include>>
+UC9 ..> UCGEN : <<include>>
 
-' Extend
-UC3 <.. UC4 : <<extend>>\n[banca aprovada]
+' Casos de uso do painel exigem autenticacao
+UC6 ..> UC5 : <<include>>
+UC7 ..> UC5 : <<include>>
+UC8 ..> UC5 : <<include>>
+UC9 ..> UC5 : <<include>>
 
-' Generalizacao/Especializacao
-UC5 --|> UC11
-UC6 --|> UC11
+' Generalizacao: atestados sao um tipo de envio de documento ao membro
+UC11 --|> UC9
 
 ' ============================================================
 ' LEGENDA
 ' ============================================================
-note bottom of "SigBah!"
-    Verde = implementado na Etapa 2
-    Amarelo = planejado (ainda nao implementado)
-    UC2, UC4 e UC10 sao executados pelo Sistema
-    (automaticamente, sem interacao de ator humano).
-end note
+legend bottom
+    Verde = implementado | Azul = automatico (Sistema) | Amarelo = planejado
+    Painel administrativo segmentado por PPG: cada secretario so enxerga as bancas do seu programa.
+endlegend
 
 @enduml
