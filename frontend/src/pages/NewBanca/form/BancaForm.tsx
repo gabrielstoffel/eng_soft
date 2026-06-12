@@ -21,6 +21,23 @@ export function getInitialForm(ppg: Ppg): NewBancaFormState {
   return newBancaDefaultValues(ppg);
 }
 
+/**
+ * Scroll the first invalid field into view (and focus it) after a failed
+ * validation. Retries across a few frames because the error may live in a
+ * composition tab that only renders once it's been switched to.
+ */
+export function scrollToFirstError(attempts = 10) {
+  requestAnimationFrame(() => {
+    const el = document.querySelector<HTMLElement>('[aria-invalid="true"]');
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.focus({ preventScroll: true });
+    } else if (attempts > 0) {
+      scrollToFirstError(attempts - 1);
+    }
+  });
+}
+
 export function serializeBanca(form: NewBancaFormState): BancaRequest {
   const roles = ROLES_BY_TIPO[form.ppg][form.tipo];
 
@@ -93,10 +110,14 @@ type BancaFormProps = {
 const STEP_ONE_FIELDS = [
   "nome.gender",
   "nome.name",
+  "nome.cpf",
+  "nome.birth_date",
+  "nome.email",
   "tipo",
   "data",
   "horario",
   "modalidade",
+  "sala_preferencia",
   "titulo",
 ] as const;
 
@@ -122,7 +143,10 @@ export default function BancaForm({
 
   async function goToComposition() {
     const isValid = await trigger(STEP_ONE_FIELDS);
-    if (!isValid) return;
+    if (!isValid) {
+      scrollToFirstError();
+      return;
+    }
     setStep(2);
   }
 
