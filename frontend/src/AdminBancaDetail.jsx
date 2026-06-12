@@ -13,12 +13,7 @@ const STATUS_LABEL = {
     rejected: 'Recusada',
 }
 
-const INVITE_KIND_LABEL = {
-    carta_convite: 'Carta-convite',
-    parecer: 'Parecer',
-}
-
-// Convites/pareceres are grouped by member category, mirroring the composition section.
+// Convites are grouped by member category, mirroring the composition section.
 const INVITE_CATEGORIES = [
     { label: 'Orientação', roles: ['orientador', 'coorientador'] },
     { label: 'Internos', roles: ['interno1', 'interno2', 'supl_int'] },
@@ -81,7 +76,7 @@ export default function AdminBancaDetail() {
     const [invitesLoading, setInvitesLoading] = useState(false)
     const [selectedInviteIds, setSelectedInviteIds] = useState(new Set())
     const [inviteTab, setInviteTab] = useState('Orientação')
-    const [sendInFlight, setSendInFlight] = useState(null) // null | 'convites' | 'pareceres'
+    const [sendInFlight, setSendInFlight] = useState(null) // null | 'convites'
     const [sendStatus, setSendStatus] = useState(null)
 
     // Pass a concrete object (not the factory fn) so `ppg` is defined on the
@@ -354,9 +349,6 @@ export default function AdminBancaDetail() {
     const selectedConviteIds = invites
         .filter(i => i.kind === 'carta_convite' && selectedInviteIds.has(i.item_id))
         .map(i => i.item_id)
-    const selectedParecerIds = invites
-        .filter(i => i.kind === 'parecer' && selectedInviteIds.has(i.item_id))
-        .map(i => i.item_id)
 
     function toggleInvite(id) {
         setSelectedInviteIds(prev => {
@@ -381,12 +373,6 @@ export default function AdminBancaDetail() {
         if (selectedConviteIds.length === 0) return
         if (!window.confirm('Tem certeza que deseja enviar os convites selecionados?')) return
         sendInvites(selectedConviteIds, 'convites')
-    }
-
-    function sendSelectedPareceres() {
-        if (selectedParecerIds.length === 0) return
-        if (!window.confirm('Tem certeza que deseja enviar os pareceres selecionados?')) return
-        sendInvites(selectedParecerIds, 'pareceres')
     }
 
     return (
@@ -611,7 +597,7 @@ export default function AdminBancaDetail() {
             </section>
 
             <section>
-                <h2>Envio de Convites e Pareceres</h2>
+                <h2>Envio de Convites</h2>
                 {!isApproved && (
                     <p style={{ color: '#6b7280' }}>
                         Disponível apenas após a aprovação da banca.
@@ -621,7 +607,7 @@ export default function AdminBancaDetail() {
                 {isApproved && invitesLoading && <p style={{ color: '#6b7280' }}>Carregando…</p>}
 
                 {isApproved && !invitesLoading && invites.length === 0 && !invitesError && (
-                    <p style={{ color: '#6b7280' }}>Nenhum convite ou parecer disponível.</p>
+                    <p style={{ color: '#6b7280' }}>Nenhum convite disponível.</p>
                 )}
 
                 {isApproved && !invitesLoading && invites.length > 0 && (
@@ -659,7 +645,6 @@ export default function AdminBancaDetail() {
                                             aria-label="Selecionar todos"
                                         />
                                     </th>
-                                    <th>Tipo</th>
                                     <th>Membro</th>
                                     <th>Destinatário</th>
                                     <th>Status</th>
@@ -676,7 +661,6 @@ export default function AdminBancaDetail() {
                                                 disabled={!item.recipient}
                                             />
                                         </td>
-                                        <td>{INVITE_KIND_LABEL[item.kind] || item.kind}</td>
                                         <td>{item.member_name || '—'}</td>
                                         <td>{item.recipient || <span style={{ color: '#b91c1c' }}>sem e-mail</span>}</td>
                                         <td>
@@ -702,19 +686,6 @@ export default function AdminBancaDetail() {
                                 }}
                             >
                                 {sendInFlight === 'convites' ? 'Enviando…' : `Enviar Convites (${selectedConviteIds.length})`}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={sendSelectedPareceres}
-                                disabled={selectedParecerIds.length === 0 || !!sendInFlight}
-                                style={{
-                                    padding: '0.6rem 1.5rem',
-                                    background: selectedParecerIds.length === 0 ? '#9ca3af' : '#3b82f6',
-                                    color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.95rem',
-                                    cursor: (selectedParecerIds.length === 0 || sendInFlight) ? 'not-allowed' : 'pointer',
-                                }}
-                            >
-                                {sendInFlight === 'pareceres' ? 'Enviando…' : `Enviar Pareceres (${selectedParecerIds.length})`}
                             </button>
                         </div>
 

@@ -1,9 +1,12 @@
-"""Sending of cartas-convite and pareceres to banca members (Secretaria).
+"""Sending of cartas-convite to banca members (Secretaria).
 
 Implements plan §2.7 / Fase 6 (S1–S5): per-member send, batch send, and a
 per-item sent/not-sent/date status. Item identity reuses the document manifest
-ids produced by `document_service` (e.g. "carta_convite:externo1",
-"parecer:interno1"), so status keys line up 1:1 with generated PDFs.
+ids produced by `document_service` (e.g. "carta_convite:externo1"), so status
+keys line up 1:1 with generated PDFs.
+
+The parecer is no longer mailed on its own: each evaluating member's parecer
+PDF travels as an extra attachment on their carta-convite e-mail.
 """
 
 import io
@@ -30,7 +33,7 @@ from app.result import Err, Ok, Result
 
 logger = get_logger(__name__)
 
-_INVITE_KINDS = ("carta_convite", "parecer")
+_INVITE_KINDS = ("carta_convite",)
 
 # Above this size the thesis/dissertation PDF is zipped before being attached.
 _MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
@@ -124,6 +127,10 @@ class InviteService:
         req = record.request
         profile = get_profile(record.ppg)
 
+        # Manifest ids let us tell whether a given member also has a parecer to
+        # attach (only the evaluating roles do, and only for PPGs that emit them).
+        manifest_ids = {entry.id for entry in document_service.file_manifest(req)}
+
         # The thesis/dissertation/exam PDF travels with every invite.
         thesis_attachments = _prepare_thesis_attachments(token)
 
@@ -141,7 +148,7 @@ class InviteService:
 
             member = getattr(req, item.member_role)
 
-            # Generate the single PDF for this item.
+            # Generate the carta-convite PDF for this member.
             match document_service.generate_files(req, [item_id], record.ata):
                 case Err() as err:
                     logger.error("invite.send.document_error", {"item_id": item_id, "message": err.error.message})
@@ -150,9 +157,25 @@ class InviteService:
                 case ok:
                     buf, filename, mime = ok.value
 
+            attachments = [(filename, buf.read(), mime)]
+
+            # The member's parecer (if any) rides along with their carta-convite
+            # instead of being mailed separately.
+            parecer_id = f"parecer:{item.member_role}"
+            has_parecer = parecer_id in manifest_ids
+            if has_parecer:
+                match document_service.generate_files(req, [parecer_id], record.ata):
+                    case Err() as err:
+                        logger.error("invite.send.parecer_document_error", {"item_id": item_id, "message": err.error.message})
+                        results.append(InviteSendResult(item_id=item_id, ok=False, error=err.error.message))
+                        continue
+                    case ok:
+                        p_buf, p_filename, p_mime = ok.value
+                attachments.append((p_filename, p_buf.read(), p_mime))
+
             subject = petition_service.build_invite_subject(req, item.kind)
-            html = petition_service.build_invite_html(req, item.kind, member)
-            attachments = [(filename, buf.read(), mime), *thesis_attachments]
+            html = petition_service.build_invite_html(req, item.kind, member, with_parecer=has_parecer)
+            attachments.extend(thesis_attachments)
             match email_service.send_email_with_attachments(
                 item.recipient, subject, html, attachments, cc=profile.secretary_email
             ):

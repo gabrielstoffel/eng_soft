@@ -212,11 +212,13 @@ def build_invite_subject(req: BancaRequest, kind: str) -> str:
     return f"[SigBah!] {doc} — {tipo_label(req.tipo)} — {req.nome.name}"
 
 
-def build_invite_html(req: BancaRequest, kind: str, member: MemberInfo) -> str:
+def build_invite_html(req: BancaRequest, kind: str, member: MemberInfo, with_parecer: bool = False) -> str:
     treatment = "Profª. Drª." if member.gender == 1 else "Prof. Dr."
     saudacao = f"Prezad{'a' if member.gender == 1 else 'o'} {treatment} {escape(member.name)}."
     if kind == "carta_convite":
         intro = "Em anexo, encaminhamos a carta convite formalizando sua participação na banca."
+        if with_parecer:
+            intro += " Segue também o formulário de parecer a ser preenchido."
     else:
         intro = "Em anexo, encaminhamos o formulário de parecer referente à banca."
     return f"""\
