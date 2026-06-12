@@ -13,6 +13,18 @@ const STATUS_LABEL = {
     rejected: 'Recusada',
 }
 
+const INVITE_KIND_LABEL = {
+    carta_convite: 'Carta-convite',
+    parecer: 'Parecer',
+}
+
+// Convites/pareceres are grouped by member category, mirroring the composition section.
+const INVITE_CATEGORIES = [
+    { label: 'Orientação', roles: ['orientador', 'coorientador'] },
+    { label: 'Internos', roles: ['interno1', 'interno2', 'supl_int'] },
+    { label: 'Externos', roles: ['externo1', 'externo2', 'supl_ext'] },
+]
+
 function formatTimestamp(iso) {
     if (!iso) return '—'
     const d = new Date(iso)
@@ -67,11 +79,15 @@ export default function AdminBancaDetail() {
     const [invites, setInvites] = useState([])
     const [invitesError, setInvitesError] = useState(null)
     const [invitesLoading, setInvitesLoading] = useState(false)
-    const [sendInFlight, setSendInFlight] = useState(null) // null | 'convites' | 'pareceres' | <item_id>
+    const [selectedInviteIds, setSelectedInviteIds] = useState(new Set())
+    const [inviteTab, setInviteTab] = useState('Orientação')
+    const [sendInFlight, setSendInFlight] = useState(null) // null | 'convites' | 'pareceres'
     const [sendStatus, setSendStatus] = useState(null)
 
-    const previewForm = useForm({ defaultValues: newBancaDefaultValues })
-    const editMethods = useForm({ defaultValues: newBancaDefaultValues })
+    // Pass a concrete object (not the factory fn) so `ppg` is defined on the
+    // first render — the real banca data is loaded in via reset() once fetched.
+    const previewForm = useForm({ defaultValues: newBancaDefaultValues('ppgfis') })
+    const editMethods = useForm({ defaultValues: newBancaDefaultValues('ppgfis') })
 
     useEffect(() => {
         let cancelled = false
@@ -132,8 +148,12 @@ export default function AdminBancaDetail() {
             .then(async res => {
                 const data = await res.json()
                 if (cancelled) return
-                if (res.ok) setInvites(data)
-                else setInvitesError(typeof data.detail === 'string' ? data.detail : 'Erro ao listar convites.')
+                if (res.ok) {
+                    setInvites(data)
+                    setSelectedInviteIds(new Set())
+                } else {
+                    setInvitesError(typeof data.detail === 'string' ? data.detail : 'Erro ao listar convites.')
+                }
             })
             .catch(err => { if (!cancelled) setInvitesError('Erro de conexão: ' + err.message) })
             .finally(() => { if (!cancelled) setInvitesLoading(false) })
@@ -308,7 +328,10 @@ export default function AdminBancaDetail() {
             // Refresh statuses
             const refetch = await apiFetch(`/admin/bancas/${token}/invites`)
             const refreshed = await refetch.json()
-            if (refetch.ok) setInvites(refreshed)
+            if (refetch.ok) {
+                setInvites(refreshed)
+                setSelectedInviteIds(new Set())
+            }
         } catch (err) {
             setSendStatus({ ok: false, message: 'Erro de conexão: ' + err.message })
         } finally {
@@ -316,8 +339,55 @@ export default function AdminBancaDetail() {
         }
     }
 
-    const conviteItems = invites.filter(i => i.kind === 'carta_convite')
-    const parecerItems = invites.filter(i => i.kind === 'parecer')
+    // Invites grouped into tabs by member category (like the composition section).
+    const availableInviteCategories = INVITE_CATEGORIES.filter(cat =>
+        invites.some(i => cat.roles.includes(i.member_role)),
+    )
+    const activeCategory = availableInviteCategories.find(c => c.label === inviteTab) || availableInviteCategories[0]
+    const activeInviteItems = activeCategory
+        ? invites.filter(i => activeCategory.roles.includes(i.member_role))
+        : []
+    // Only items with a recipient (member e-mail) can actually be sent.
+    const activeSendableIds = activeInviteItems.filter(i => i.recipient).map(i => i.item_id)
+    const allActiveSelected = activeSendableIds.length > 0 && activeSendableIds.every(id => selectedInviteIds.has(id))
+
+    const selectedConviteIds = invites
+        .filter(i => i.kind === 'carta_convite' && selectedInviteIds.has(i.item_id))
+        .map(i => i.item_id)
+    const selectedParecerIds = invites
+        .filter(i => i.kind === 'parecer' && selectedInviteIds.has(i.item_id))
+        .map(i => i.item_id)
+
+    function toggleInvite(id) {
+        setSelectedInviteIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) next.delete(id)
+            else next.add(id)
+            return next
+        })
+    }
+
+    // Select-all toggles only the visible tab's sendable items.
+    function toggleActiveTabInvites() {
+        setSelectedInviteIds(prev => {
+            const next = new Set(prev)
+            if (allActiveSelected) activeSendableIds.forEach(id => next.delete(id))
+            else activeSendableIds.forEach(id => next.add(id))
+            return next
+        })
+    }
+
+    function sendSelectedConvites() {
+        if (selectedConviteIds.length === 0) return
+        if (!window.confirm('Tem certeza que deseja enviar os convites selecionados?')) return
+        sendInvites(selectedConviteIds, 'convites')
+    }
+
+    function sendSelectedPareceres() {
+        if (selectedParecerIds.length === 0) return
+        if (!window.confirm('Tem certeza que deseja enviar os pareceres selecionados?')) return
+        sendInvites(selectedParecerIds, 'pareceres')
+    }
 
     return (
         <div className="container">
@@ -550,22 +620,104 @@ export default function AdminBancaDetail() {
                 {isApproved && invitesError && <div className="alert alert-err">{invitesError}</div>}
                 {isApproved && invitesLoading && <p style={{ color: '#6b7280' }}>Carregando…</p>}
 
-                {isApproved && !invitesLoading && (
+                {isApproved && !invitesLoading && invites.length === 0 && !invitesError && (
+                    <p style={{ color: '#6b7280' }}>Nenhum convite ou parecer disponível.</p>
+                )}
+
+                {isApproved && !invitesLoading && invites.length > 0 && (
                     <>
-                        <InviteGroup
-                            title="Cartas-convite"
-                            items={conviteItems}
-                            batchTag="convites"
-                            sendInFlight={sendInFlight}
-                            onSend={sendInvites}
-                        />
-                        <InviteGroup
-                            title="Pareceres"
-                            items={parecerItems}
-                            batchTag="pareceres"
-                            sendInFlight={sendInFlight}
-                            onSend={sendInvites}
-                        />
+                        <div style={{ display: 'flex', gap: '0.25rem', background: '#f1f5f9', padding: '0.25rem', borderRadius: '0.75rem', marginBottom: '1rem' }}>
+                            {availableInviteCategories.map(cat => {
+                                const active = activeCategory?.label === cat.label
+                                return (
+                                    <button
+                                        key={cat.label}
+                                        type="button"
+                                        onClick={() => setInviteTab(cat.label)}
+                                        style={{
+                                            flex: 1, padding: '0.6rem 1rem', borderRadius: '0.5rem', border: 'none',
+                                            cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem',
+                                            background: active ? '#fff' : 'transparent',
+                                            color: active ? '#0f172a' : '#475569',
+                                            boxShadow: active ? '0 1px 2px rgba(15,23,42,0.06)' : 'none',
+                                        }}
+                                    >
+                                        {cat.label}
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        <table className="banca-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '2rem' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={allActiveSelected}
+                                            onChange={toggleActiveTabInvites}
+                                            aria-label="Selecionar todos"
+                                        />
+                                    </th>
+                                    <th>Tipo</th>
+                                    <th>Membro</th>
+                                    <th>Destinatário</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {activeInviteItems.map(item => (
+                                    <tr key={item.item_id}>
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedInviteIds.has(item.item_id)}
+                                                onChange={() => toggleInvite(item.item_id)}
+                                                disabled={!item.recipient}
+                                            />
+                                        </td>
+                                        <td>{INVITE_KIND_LABEL[item.kind] || item.kind}</td>
+                                        <td>{item.member_name || '—'}</td>
+                                        <td>{item.recipient || <span style={{ color: '#b91c1c' }}>sem e-mail</span>}</td>
+                                        <td>
+                                            {item.sent
+                                                ? <span style={{ color: '#15803d' }}>Enviado — {formatTimestamp(item.sent_at)}</span>
+                                                : <span style={{ color: '#92400e' }}>Não enviado</span>}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+                            <button
+                                type="button"
+                                onClick={sendSelectedConvites}
+                                disabled={selectedConviteIds.length === 0 || !!sendInFlight}
+                                style={{
+                                    padding: '0.6rem 1.5rem',
+                                    background: selectedConviteIds.length === 0 ? '#9ca3af' : '#3b82f6',
+                                    color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.95rem',
+                                    cursor: (selectedConviteIds.length === 0 || sendInFlight) ? 'not-allowed' : 'pointer',
+                                }}
+                            >
+                                {sendInFlight === 'convites' ? 'Enviando…' : `Enviar Convites (${selectedConviteIds.length})`}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={sendSelectedPareceres}
+                                disabled={selectedParecerIds.length === 0 || !!sendInFlight}
+                                style={{
+                                    padding: '0.6rem 1.5rem',
+                                    background: selectedParecerIds.length === 0 ? '#9ca3af' : '#3b82f6',
+                                    color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.95rem',
+                                    cursor: (selectedParecerIds.length === 0 || sendInFlight) ? 'not-allowed' : 'pointer',
+                                }}
+                            >
+                                {sendInFlight === 'pareceres' ? 'Enviando…' : `Enviar Pareceres (${selectedParecerIds.length})`}
+                            </button>
+                        </div>
+
                         {sendStatus && (
                             <div className={sendStatus.ok ? 'alert alert-ok' : 'alert alert-err'}>
                                 {sendStatus.message}
@@ -578,71 +730,3 @@ export default function AdminBancaDetail() {
     )
 }
 
-function InviteGroup({ title, items, batchTag, sendInFlight, onSend }) {
-    if (items.length === 0) return null
-    const sendableIds = items.filter(i => i.recipient).map(i => i.item_id)
-    const busy = !!sendInFlight
-    return (
-        <div style={{ marginTop: '1rem' }}>
-            <h3>{title}</h3>
-            <table className="banca-table">
-                <thead>
-                    <tr>
-                        <th>Membro</th>
-                        <th>Destinatário</th>
-                        <th>Status</th>
-                        <th style={{ width: '8rem' }} aria-label="Ações"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map(item => {
-                        const inFlight = sendInFlight === item.item_id
-                        return (
-                            <tr key={item.item_id}>
-                                <td>{item.member_name || '—'}</td>
-                                <td>{item.recipient || <span style={{ color: '#b91c1c' }}>sem e-mail</span>}</td>
-                                <td>
-                                    {item.sent
-                                        ? <span style={{ color: '#15803d' }}>Enviado — {formatTimestamp(item.sent_at)}</span>
-                                        : <span style={{ color: '#92400e' }}>Não enviado</span>}
-                                </td>
-                                <td>
-                                    <button
-                                        type="button"
-                                        onClick={() => onSend([item.item_id], item.item_id)}
-                                        disabled={busy || !item.recipient}
-                                        style={{
-                                            padding: '0.35rem 0.75rem',
-                                            background: !item.recipient ? '#9ca3af' : '#1f2937',
-                                            color: '#fff', border: 'none', borderRadius: 4,
-                                            fontSize: '0.85rem',
-                                            cursor: (busy || !item.recipient) ? 'not-allowed' : 'pointer',
-                                            opacity: busy && !inFlight ? 0.5 : 1,
-                                        }}
-                                    >
-                                        {inFlight ? 'Enviando…' : (item.sent ? 'Reenviar' : 'Enviar')}
-                                    </button>
-                                </td>
-                            </tr>
-                        )
-                    })}
-                </tbody>
-            </table>
-            <div style={{ marginTop: '0.5rem' }}>
-                <button
-                    type="button"
-                    onClick={() => onSend(sendableIds, batchTag)}
-                    disabled={busy || sendableIds.length === 0}
-                    style={{
-                        padding: '0.6rem 1.5rem',
-                        background: sendableIds.length === 0 ? '#9ca3af' : '#3b82f6',
-                        color: '#fff', border: 'none', borderRadius: 4, fontSize: '0.95rem',
-                        cursor: (busy || sendableIds.length === 0) ? 'not-allowed' : 'pointer',
-                    }}
-                >
-                    {sendInFlight === batchTag ? 'Enviando…' : `Enviar todos (${sendableIds.length})`}
-                </button>
-            </div>
-        </div>
-    )
-}
