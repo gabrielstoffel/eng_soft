@@ -20,6 +20,7 @@ asset folder to avoid duplicating ~30 font files. The legacy PHP used Garamond
 substitute here.
 """
 
+import io
 import os
 from datetime import date, time
 
@@ -618,10 +619,13 @@ class Banca:
             qr = qrcode.QRCode(version=1, box_size=5, border=2)
             qr.add_data(self.link)
             qr.make(fit=True)
-            qr_path = os.path.join(_BASE_DIR, "qrcode.png")
-            qr.make_image().save(qr_path)
+            # Embed the QR straight from memory — no shared file on disk, so
+            # concurrent cartaz generation can't race on the same path.
+            qr_buf = io.BytesIO()
+            qr.make_image().save(qr_buf, format="PNG")
+            qr_buf.seek(0)
             # A4 landscape height is 210mm; anchor the QR above the bottom edge.
-            pdf.image(qr_path, x=page_w - margin - 25, y=210 - 30, w=25, h=25)
+            pdf.image(qr_buf, x=page_w - margin - 25, y=210 - 30, w=25, h=25)
 
         if save is True:
             self.pdf.output(os.path.join(self.dir, f"Cartaz - {self.nome[1]}.pdf"))
