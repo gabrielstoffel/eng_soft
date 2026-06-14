@@ -30,11 +30,12 @@ _PPG_GENERATOR = {
 }
 
 # Which document kinds each PPG's generator can produce. The ppgenfis generator
-# (ported from the legacy `cria_cartas.php`) only emits cartas-convite.
+# (ported from the legacy `cria_cartas.php`) emits the carta-convite, the parecer
+# (folha de conceito) and the cartaz; it has no ata/relatoria de avaliação.
 _ALL_KINDS: set[DocumentKind] = {"ata", "cartaz", "parecer", "carta_convite", "relatoria_avaliacao"}
 _PPG_DOC_KINDS: dict[str, set[DocumentKind]] = {
     "ppgfis": _ALL_KINDS,
-    "ppgenfis": {"carta_convite"},
+    "ppgenfis": {"carta_convite", "parecer", "cartaz"},
 }
 
 

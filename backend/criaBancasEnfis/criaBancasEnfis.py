@@ -23,6 +23,7 @@ substitute here.
 import os
 from datetime import date, time
 
+import qrcode
 from fpdf import FPDF, XPos, YPos
 
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -426,3 +427,201 @@ class Banca:
 
         pdf.ln(6)
         pdf.cell(0, 6, "Cordiais saudações,", align="C")
+
+    # --- parecer (folha de conceito) ----------------------------------------
+
+    def criaParecer(self, save: bool = False) -> None:
+        """One "folha de conceito" PDF per voting member (externos + internos).
+
+        Mirrors criaBancas.criaParecer, but follows the ppgenfis template
+        (documentation/ppgenfis/"Folha de conceito em word.docx"): a fill-in
+        "conceito ______" blank plus a free-text "Comentários" block, instead of
+        the ppgfis checkbox grid. Portuguese only.
+        """
+        for membro in (self.externo1, self.externo2, self.interno1, self.interno2):
+            if membro is None:
+                continue
+
+            if save is True:
+                self.pdf = self._new_pdf()
+
+            pdf = self.pdf
+            pdf.set_auto_page_break(True, margin=15)
+            pdf.set_left_margin(25)
+            pdf.set_right_margin(25)
+            pdf.add_page("P")
+
+            # Data (data da defesa), alinhada à direita -------------------
+            pdf.set_y(40)
+            pdf.set_font("Cambria", "", 12)
+            d = self.data
+            pdf.cell(
+                0, 6,
+                f"Porto Alegre, {d.day} de {_mes_extenso(d.month)} de {d.year}.",
+                align="R", new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+            pdf.ln(20)
+
+            # Título do trabalho ----------------------------------------
+            pdf.set_font("Cambria", "B", 16)
+            pdf.cell(
+                0, 8, self._descricao_trabalho().upper(),
+                align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+            pdf.ln(16)
+
+            # Autor(a) + título -----------------------------------------
+            autor = "Autora" if self.nome[0] else "Autor"
+            pdf.set_font("Cambria", "", 13)
+            pdf.multi_cell(
+                0, 7,
+                f"{autor}: **{self.nome[1]}**\n\nTítulo: __{self.titulo}__",
+                align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+            pdf.ln(16)
+
+            # Declaração + conceito -------------------------------------
+            pdf.set_font("Cambria", "", 13)
+            pdf.multi_cell(
+                0, 7,
+                "DECLARO que examinei o trabalho em epígrafe, atribuindo-lhe "
+                "conceito ______________.",
+                align="L", new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+            pdf.set_font("Cambria", "I", 11)
+            pdf.cell(0, 6, "(Aprovado ou Reprovado).", align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.ln(12)
+
+            # Comentários -----------------------------------------------
+            pdf.set_font("Cambria", "", 13)
+            pdf.cell(0, 7, "Comentários:", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.ln(45)
+
+            # Assinatura ------------------------------------------------
+            nome_assinatura = self._titulo_pessoa(membro)
+            largura = pdf.get_string_width(nome_assinatura)
+            x = pdf.center(largura)
+            y = pdf.get_y()
+            pdf.line(x, y, x + largura, y)
+            pdf.ln(2)
+            pdf.set_font("Cambria", "B", 12)
+            pdf.cell(0, 6, nome_assinatura, align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.set_font("Cambria", "", 12)
+            pdf.cell(0, 6, membro[2], align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+
+            if save is True:
+                # Filename mirrors the document_service parecer manifest label.
+                prefixo = "Profª. Drª. " if membro[0] else "Prof. Dr. "
+                self.pdf.output(os.path.join(self.dir, f"Parecer - {prefixo}{membro[1]}.pdf"))
+
+    # --- cartaz (divulgação) -------------------------------------------------
+
+    def criaCartaz(self, save: bool = False) -> None:
+        """Single landscape poster advertising the defense.
+
+        Mirrors criaBancas.criaCartaz, following the ppgenfis template
+        (documentation/ppgenfis/cartaz.docx): only the Portuguese title is shown
+        and the board members are bulleted with their institutions. A QR code for
+        the videoconference link is embedded in the footer when a link is set.
+        """
+        if save is True:
+            self.pdf = self._new_pdf()
+
+        pdf = self.pdf
+        pdf.add_page(orientation="L")
+        pdf.set_auto_page_break(False)
+        margin = 25
+        pdf.set_left_margin(margin)
+        pdf.set_right_margin(margin)
+        page_w = pdf.w
+
+        if os.path.exists(_LOGO_IF):
+            pdf.image(_LOGO_IF, x=margin, y=12, w=20, h=20)
+
+        # Título (tipo de trabalho) ------------------------------------
+        pdf.set_y(18)
+        pdf.set_font("Cambria", "B", 26)
+        pdf.multi_cell(
+            0, 12, self._descricao_trabalho().upper(),
+            align="C", new_x=XPos.LMARGIN, new_y=YPos.NEXT, wrapmode="WORD",
+        )
+        pdf.ln(8)
+
+        # Autor(a) ------------------------------------------------------
+        autor = "AUTORA" if self.nome[0] else "AUTOR"
+        pdf.set_font("Cambria", "", 20)
+        pdf.cell(
+            0, 10, f"{autor}: **{self.nome[1]}**",
+            align="C", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+        )
+        pdf.ln(6)
+
+        # Título do trabalho -------------------------------------------
+        pdf.set_font("Cambria", "", 16)
+        pdf.multi_cell(
+            0, 8, f"TÍTULO: **“{self.titulo}”**",
+            align="C", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT, wrapmode="WORD",
+        )
+        pdf.ln(10)
+
+        # Orientação ----------------------------------------------------
+        pdf.set_font("Cambria", "", 13)
+        pdf.cell(
+            0, 7, f"ORIENTADOR: **{self._titulo_pessoa(self.orientador)}**",
+            align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+        )
+        if self.coorientador is not None:
+            pdf.cell(
+                0, 7, f"COORIENTADOR: **{self._titulo_pessoa(self.coorientador)}**",
+                align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+        pdf.ln(6)
+
+        # Banca examinadora --------------------------------------------
+        pdf.cell(0, 7, "**Banca Examinadora:**", align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+        pdf.ln(2)
+        for membro in (self.externo1, self.externo2, self.interno1, self.interno2):
+            if membro is None:
+                continue
+            pdf.set_x(margin + 8)
+            pdf.multi_cell(
+                0, 7, f"● {self._titulo_pessoa(membro)} ({membro[2]})",
+                align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+
+        # Rodapé: data, horário, local, link + QR ----------------------
+        pdf.set_y(-45)
+        pdf.line(margin, pdf.get_y(), page_w - margin, pdf.get_y())
+        pdf.ln(4)
+        pdf.set_font("Cambria", "", 13)
+        half = (page_w - 2 * margin) / 2
+        pdf.cell(
+            half, 7,
+            f"DATA: **{self.data.day} de {_mes_extenso(self.data.month)} de {self.data.year}**",
+            align="L", markdown=True,
+        )
+        pdf.cell(
+            half, 7,
+            f"HORÁRIO: **{self.horario.hour}h{self.horario.minute:02d}min**",
+            align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+        )
+        if self.local_banca is not None:
+            pdf.cell(
+                0, 7, f"LOCAL: **{self.local_banca}**",
+                align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+        if self.link is not None:
+            pdf.cell(
+                0, 7, f"LINK: **{self.link}**",
+                align="L", markdown=True, new_x=XPos.LMARGIN, new_y=YPos.NEXT,
+            )
+            qr = qrcode.QRCode(version=1, box_size=5, border=2)
+            qr.add_data(self.link)
+            qr.make(fit=True)
+            qr_path = os.path.join(_BASE_DIR, "qrcode.png")
+            qr.make_image().save(qr_path)
+            # A4 landscape height is 210mm; anchor the QR above the bottom edge.
+            pdf.image(qr_path, x=page_w - margin - 25, y=210 - 30, w=25, h=25)
+
+        if save is True:
+            self.pdf.output(os.path.join(self.dir, f"Cartaz - {self.nome[1]}.pdf"))

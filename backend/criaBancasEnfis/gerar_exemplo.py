@@ -40,6 +40,8 @@ banca = Banca(
 )
 
 banca.criaCartaConvite(save=True)
+banca.criaParecer(save=True)
+banca.criaCartaz(save=True)
 
 # A Banca escreve em criaBancasEnfis/Bancas/<ata> - <nome>/. Copia para ./exemplo/
 # para facilitar a inspeção.
