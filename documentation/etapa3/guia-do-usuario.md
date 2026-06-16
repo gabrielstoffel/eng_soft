@@ -14,11 +14,9 @@ Este guia descreve o fluxo completo de uma banca e o que cada perfil —
 ```
 Orientador(a)            Coordenador(a)              Secretário(a)
 ─────────────            ──────────────              ─────────────
-1. Cadastra a banca  →   2. Recebe o pedido por
-   (formulário) e            e-mail e decide:
-   anexa os PDFs            Aprovar ou Recusar   →   3. Recebe o aviso, baixa
-                                                        os documentos e envia
-                                                        convites/pareceres
+1. Cadastra a banca  →   2. Recebe o pedido por  →   3. Recebe o aviso, baixa
+   (formulário) e            e-mail e decide:           os documentos e envia
+   anexa os PDFs            Aprovar ou Recusar          convites/pareceres
 ```
 
 A cada submissão o sistema dispara **dois e-mails**: um para o **coordenador**
@@ -102,6 +100,7 @@ O(a) coordenador(a) **avalia** cada pedido de banca. **Não é preciso fazer log
 ### O que acontece após aprovar
 
 O sistema notifica automaticamente:
+
 - a **secretaria** (para gerar/baixar documentos e enviar convites),
 - o **orientador** (confirmação + sua observação),
 - a **gerência** (solicitação de agendamento de sala, com cópia para o CPG).
@@ -160,6 +159,3 @@ Na tela de detalhes você pode:
   própria sequência de atas, configurável pela coordenação técnica.
 - **Assuntos dos e-mails** — identificam a banca pelo **tipo** e pelo **nome do
   aluno** (sem número de ata).
-- **Captura de e-mails (ambiente de testes)** — em desenvolvimento, todos os
-  e-mails são capturados pelo Mailpit (`http://localhost:8025`) e **não** saem
-  para os destinatários reais.
